@@ -6,7 +6,9 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-interface JsonValue {
+public interface JsonValue {
+
+    Object getValue();
 
     JsonValue append(JsonValue jsValue);
 
@@ -23,6 +25,26 @@ interface JsonValue {
     Optional<Boolean> asBooleanOptional();
 
     boolean asBooleanOrDefault(boolean defaultValue);
+
+    boolean asByte();
+
+    Optional<Boolean> asByteOptional();
+
+    boolean asByteOrDefault(boolean defaultValue);
+
+
+    boolean asBigDecimal();
+
+    Optional<Boolean> asBigDecimalOptional();
+
+    boolean asBigDecimalOrDefault(boolean defaultValue);
+
+
+    boolean asBigInteger();
+
+    Optional<Boolean> asBigIntegerOptional();
+
+    boolean asBigIntegerOrDefault(boolean defaultValue);
 
     char asChar();
 
@@ -264,6 +286,10 @@ interface JsonValue {
 
     int size();
 
+    static JsonValue ofObject(Object o){
+        return Json.toJsonValue(o);
+    }
+
     default String stringify(){
         final boolean keepingNull = false;
         final boolean emptyValuesToNull = false;
@@ -271,6 +297,11 @@ interface JsonValue {
     }
 
     String stringify(boolean keepingNull, boolean emptyValuesToNull);
+
+    default String stringify(boolean keepingNull){
+        final boolean emptyValuesToNull = false;
+        return stringify(keepingNull, emptyValuesToNull);
+    }
 
     JsonValue union(JsonValue jsonValue);
 

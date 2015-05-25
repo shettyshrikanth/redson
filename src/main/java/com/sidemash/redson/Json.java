@@ -1,7 +1,7 @@
 package com.sidemash.redson;
 
-import scala.NotImplementedError;
-
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -15,90 +15,152 @@ public class Json {
     private static final Map<Class<?>, BiFunction<?, JsonValue, JsonValue>>
             writerToJson =  new HashMap<>();
 
+    private static final Map<Class<?>, Function<JsonValue, ?>>
+            usersDefinedReadersFromJson =  new HashMap<>();
+    private static final Map<Class<?>, BiFunction<?, JsonValue, JsonValue>>
+            usersDefinedWriterToJson =  new HashMap<>();
+
     static {
-
-        // Primitives Types
-        writerToJson.put(Boolean.class,  (Boolean val, JsonValue jsonValue)    -> JsonBoolean.of(val));
-        writerToJson.put(Byte.class,     (Byte val, JsonValue jsonValue)       -> JsonNumber.of(val));
-        writerToJson.put(Character.class,(Character val, JsonValue jsonValue)  -> JsonString.of(val));
-        writerToJson.put(Double.class,   (Double val, JsonValue jsonValue)     -> JsonNumber.of(val));
-        writerToJson.put(Float.class,    (Float val, JsonValue jsonValue)      -> JsonNumber.of(val));
-        writerToJson.put(Integer.class,  (Integer val, JsonValue jsonValue)    -> JsonNumber.of(val));
-        writerToJson.put(Long.class,     (Long val, JsonValue jsonValue)       -> JsonNumber.of(val));
-        writerToJson.put(Short.class,    (Short val, JsonValue jsonValue)      -> JsonNumber.of(val));
-        writerToJson.put(String.class,   (String val, JsonValue jsonValue)     -> JsonString.of(val));
-
-        // Class
-        // FallBack Strategy -> JsonObject with All the getters
-
-        // Enums
-        // FallBack strategy -> if there is a getter same as Class strategie else  String.
-
-        // Arrays
-        // JsonArray
-
-        // Iterable
-        // JsonArray
-
-        // Map
-        // JsonObject
-
-
+        // Primitives
+        writerToJson.put(Boolean.class,   (Boolean value, JsonValue jsonValue)    -> JsonBoolean.of(value));
+        writerToJson.put(Byte.class,      (Byte value, JsonValue jsonValue)       -> JsonNumber.of(value));
+        writerToJson.put(BigDecimal.class,(BigDecimal value, JsonValue jsonValue) -> JsonNumber.of(value));
+        writerToJson.put(BigInteger.class,(BigInteger value, JsonValue jsonValue) -> JsonNumber.of(value));
+        writerToJson.put(Character.class, (Character value, JsonValue jsonValue)  -> JsonString.of(value));
+        writerToJson.put(Double.class,    (Double value, JsonValue jsonValue)     -> JsonNumber.of(value));
+        writerToJson.put(Float.class,     (Float value, JsonValue jsonValue)      -> JsonNumber.of(value));
+        writerToJson.put(Integer.class,   (Integer value, JsonValue jsonValue)    -> JsonNumber.of(value));
+        writerToJson.put(Long.class,      (Long value, JsonValue jsonValue)       -> JsonNumber.of(value));
+        writerToJson.put(Short.class,     (Short value, JsonValue jsonValue)      -> JsonNumber.of(value));
+        // String
+        writerToJson.put(String.class,   (String value, JsonValue jsonValue)     -> JsonString.of(value));
         // Optional
-        writerToJson.put(Optional.class,(Object opt, JsonValue jsonValue) -> {
-            Optional<?> val = (Optional<?>) opt;
-            if (val.isPresent()) {
-                BiFunction<Object, JsonValue, JsonValue> fn =
-                        (BiFunction<Object, JsonValue, JsonValue>) writerToJson.get(val.get().getClass());
-                return fn.apply(val.get(), JsonObject.EMPTY);
-            }
-            else
-                return JsonNull.INSTANCE;
-        });
+        writerToJson.put(Optional.class,  OptionalConverter::toJsonValue);
     }
+
+
+    static {
+        // Primitives
+        readersFromJson.put(Boolean.class,    JsonValue::asBoolean);
+        readersFromJson.put(Byte.class,       JsonValue::asByte);
+        readersFromJson.put(BigDecimal.class, JsonValue::asBigDecimal);
+        readersFromJson.put(BigInteger.class, JsonValue::asBigInteger);
+        readersFromJson.put(Character.class,  JsonValue::asChar);
+        readersFromJson.put(Double.class,     JsonValue::asDouble);
+        readersFromJson.put(Float.class,      JsonValue::asFloat);
+        readersFromJson.put(Integer.class,    JsonValue::asInt);
+        readersFromJson.put(Long.class,       JsonValue::asLong);
+        readersFromJson.put(Short.class,      JsonValue::asShort);
+        // String
+        readersFromJson.put(String.class,     JsonValue::asString);
+        // Optional
+        readersFromJson.put(Optional.class,   OptionalConverter::fromJsonValue);
+    }
+
+    public static class OptionalConverter {
+
+        public static JsonValue toJsonValue(Object opt, JsonValue jsonValue){
+            Optional<?> value = (Optional<?>) opt;
+            JsonValue result = JsonOptional.EMPTY;
+            if (value.isPresent()) {
+                BiFunction<Object, JsonValue, JsonValue> fn =
+                        (BiFunction<Object, JsonValue, JsonValue>) writerToJson.get(value.get().getClass());
+                result = fn.apply(value.get(), JsonOptional.EMPTY);
+            }
+            return result;
+        }
+
+        public static Optional<?> fromJsonValue(JsonValue jsonValue){
+            Optional<?> result;
+            if (jsonValue.isJsonNull() || (jsonValue.isJsonOptional() && jsonValue.isEmpty()) ) {
+                result = Optional.empty();
+            }
+            else {
+                result = Optional.of(readersFromJson.get(jsonValue.getValue().getClass()).apply(jsonValue));
+            }
+            return result;
+        }
+    }
+
+
+
+
 
     private Json(){}
 
-    private static String prettyStringify(JsonValue jsonValue) {
+    public static String prettyStringify(Object o) {
+        JsonValue jsonValue = (o instanceof  JsonValue) ? ((JsonValue) o) : toJsonValue(o);
+        return jsonValue.prettyStringify();
+    }
+
+    public static String prettyStringify(Object o, boolean keepingNull) {
         final int indent = 3;
-        final boolean keepNull = false;
-        return prettyStringify(jsonValue, indent, keepNull);
+        final boolean emptyValuesToNull = false;
+        JsonValue jsonValue = (o instanceof  JsonValue) ? ((JsonValue) o) : toJsonValue(o);
+
+        return jsonValue.prettyStringify(indent, keepingNull,emptyValuesToNull);
     }
 
-    private static String prettyStringify(JsonValue jsonValue, boolean keepNull) {
+    public static String prettyStringify(Object o, boolean keepingNull, boolean emptyValuesToNull) {
         final int indent = 3;
-        return prettyStringify(jsonValue, indent, keepNull);
+        JsonValue jsonValue = (o instanceof  JsonValue) ? ((JsonValue) o) : toJsonValue(o);
+
+        return jsonValue.prettyStringify(indent, keepingNull,emptyValuesToNull);
     }
 
-    private static String prettyStringify(JsonValue jsonValue, int indent, boolean keepNull){
-        return prettyStringifyRecursive(jsonValue, indent, indent, keepNull);
+    public static String prettyStringify(Object o, int indent, boolean keepingNull){
+        final boolean emptyValuesToNull = false;
+        JsonValue jsonValue = (o instanceof  JsonValue) ? ((JsonValue) o) : toJsonValue(o);
+
+        return jsonValue.prettyStringify(indent, keepingNull, emptyValuesToNull);
     }
 
-    private static String prettyStringifyRecursive(JsonValue jsonValue, int indent, int incrementAcc, boolean keepNull){
-        throw new NotImplementedError();
+    public static String prettyStringify(Object o, int indent, boolean keepingNull, boolean emptyValuesToNull){
+        JsonValue jsonValue = (o instanceof  JsonValue) ? ((JsonValue) o) : toJsonValue(o);
+
+        return jsonValue.prettyStringify(indent, keepingNull, emptyValuesToNull);
     }
+
+
+
+
+
+    public static String stringify(Object o) {
+        JsonValue jsonValue = (o instanceof  JsonValue) ? ((JsonValue) o) : toJsonValue(o);
+        return jsonValue.stringify();
+    }
+
+    public static String stringify(Object o, boolean keepingNull) {
+        final boolean emptyValuesToNull = false;
+        JsonValue jsonValue = (o instanceof  JsonValue) ? ((JsonValue) o) : toJsonValue(o);
+
+        return jsonValue.stringify(keepingNull, emptyValuesToNull);
+    }
+
+    public static String stringify(Object o, boolean keepingNull, boolean emptyValuesToNull) {
+        JsonValue jsonValue = (o instanceof  JsonValue) ? ((JsonValue) o) : toJsonValue(o);
+
+        return jsonValue.stringify(keepingNull, emptyValuesToNull);
+    }
+
+
+
 
     public static<T> void registerReaderFromJson(Class<T> cl, Function<JsonValue, T> readerFn){
-        readersFromJson.put(cl, readerFn);
+        usersDefinedReadersFromJson.put(cl, readerFn);
     }
 
     public static<T> void registerWriterToJson(Class<T> cl,BiFunction<T, JsonValue, JsonValue> writerFn){
-        writerToJson.put(cl, writerFn);
+        usersDefinedWriterToJson.put(cl, writerFn);
     }
+    
+    
+    
 
 /*
-
     public static JsonValue parse(String s);
-    public static <T> T parse(String s, Class<T> cl);
-
-    public static String stringify(JsonValue jsonValue);
-    public static String stringify(JsonValue jsonValue, Function<JsonValue, String> converterFn);
-    public static <T> String stringify(T instance);
-    public static <T> String stringify(T instance,  Function<T, String> converterFn);
-
-    public static String prettyStringify(JsonValue jsonValue);
-    public static String prettyStringify(JsonValue jsonValue, int indent);
-    public static <T> String prettyStringify(T instance, int indent);
+    public static Object parseAsObject(String s); // Will apply defaults conversions
+    public static <T> T parseAsObject(String s, Class<T> cl); // Will apply registered conversions with default fallback
 
     // replace Void by JsonNode
     public static Void toJsonNode(JsonValue jsonValue);
@@ -106,15 +168,59 @@ public class Json {
     public static <T> Void toJsonNode(T instance);
     public static <T> Void toJsonNode(T instance , Function<JsonValue, Void> converterFn);
 
-*/
+
     public static JsonValue toJsonValue(Object o){
         BiFunction<Object, JsonValue, JsonValue> fn =
                 (BiFunction<Object, JsonValue, JsonValue>) writerToJson.get(o.getClass());
         return fn.apply(o, JsonObject.EMPTY);
     }
 
-    private String jsonStringOf(JsonValue jsonValue){
-        throw new NotImplementedError();
+
+    public static Object fromJsonValue(JsonValue JsonValue){
+
+        BiFunction<Object, JsonValue, JsonValue> fn =
+                (BiFunction<Object, JsonValue, JsonValue>) writerToJson.get(o.getClass());
+        return fn.apply(o, JsonObject.EMPTY);
     }
+
+    public static <T> T fromJsonValue(JsonValue JsonValue, Class<T> expectedClass){
+        BiFunction<Object, JsonValue, JsonValue> fn =
+                (BiFunction<Object, JsonValue, JsonValue>) writerToJson.get(o.getClass());
+        return fn.apply(o, JsonObject.EMPTY);
+    }
+
+
+    */
+    // By default (  defaults conversions )
+    // JsonObject -> LinkedHashMap
+    // JsonArray -> ArrayList
+    // JsonString -> String
+    // JsonNumber -> BigDecimal
+    // JsonBoolean -> Boolean
+    // JsonNull -> null
+    // JsonOptional -> Optional
+    // JsonOptional.EMPTY -> Optional.empty()
+
+
+
+    // Class
+    // FallBack Strategy -> JsonObject with All the getters
+
+    // Enums
+    // FallBack strategy -> if there is a getter same as Class strategie else  String.
+
+    // Arrays
+    // JsonArray
+
+    // Iterable
+    // JsonArray
+
+    // Map
+    // JsonObject
+
+
+
+
+
 
 }

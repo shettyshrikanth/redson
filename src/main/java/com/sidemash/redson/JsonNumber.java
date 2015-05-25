@@ -2,6 +2,7 @@ package com.sidemash.redson;
 
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 
 public class JsonNumber implements JsonLiteral {
 
@@ -11,6 +12,9 @@ public class JsonNumber implements JsonLiteral {
         this.value = value;
     }
 
+    public static JsonNumber of(BigInteger value){
+        return new JsonNumber(new BigDecimal(value));
+    }
     public static JsonNumber of(BigDecimal value){
         return new JsonNumber(value);
     }

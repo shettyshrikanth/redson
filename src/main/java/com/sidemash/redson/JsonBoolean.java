@@ -33,7 +33,7 @@ public enum JsonBoolean implements JsonLiteral {
         this.value = value;
     }
 
-    static JsonBoolean  of(boolean b) {
+    public static JsonBoolean  of(boolean b) {
         if(b) return JsonBoolean.TRUE; else return JsonBoolean.FALSE;
     }
 
