@@ -2,11 +2,13 @@ package com.sidemash.redson;
 
 
 import scala.Tuple2;
+import scala.collection.Iterator;
 import scala.collection.immutable.Map;
 import scala.collection.immutable.Map$;
 import scala.collection.mutable.Builder;
 
 import java.util.*;
+import java.util.Set;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -250,4 +252,126 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>> {
         }
         return Collections.unmodifiableMap(value);
     }
+
+    @Override
+    public <T> java.util.Map<Integer, T> asIntIndexedMapOf(Class<T> c, java.util.Map<Integer, T> map) {
+        if (bindings.isEmpty())
+            return map;
+        scala.collection.Iterator<JsonValue> valueIterator = bindings.valuesIterator();
+        int i = 0;
+        while (valueIterator.hasNext()) {
+            map.put(i, Json.fromJsonValue(valueIterator.next(), c));
+            ++i;
+        }
+        return map;
+    }
+
+    @Override
+    public <T> List<T> asListOf(Class<T> cl, List<T> list) {
+        final scala.collection.Iterator<JsonValue> valueIterator = bindings.valuesIterator();
+        while (valueIterator.hasNext())
+            list.add(Json.fromJsonValue(valueIterator.next(), cl));
+        return list;
+    }
+
+    @Override
+    public <T> Set<T> asSetOf(Class<T> cl, Set<T> set) {
+        final Iterator<JsonValue> valuesIterator = bindings.valuesIterator();
+        while (valuesIterator.hasNext())
+            set.add(Json.fromJsonValue(valuesIterator.next(), cl));
+        return set;
+    }
+
+    @Override
+    public <T> java.util.Map<String, T> asStringIndexedMapOf(Class<T> c, java.util.Map<String, T> map) {
+        Iterator<Tuple2<String, JsonValue>> iterator = bindings.iterator();
+        while (iterator.hasNext()) {
+            Tuple2<String, JsonValue> element = iterator.next();
+            map.put(element._1(), Json.fromJsonValue(element._2(), c));
+        }
+        return map;
+    }
+
+    @Override
+    public Set<Integer> getIndexSet() {
+        final Set<Integer> indexes = new LinkedHashSet<>();
+        for (int i = 0; i < bindings.size(); i++)
+            indexes.add(i);
+        return indexes;
+    }
+
+    @Override
+    public Set<JsonEntry<Integer>> getIntIndexedEntrySet() {
+        Set<JsonEntry<Integer>> indexes = new LinkedHashSet<>();
+        Iterator<Tuple2<String, JsonValue>> iterator = bindings.iterator();
+        int i = 0;
+        while (iterator.hasNext()) {
+            Tuple2<String, JsonValue> element = iterator.next();
+            indexes.add(new JsonEntry<>(i, element._2()));
+            ++i;
+        }
+        return indexes;
+    }
+
+    @Override
+    public Set<String> keySet() {
+        Set<String> indexes = new LinkedHashSet<>();
+        Iterator<Tuple2<String, JsonValue>> iterator = bindings.iterator();
+        while (iterator.hasNext())
+            indexes.add(iterator.next()._1());
+        return indexes;
+    }
+
+    @Override
+    public JsonValue prepend(JsonValue jsValue) {
+        throw new UnsupportedOperationException(
+                String.format("unsupported operation for instance of %s ", this.getClass()));
+    }
+
+    @Override
+    public JsonValue prepend(String key, JsonValue jsValue) {
+        Builder<Tuple2<String, JsonValue>, Map<String, JsonValue>> builder = bindings.newBuilder();
+        builder.$plus$eq(new Tuple2<String, JsonValue>(key, jsValue));
+        builder.$plus$plus$eq(bindings);
+        return new JsonObject(builder.result());
+    }
+
+    @Override
+    public JsonValue prependIfAbsent(String key, JsonValue jsValue) {
+        if(bindings.contains(key))
+            return this;
+        else
+            return prepend(key, jsValue);
+    }
+
+    @Override
+    public JsonValue reverse() {
+        Iterator<Tuple2<String, JsonValue>> iterator = bindings.reversed().iterator();
+        Builder<Tuple2<String, JsonValue>, Map<String, JsonValue>> builder = bindings.newBuilder();
+        while (iterator.hasNext()) {
+            builder.$plus$eq(iterator.next());
+        }
+        return new JsonObject(builder.result());
+    }
+
+    @Override
+    public int size() {
+        return bindings.size();
+    }
+
+    @Override
+    public Collection<? extends JsonValue> values() {
+        scala.collection.Iterator<JsonValue> iterator = bindings.valuesIterator();
+        final List<JsonValue> values = new ArrayList<>();
+        while (iterator.hasNext()) {
+            values.add(iterator.next());
+        }
+        return Collections.unmodifiableList(values);
+    }
+
+    @Override
+    public java.util.Iterator<? extends JsonValue> valuesIterator() {
+        return values().iterator();
+    }
+
 }
