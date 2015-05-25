@@ -1,8 +1,12 @@
 package com.sidemash.redson;
 
+import com.sidemash.redson.converter.OptionalConverter;
+
+import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
@@ -57,32 +61,6 @@ public class Json {
         readersFromJson.put(Optional.class,   OptionalConverter::fromJsonValue);
     }
 
-    public static class OptionalConverter {
-        public static JsonValue toJsonValue(Object opt, JsonValue jsonValue){
-            Optional<?> value = (Optional<?>) opt;
-            JsonValue result = JsonOptional.EMPTY;
-            if (value.isPresent()) {
-                BiFunction<Object, JsonValue, JsonValue> fn =
-                        (BiFunction<Object, JsonValue, JsonValue>) writerToJson.get(value.get().getClass());
-                result = fn.apply(value.get(), JsonOptional.EMPTY);
-            }
-            return result;
-        }
-
-        public static Optional<?> fromJsonValue(JsonValue jsonValue){
-            Optional<?> result;
-            if (jsonValue.isJsonNull() || (jsonValue.isJsonOptional() && jsonValue.isEmpty()) ) {
-                result = Optional.empty();
-            }
-            else {
-                result = Optional.of(readersFromJson.get(jsonValue.getValue().getClass()).apply(jsonValue));
-            }
-            return result;
-        }
-    }
-
-
-
 
 
     private Json(){}
@@ -120,10 +98,6 @@ public class Json {
         return jsonValue.prettyStringify(indent, keepingNull, emptyValuesToNull);
     }
 
-
-
-
-
     public static String stringify(Object o) {
         JsonValue jsonValue = (o instanceof  JsonValue) ? ((JsonValue) o) : toJsonValue(o);
         return jsonValue.stringify();
@@ -142,9 +116,6 @@ public class Json {
         return jsonValue.stringify(keepingNull, emptyValuesToNull);
     }
 
-
-
-
     public static<T> void registerReaderFromJson(Class<T> cl, Function<JsonValue, T> readerFn){
         usersDefinedReadersFromJson.put(cl, readerFn);
     }
@@ -152,44 +123,8 @@ public class Json {
     public static<T> void registerWriterToJson(Class<T> cl,BiFunction<T, JsonValue, JsonValue> writerFn){
         usersDefinedWriterToJson.put(cl, writerFn);
     }
-    
-    
-    
-
-/*
-    public static JsonValue parse(String s);
-    public static Object parseAsObject(String s); // Will apply defaults conversions
-    public static <T> T parseAsObject(String s, Class<T> cl); // Will apply registered conversions with default fallback
-
-    // replace Void by JsonNode
-    public static Void toJsonNode(JsonValue jsonValue);
-    public static Void toJsonNode(JsonValue jsonValue,  Function<JsonValue, Void> converterFn));
-    public static <T> Void toJsonNode(T instance);
-    public static <T> Void toJsonNode(T instance , Function<JsonValue, Void> converterFn);
 
 
-    public static JsonValue toJsonValue(Object o){
-        BiFunction<Object, JsonValue, JsonValue> fn =
-                (BiFunction<Object, JsonValue, JsonValue>) writerToJson.get(o.getClass());
-        return fn.apply(o, JsonObject.EMPTY);
-    }
-
-
-    public static Object fromJsonValue(JsonValue JsonValue){
-
-        BiFunction<Object, JsonValue, JsonValue> fn =
-                (BiFunction<Object, JsonValue, JsonValue>) writerToJson.get(o.getClass());
-        return fn.apply(o, JsonObject.EMPTY);
-    }
-
-    public static <T> T fromJsonValue(JsonValue JsonValue, Class<T> expectedClass){
-        BiFunction<Object, JsonValue, JsonValue> fn =
-                (BiFunction<Object, JsonValue, JsonValue>) writerToJson.get(o.getClass());
-        return fn.apply(o, JsonObject.EMPTY);
-    }
-
-
-    */
     // By default (  defaults conversions )
     // JsonObject -> LinkedHashMap
     // JsonArray -> ArrayList
@@ -218,8 +153,100 @@ public class Json {
     // JsonObject
 
 
+    public static JsonValue toJsonValue(Object o){
+        if(o == null)
+            return JsonNull.INSTANCE;
+
+        // First Check for User Defined conversion rules
+        BiFunction<Object, JsonValue, JsonValue> fn;
+        Class<?> cl = o.getClass();
+        if (usersDefinedWriterToJson.containsKey(cl)) {
+            fn = (BiFunction<Object, JsonValue, JsonValue>) usersDefinedWriterToJson.get(cl);
+            return fn.apply(o, JsonObject.EMPTY);
+        }
+
+        // If not, then Apply default conversion strategies
+        if (writerToJson.containsKey(cl)) {
+           fn = (BiFunction<Object, JsonValue, JsonValue>) writerToJson.get(cl);
+        }
+        else {
+            if(cl.isArray())
+                fn = (BiFunction<Object, JsonValue, JsonValue>) writerToJson.get(Array.class);
+            else if(o instanceof Iterable)
+                fn = (BiFunction<Object, JsonValue, JsonValue>) writerToJson.get(Iterable.class);
+            else if(o instanceof Map)
+                fn = (BiFunction<Object, JsonValue, JsonValue>) writerToJson.get(Map.class);
+            else if(cl.isEnum())
+                fn = (BiFunction<Object, JsonValue, JsonValue>) writerToJson.get(Enum.class);
+            else
+                fn = (BiFunction<Object, JsonValue, JsonValue>) writerToJson.get(Object.class);
+        }
+        return fn.apply(o, JsonObject.EMPTY);
+    }
 
 
+
+    public static Object fromJsonValue(JsonValue jsonValue){
+
+        if(jsonValue.isJsonNull())
+            return null;
+
+        Function<JsonValue, Object> fn = null;
+        if(jsonValue.isJsonArray())
+            fn = (Function<JsonValue, Object>) readersFromJson.get(List.class);
+
+        else if(jsonValue.isJsonBoolean())
+            fn = (Function<JsonValue, Object>) readersFromJson.get(Boolean.class);
+
+        else if(jsonValue.isJsonNumber())
+            fn = (Function<JsonValue, Object>) readersFromJson.get(BigDecimal.class);
+
+        else if(jsonValue.isJsonString())
+            fn = (Function<JsonValue, Object>) readersFromJson.get(String.class);
+
+        else if(jsonValue.isJsonObject())
+            fn = (Function<JsonValue, Object>) readersFromJson.get(Map.class);
+
+        else if (jsonValue.isJsonOptional())
+            fn = (Function<JsonValue, Object>) readersFromJson.get(Optional.class);
+
+        // At this point fn is certainly not null as all the kind of JsonObject have been
+        // included in if test.
+        return fn.apply(jsonValue);
+    }
+
+    public static <T> T fromJsonValue(JsonValue JsonValue, Class<T> expectedClass){
+
+        // First Check for User Defined conversion rules
+        Function<JsonValue, Object> fn;
+        if(usersDefinedReadersFromJson.containsKey(expectedClass))
+           fn = (Function<JsonValue, Object>) usersDefinedReadersFromJson.get(expectedClass);
+
+        // Then Check for Default conversion rules
+        else if(readersFromJson.containsKey(expectedClass))
+            fn = (Function<JsonValue, Object>) readersFromJson.get(expectedClass);
+        else
+            throw new UnsupportedOperationException(
+                    String.format("Unable to convert from JsonValue because converter " +
+                    "for class %s is not registered", expectedClass)
+            );
+
+        return (T) fn.apply(JsonValue);
+    }
+
+
+
+/*
+    public static JsonValue parse(String s);
+    public static Object parseAsObject(String s); // Will apply defaults conversions
+    public static <T> T parseAsObject(String s, Class<T> cl); // Will apply registered conversions with default fallback
+
+    // replace Void by JsonNode
+    public static Void toJsonNode(JsonValue jsonValue);
+    public static Void toJsonNode(JsonValue jsonValue,  Function<JsonValue, Void> converterFn));
+    public static <T> Void toJsonNode(T instance);
+    public static <T> Void toJsonNode(T instance , Function<JsonValue, Void> converterFn);
+*/
 
 
 }

@@ -1,6 +1,9 @@
 package com.sidemash.redson;
 
 
+import javax.swing.text.html.Option;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -154,4 +157,119 @@ public class JsonOptional implements JsonValue {
         throw new UnsupportedOperationException("UnionAll on instance of JsonOptional");
     }
 
+    @Override
+    public Object getValue() {
+        if(value.isPresent()) return Optional.of(value.get().getValue());
+        else return Optional.empty();
+    }
+
+    @Override
+    public boolean asBoolean() {
+        throw new ClassCastException();
+    }
+
+    @Override
+    public Optional<Boolean> asBooleanOptional() {
+        return Optional.empty();
+    }
+
+    @Override
+    public boolean asBooleanOrDefault(boolean defaultValue) {
+        return defaultValue;
+    }
+
+    @Override
+    public byte asByte() {
+        throw new ClassCastException();
+    }
+
+    @Override
+    public Optional<Byte> asByteOptional() {
+        return Optional.empty();
+    }
+
+    @Override
+    public byte asByteOrDefault(byte defaultValue) {
+        return defaultValue;
+    }
+
+    @Override
+    public boolean asBigDecimal() {
+        throw new ClassCastException();
+    }
+
+    @Override
+    public Optional<BigDecimal> asBigDecimalOptional() {
+        return Optional.empty();
+    }
+
+    @Override
+    public BigDecimal asBigDecimalOrDefault(BigDecimal defaultValue) {
+        return Optional.empty();
+    }
+
+    @Override
+    public BigInteger asBigInteger() {
+        throw new ClassCastException();
+    }
+
+    @Override
+    public Optional<Boolean> asBigIntegerOptional() {
+        return Optional.empty();
+    }
+
+    @Override
+    public BigInteger asBigIntegerOrDefault(BigInteger defaultValue) {
+        return defaultValue;
+    }
+
+    @Override
+    public char asChar() {
+        throw new ClassCastException();
+    }
+
+    @Override
+    public Optional<Character> asCharOptional() {
+        return Optional.empty();
+    }
+
+    @Override
+    public char asCharOrDefault(char defaultValue) {
+        return defaultValue;
+    }
+
+    @Override
+    public double asDouble() {
+        throw new ClassCastException();
+    }
+
+    @Override
+    public Optional<Double> asDoubleOptional() {
+        return Optional.empty();
+    }
+
+    @Override
+    public double asDoubleOrDefault(double defaultValue) {
+        return defaultValue;
+    }
+
+    @Override
+    public float asFloat() {
+        throw new ClassCastException();
+    }
+
+    @Override
+    public Optional<Float> asFloatOptional() {
+        return Optional.empty();
+    }
+
+    @Override
+    public float asFloatOrDefault(float defaultValue) {
+        return defaultValue;
+    }
+
+    @Override
+    public int asInt() {
+        throw new ClassCastException();
+    }
 }
