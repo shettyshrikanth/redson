@@ -167,7 +167,7 @@ public class Json {
 
         // If not, then Apply default conversion strategies
         if (writerToJson.containsKey(cl)) {
-           fn = (BiFunction<Object, JsonValue, JsonValue>) writerToJson.get(cl);
+            fn = (BiFunction<Object, JsonValue, JsonValue>) writerToJson.get(cl);
         }
         else {
             if(cl.isArray())
@@ -220,15 +220,15 @@ public class Json {
         // First Check for User Defined conversion rules
         Function<JsonValue, Object> fn;
         if(usersDefinedReadersFromJson.containsKey(expectedClass))
-           fn = (Function<JsonValue, Object>) usersDefinedReadersFromJson.get(expectedClass);
+            fn = (Function<JsonValue, Object>) usersDefinedReadersFromJson.get(expectedClass);
 
-        // Then Check for Default conversion rules
+            // Then Check for Default conversion rules
         else if(readersFromJson.containsKey(expectedClass))
             fn = (Function<JsonValue, Object>) readersFromJson.get(expectedClass);
         else
             throw new UnsupportedOperationException(
                     String.format("Unable to convert from JsonValue because converter " +
-                    "for class %s is not registered", expectedClass)
+                            "for class %s is not registered", expectedClass)
             );
 
         return (T) fn.apply(JsonValue);
