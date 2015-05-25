@@ -11,6 +11,8 @@ public class Main {
                         JsonObject.of("age",  JsonNumber.of(10))
                 );
 
+
+
         JsonValue jsValue1 =
                 JsonArray.of(JsonNumber.of(10), JsonObject.EMPTY,  JsonNumber.of(10))
                 ;
@@ -24,10 +26,6 @@ public class Main {
                                 );
         timedOperation(() -> { jsValue3.toString(); return null; });
 
-
-        // JsonOptional.empty  -> Missing Field
-        // JsonOptional.of(T)  -> field of type T
-        // JsonNull   -> Field with a null value
 
         System.out.println(jsValue3);
     }
