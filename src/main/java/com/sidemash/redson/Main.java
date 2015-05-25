@@ -19,8 +19,8 @@ public class Main {
         JsonObject jsValue3 = JsonObject.of(
                                      JsonObject.of("name", JsonNumber.of(10)),
                                      JsonObject.of("age",  JsonNumber.of(10)),
-                                    JsonObject.of("naming", JsonNumber.of(10)),
-                                    JsonObject.of("text", JsonOptional.EMPTY)
+                                     JsonObject.of("naming", JsonNumber.of(10)),
+                                     JsonObject.of("text", JsonOptional.EMPTY)
                                 );
         timedOperation(() -> { jsValue3.toString(); return null; });
 
