@@ -90,11 +90,17 @@ public interface JsonValue {
 
     <T> Optional<T> asOptionalOf(Class<T> c);
 
-    <T> T asPojo(Class<T> cl);
+    default <T> T asPojo(Class<T> cl) {
+        return Json.fromJsonValue(this, cl);
+    }
 
-    <T> Optional<T> asPojoOptional();
+    default <T> Optional<T> asPojoOptional(Class<T> cl){
+        return Json.fromJsonValueOptional(this, cl);
+    }
 
-    <T> T asPojoOrDefault(T defaultValue);
+    default <T> T asPojoOrDefault(Class<T> cl, T defaultValue) {
+        return Json.fromJsonValueOrDefault(this, cl, defaultValue);
+    }
 
     <T> Set<T> asSetOf(Class<T> cl,  Set<T> set);
 
@@ -124,12 +130,6 @@ public interface JsonValue {
     boolean containsValue(Object value);
 
     JsonValue distinct();
-
-    <T> T  foldBreadth(T seed, BiFunction<T,? super JsonEntry, T> fn);
-
-    <T> T foldDepth(T seed, BiFunction<T,? super JsonEntry, T> fn);
-
-    JsonValue foldDepth(BiFunction<? super JsonValue,? super JsonEntry, ? extends JsonValue> fn);
 
     Set<Integer> getIndexSet();
 
