@@ -219,4 +219,11 @@ public class JsonArray implements JsonStructure, Iterable<JsonValue> {
         }
         return null;
     }
+
+    @Override
+    public String toString() {
+        return "JsonArray{" +
+                "items=" + items +
+                '}';
+    }
 }

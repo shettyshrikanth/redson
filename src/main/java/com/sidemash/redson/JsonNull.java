@@ -42,18 +42,18 @@ public enum JsonNull implements JsonLiteral {
     }
 
     @Override
-    public String toString() {
-        return "null";
-    }
-
-    @Override
     public String prettyStringifyRecursive(int indent, int incrementAcc, boolean keepingNull, boolean emptyValuesToNull) {
-        return  stringify(keepingNull, emptyValuesToNull);
+        return stringify(keepingNull, emptyValuesToNull);
     }
 
     @Override
     public String stringify(boolean keepingNull, boolean emptyValuesToNull) {
         if(keepingNull) return  "null";
         else throw new UnsupportedOperationException("Stringify JsonNull while NOT keeping null value");
+    }
+
+    @Override
+    public String toString() {
+        return "JsonNull{}";
     }
 }

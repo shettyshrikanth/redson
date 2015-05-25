@@ -17,4 +17,13 @@ public class JsonEntry<T> {
     public JsonValue getValue() {
         return value;
     }
+
+    @Override
+    public String toString() {
+        return "JsonEntry{" +
+                "key=" + key +
+                ", value=" + value +
+                '}';
+    }
+
 }

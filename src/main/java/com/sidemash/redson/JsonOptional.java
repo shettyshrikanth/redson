@@ -117,28 +117,27 @@ public class JsonOptional implements JsonValue {
         return false;
     }
 
-    @Override
-    public String prettyStringifyRecursive(int indent, int incrementAcc) {
-        if(value.isPresent())
-            return value.get().prettyStringifyRecursive(indent, incrementAcc);
-        else
-            return JsonNull.INSTANCE.prettyStringifyRecursive(indent, incrementAcc);
-    }
 
     @Override
-    public String prettyStringify(int indent) {
-        if(value.isPresent())
-            return value.get().prettyStringify(indent);
-        else
-            return JsonNull.INSTANCE.prettyStringify(indent);
+    public String prettyStringifyRecursive(int indent, int incrementAcc, boolean keepingNull, boolean emptyValuesToNull) {
+        return stringify(keepingNull, emptyValuesToNull);
     }
 
     @Override
     public String toString() {
+        return "JsonOptional{" +
+                "value=" + value +
+                '}';
+    }
+
+    @Override
+    public String stringify(boolean keepingNull, boolean emptyValuesToNull) {
         if(value.isPresent())
-            return value.get().toString();
+            return value.get().stringify(keepingNull, emptyValuesToNull);
+        else if(emptyValuesToNull)
+            return JsonNull.INSTANCE.stringify(keepingNull, emptyValuesToNull);
         else
-            return JsonNull.INSTANCE.toString();
+            throw new UnsupportedOperationException("stringify an empty JsonOptional");
     }
 
     @Override
