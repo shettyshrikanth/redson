@@ -114,13 +114,6 @@ public class JsonArray implements JsonStructure, Iterable<JsonValue> {
         };
     }
 
-    public Stream<JsonValue> stream(){
-        return StreamSupport.stream(
-                Spliterators.spliteratorUnknownSize(iterator(), Spliterator.NONNULL | Spliterator.IMMUTABLE),
-                false
-        );
-    }
-
     @Override
     public String prettyStringifyRecursive(int indent, int incrementAcc, boolean keepingNull, boolean emptyValuesToNull)  {
         String result;
@@ -161,6 +154,13 @@ public class JsonArray implements JsonStructure, Iterable<JsonValue> {
         return result;
     }
 
+    public Stream<JsonValue> stream(){
+        return StreamSupport.stream(
+                Spliterators.spliteratorUnknownSize(iterator(), Spliterator.NONNULL | Spliterator.IMMUTABLE),
+                false
+        );
+    }
+
     @Override
     public String stringify(boolean keepingNull, boolean emptyValuesToNull){
         StringJoiner sj = new StringJoiner(",", "[", "]");
@@ -175,6 +175,13 @@ public class JsonArray implements JsonStructure, Iterable<JsonValue> {
             }
         }
         return sj.toString();
+    }
+
+    @Override
+    public String toString() {
+        return "JsonArray{" +
+                "items=" + items +
+                '}';
     }
 
     @Override
@@ -220,10 +227,4 @@ public class JsonArray implements JsonStructure, Iterable<JsonValue> {
         return null;
     }
 
-    @Override
-    public String toString() {
-        return "JsonArray{" +
-                "items=" + items +
-                '}';
-    }
 }

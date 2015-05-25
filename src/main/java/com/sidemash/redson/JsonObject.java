@@ -123,16 +123,6 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>> {
         };
     }
 
-    public Stream<JsonEntry> stream(){
-        return StreamSupport.stream(
-                Spliterators.spliteratorUnknownSize(iterator(), Spliterator.NONNULL | Spliterator.IMMUTABLE),
-                false
-        );
-    }
-
-
-
-
     @Override
     public String prettyStringifyRecursive(int indent,
                                             int incrementAcc,
@@ -168,14 +158,20 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>> {
                                             incrementAcc + indent,
                                             keepingNull,
                                             emptyValuesToNull)
-                            )
-                    );
+                            ));
                 }
 
             }
             result = sj.toString();
         }
         return result;
+    }
+
+    public Stream<JsonEntry> stream(){
+        return StreamSupport.stream(
+                Spliterators.spliteratorUnknownSize(iterator(), Spliterator.NONNULL | Spliterator.IMMUTABLE),
+                false
+        );
     }
 
     @Override
@@ -195,6 +191,13 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>> {
         }
 
         return sj.toString();
+    }
+
+    @Override
+    public String toString() {
+        return "JsonObject{" +
+                "bindings=" + bindings +
+                '}';
     }
 
     @Override
@@ -235,12 +238,5 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>> {
             );
         }
         return new JsonObject(mapBuilder.result());
-    }
-
-    @Override
-    public String toString() {
-        return "JsonObject{" +
-                "bindings=" + bindings +
-                '}';
     }
 }

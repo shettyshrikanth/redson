@@ -6,7 +6,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
- interface JsonValue {
+interface JsonValue {
 
     JsonValue append(JsonValue jsValue);
 
@@ -14,7 +14,9 @@ import java.util.function.Supplier;
 
     JsonValue appendIfAbsent(String key, JsonValue jsValue);
 
-    JsonValue applyFn(Function<JsonValue, JsonValue> function);
+    default JsonValue applyFn(Function<JsonValue, JsonValue> function) {
+        return function.apply(this);
+    }
 
     boolean asBoolean();
 
@@ -34,12 +36,6 @@ import java.util.function.Supplier;
 
     double asDoubleOrDefault(double defaultValue);
 
-    <T> T asPojo(Class<T> cl);
-
-    <T> Optional<T> asPojoOptional();
-
-    <T> T asDoubleOrDefault(T defaultValue);
-
     float asFloat();
 
     Optional<Float> asFloatOptional();
@@ -53,22 +49,34 @@ import java.util.function.Supplier;
     <T> Map<Integer, T> asIntIndexedMapOf(Class<T> c, Map<Integer, T> map);
 
     Optional<Integer> asIntOptional();
+
     int asIntOrDefault(int defaultValue);
 
-    long asLong();
-
     <T> List<T> asListOf(Class<T> cl, List<T> list);
+
     <T> List<T> asListOf(Class<T> cl);
-    <T> Set<T> asSetOf(Class<T> cl,  Set<T> set);
-    <T> Set<T> asSetOf(Class<T> cl);
+
+    long asLong();
 
     Optional<Long> asLongOptional();
 
     long asLongOrDefault(long defaultValue);
 
-    Optional<? extends JsonValue> asOptional();
+    default Optional<? extends JsonValue> asOptional() {
+        return Optional.of(this);
+    }
 
     <T> Optional<T> asOptionalOf(Class<T> c);
+
+    <T> T asPojo(Class<T> cl);
+
+    <T> Optional<T> asPojoOptional();
+
+    <T> T asPojoOrDefault(T defaultValue);
+
+    <T> Set<T> asSetOf(Class<T> cl,  Set<T> set);
+
+    <T> Set<T> asSetOf(Class<T> cl);
 
     short asShort();
 
@@ -85,6 +93,13 @@ import java.util.function.Supplier;
 
     String  asStringOrDefault(String defaultValue);
 
+    boolean containsAll(JsonValue... jsValues);
+
+    boolean containsAll(List<? extends JsonValue> jsValues);
+
+    boolean containsKey(String key);
+
+    boolean containsValue(Object value);
 
     JsonValue distinct();
 
@@ -99,15 +114,6 @@ import java.util.function.Supplier;
     Set<JsonEntry<Integer>> getIntIndexedEntrySet();
 
     Set<JsonEntry<String>> getStringIndexedEntrySet();
-
-    boolean containsAll(JsonValue... jsValues);
-
-    boolean containsAll(List<? extends JsonValue> jsValues);
-
-    boolean containsKey(String key);
-
-    boolean containsValue(Object value);
-
 
     /**
      * Executes thenFn callback if conditionFn function is true, and elseFn if false.
@@ -221,7 +227,6 @@ import java.util.function.Supplier;
         return (!isEmpty());
     }
 
-    JsonValue keepNull();
 
     Set<String> keySet();
 
@@ -231,62 +236,47 @@ import java.util.function.Supplier;
 
     JsonValue prependIfAbsent(String key, JsonValue jsValue);
 
+    default String prettyStringify() {
+        final int indent = 3;
+        return prettyStringify(indent);
+    }
+
+    default String prettyStringify(int indent) {
+        final boolean keepingNull = false;
+        final boolean emptyValuesToNull = false;
+        return prettyStringify(indent, keepingNull, emptyValuesToNull);
+    }
+
+    default String prettyStringify(boolean keepingNull, boolean emptyValuesToNull) {
+        final int indent = 3;
+        return prettyStringify(indent, keepingNull, emptyValuesToNull);
+    }
+
+    default String prettyStringify(int indent, boolean keepingNull, boolean emptyValuesToNull){
+        return prettyStringifyRecursive(indent, indent, keepingNull, emptyValuesToNull);
+    }
+
+    String prettyStringifyRecursive(int indent, int incrementAcc, boolean keepingNull, boolean emptyValuesToNull);
+
     JsonValue reduceBreadth(BiFunction<? super JsonValue,? super JsonEntry, ? extends JsonValue> fn);
 
     JsonValue reverse();
 
     int size();
 
+    default String stringify(){
+        final boolean keepingNull = false;
+        final boolean emptyValuesToNull = false;
+        return stringify(keepingNull, emptyValuesToNull);
+    }
 
- 
+    String stringify(boolean keepingNull, boolean emptyValuesToNull);
+
     JsonValue union(JsonValue jsonValue);
 
     JsonValue unionAll(List<? extends JsonValue> jsonValues);
 
     Collection<? extends JsonValue> values();
 
- 
     Iterator<? extends JsonValue> valuesIterator();
-
-
-
-
-
-
-
-
-
-
- 
-     String prettyStringifyRecursive(int indent, int incrementAcc, boolean keepingNull, boolean emptyValuesToNull);
-
-
-     default String prettyStringify() {
-         final int indent = 3;
-         return prettyStringify(indent);
-     }
-
-
-     default String prettyStringify(int indent) {
-         final boolean keepingNull = false;
-         final boolean emptyValuesToNull = false;
-         return prettyStringify(indent, keepingNull, emptyValuesToNull);
-     }
-
-     default String prettyStringify(boolean keepingNull, boolean emptyValuesToNull) {
-         final int indent = 3;
-         return prettyStringify(indent, keepingNull, emptyValuesToNull);
-     }
-
-     default String prettyStringify(int indent, boolean keepingNull, boolean emptyValuesToNull){
-         return prettyStringifyRecursive(indent, indent, keepingNull, emptyValuesToNull);
-     }
-    
-     default String stringify(){
-         final boolean keepingNull = false;
-         final boolean emptyValuesToNull = false;
-         return stringify(keepingNull, emptyValuesToNull);
-     }
-    
-     String stringify(boolean keepingNull, boolean emptyValuesToNull);
 }

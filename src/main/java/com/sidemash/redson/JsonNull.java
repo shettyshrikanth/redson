@@ -1,9 +1,16 @@
 package com.sidemash.redson;
 
 
+import java.util.Optional;
+
 public enum JsonNull implements JsonLiteral {
 
     INSTANCE;
+
+    @Override
+    public Optional<? extends JsonValue> asOptional() {
+        return Optional.empty();
+    }
 
     @Override
     public boolean containsKey(String key) {
@@ -56,4 +63,5 @@ public enum JsonNull implements JsonLiteral {
     public String toString() {
         return "JsonNull{}";
     }
+
 }

@@ -34,6 +34,11 @@ public class JsonOptional implements JsonValue {
     }
 
     @Override
+    public Optional<? extends JsonValue> asOptional() {
+        return value;
+    }
+
+    @Override
     public boolean containsAll(JsonValue... jsValues) {
         return containsAll(Arrays.asList(jsValues));
     }
@@ -117,17 +122,9 @@ public class JsonOptional implements JsonValue {
         return false;
     }
 
-
     @Override
     public String prettyStringifyRecursive(int indent, int incrementAcc, boolean keepingNull, boolean emptyValuesToNull) {
         return stringify(keepingNull, emptyValuesToNull);
-    }
-
-    @Override
-    public String toString() {
-        return "JsonOptional{" +
-                "value=" + value +
-                '}';
     }
 
     @Override
@@ -141,6 +138,13 @@ public class JsonOptional implements JsonValue {
     }
 
     @Override
+    public String toString() {
+        return "JsonOptional{" +
+                "value=" + value +
+                '}';
+    }
+
+    @Override
     public JsonValue union(JsonValue jsonValue) {
         throw new UnsupportedOperationException("Union on instance of JsonOptional");
     }
@@ -149,4 +153,5 @@ public class JsonOptional implements JsonValue {
     public JsonValue unionAll(List<? extends JsonValue> jsonValues) {
         throw new UnsupportedOperationException("UnionAll on instance of JsonOptional");
     }
+
 }

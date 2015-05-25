@@ -50,13 +50,6 @@ public class JsonString implements JsonLiteral {
     }
 
     @Override
-    public String toString() {
-        return "JsonString{" +
-                "value='" + value + '\'' +
-                '}';
-    }
-
-    @Override
     public String prettyStringifyRecursive(int indent, int incrementAcc, boolean keepingNull, boolean emptyValuesToNull) {
         return value;
     }
@@ -64,6 +57,13 @@ public class JsonString implements JsonLiteral {
     @Override
     public String stringify(boolean keepingNull, boolean emptyValuesToNull) {
         return  value;
+    }
+
+    @Override
+    public String toString() {
+        return "JsonString{" +
+                "value='" + value + '\'' +
+                '}';
     }
 
 }

@@ -33,6 +33,10 @@ public enum JsonBoolean implements JsonLiteral {
         this.value = value;
     }
 
+    static JsonBoolean  of(boolean b) {
+        if(b) return JsonBoolean.TRUE; else return JsonBoolean.FALSE;
+    }
+
     @Override
     public boolean containsKey(String key) {
         throw new UnsupportedOperationException("This operation is not supported for JsonBoolean.");
@@ -49,23 +53,18 @@ public enum JsonBoolean implements JsonLiteral {
     }
 
     @Override
-    public boolean isJsonNumber() {
+    public boolean isJsonNull() {
         return false;
     }
 
     @Override
-    public boolean isJsonNull() {
+    public boolean isJsonNumber() {
         return false;
     }
 
     @Override
     public boolean isJsonString() {
         return false;
-    }
-
-
-    static JsonBoolean  of(boolean b) {
-        if(b) return JsonBoolean.TRUE; else return JsonBoolean.FALSE;
     }
 
     @Override

@@ -77,11 +77,6 @@ public interface JsonLiteral extends JsonValue {
     }
 
     @Override
-    default String prettyStringifyRecursive(int indent, int incrementAcc) {
-        return toString();
-    }
-
-    @Override
     default String prettyStringify() {
         return toString();
     }

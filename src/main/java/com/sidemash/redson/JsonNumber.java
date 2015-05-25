@@ -67,14 +67,14 @@ public class JsonNumber implements JsonLiteral {
     }
 
     @Override
+    public String stringify(boolean keepingNull, boolean emptyValuesToNull) {
+        return value.toString();
+    }
+
+    @Override
     public String toString() {
         return "JsonNumber{" +
                 "value=" + value +
                 '}';
-    }
-
-    @Override
-    public String stringify(boolean keepingNull, boolean emptyValuesToNull) {
-        return value.toString();
     }
 }
