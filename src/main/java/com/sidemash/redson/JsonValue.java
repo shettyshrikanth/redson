@@ -68,8 +68,6 @@ public interface JsonValue {
 
     int asInt();
 
-    <T> Map<Integer, T> asIntIndexedMapOf(Class<T> c);
-
     <T> Map<Integer, T> asIntIndexedMapOf(Class<T> c, Map<Integer, T> map);
 
     Optional<Integer> asIntOptional();
@@ -282,8 +280,6 @@ public interface JsonValue {
 
     String prettyStringifyRecursive(int indent, int incrementAcc, boolean keepingNull, boolean emptyValuesToNull);
 
-    JsonValue reduceBreadth(BiFunction<? super JsonValue,? super JsonEntry, ? extends JsonValue> fn);
-
     JsonValue reverse();
 
     int size();
@@ -304,6 +300,12 @@ public interface JsonValue {
         final boolean emptyValuesToNull = false;
         return stringify(keepingNull, emptyValuesToNull);
     }
+
+
+    default <T> Map<Integer, T> asIntIndexedMapOf(Class<T> c) {
+        return asIntIndexedMapOf(c, new LinkedHashMap<>());
+    }
+
 
     JsonValue union(JsonValue jsonValue);
 

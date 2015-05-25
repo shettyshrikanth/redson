@@ -4,9 +4,8 @@ package com.sidemash.redson;
 import javax.swing.text.html.Option;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.function.BiFunction;
 
 public class JsonOptional implements JsonValue {
 
@@ -42,6 +41,76 @@ public class JsonOptional implements JsonValue {
     }
 
     @Override
+    public <T> Optional<T> asOptionalOf(Class<T> c) {
+        return null;
+    }
+
+    @Override
+    public <T> T asPojo(Class<T> cl) {
+        return null;
+    }
+
+    @Override
+    public <T> Optional<T> asPojoOptional() {
+        return null;
+    }
+
+    @Override
+    public <T> T asPojoOrDefault(T defaultValue) {
+        return null;
+    }
+
+    @Override
+    public <T> Set<T> asSetOf(Class<T> cl, Set<T> set) {
+        return null;
+    }
+
+    @Override
+    public <T> Set<T> asSetOf(Class<T> cl) {
+        return null;
+    }
+
+    @Override
+    public short asShort() {
+        return 0;
+    }
+
+    @Override
+    public Optional<Short> asShortOptional() {
+        return null;
+    }
+
+    @Override
+    public short asShortOrDefault(short defaultValue) {
+        return 0;
+    }
+
+    @Override
+    public String asString() {
+        return null;
+    }
+
+    @Override
+    public <T> Map<String, T> asStringIndexedMapOf(Class<T> c) {
+        return null;
+    }
+
+    @Override
+    public <T> Map<String, T> asStringIndexedMapOf(Class<T> c, Map<String, T> map) {
+        return null;
+    }
+
+    @Override
+    public Optional<String> asStringOptional() {
+        return null;
+    }
+
+    @Override
+    public String asStringOrDefault(String defaultValue) {
+        return null;
+    }
+
+    @Override
     public boolean containsAll(JsonValue... jsValues) {
         return containsAll(Arrays.asList(jsValues));
     }
@@ -63,6 +132,41 @@ public class JsonOptional implements JsonValue {
     @Override
     public boolean containsValue(Object value) {
         return this.value.isPresent() && this.value.get().equals(value);
+    }
+
+    @Override
+    public JsonValue distinct() {
+        return null;
+    }
+
+    @Override
+    public <T> T foldBreadth(T seed, BiFunction<T, ? super JsonEntry, T> fn) {
+        return null;
+    }
+
+    @Override
+    public <T> T foldDepth(T seed, BiFunction<T, ? super JsonEntry, T> fn) {
+        return null;
+    }
+
+    @Override
+    public JsonValue foldDepth(BiFunction<? super JsonValue, ? super JsonEntry, ? extends JsonValue> fn) {
+        return null;
+    }
+
+    @Override
+    public Set<Integer> getIndexSet() {
+        return null;
+    }
+
+    @Override
+    public Set<JsonEntry<Integer>> getIntIndexedEntrySet() {
+        return null;
+    }
+
+    @Override
+    public Set<JsonEntry<String>> getStringIndexedEntrySet() {
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -126,8 +230,38 @@ public class JsonOptional implements JsonValue {
     }
 
     @Override
+    public Set<String> keySet() {
+        Set<String> result =
+    }
+
+    @Override
+    public JsonValue prepend(JsonValue jsValue) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public JsonValue prepend(String key, JsonValue jsValue) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public JsonValue prependIfAbsent(String key, JsonValue jsValue) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public String prettyStringifyRecursive(int indent, int incrementAcc, boolean keepingNull, boolean emptyValuesToNull) {
         return stringify(keepingNull, emptyValuesToNull);
+    }
+
+    @Override
+    public JsonValue reverse() {
+        return this;
+    }
+
+    @Override
+    public int size() {
+        return (value.isPresent()) ? 1 : 0;
     }
 
     @Override
@@ -155,6 +289,32 @@ public class JsonOptional implements JsonValue {
     @Override
     public JsonValue unionAll(List<? extends JsonValue> jsonValues) {
         throw new UnsupportedOperationException("UnionAll on instance of JsonOptional");
+    }
+
+    @Override
+    public Collection<? extends JsonValue> values() {
+        List<JsonValue> result = new ArrayList<>();
+        value.ifPresent((jsonValue) -> result.add(jsonValue));
+        return result;
+    }
+
+    @Override
+    public Iterator<? extends JsonValue> valuesIterator() {
+        return new Iterator<JsonValue>() {
+            Optional<JsonValue> optJsValue = value;
+
+            @Override
+            public boolean hasNext() {
+                return optJsValue.isPresent();
+            }
+
+            @Override
+            public JsonValue next() {
+                JsonValue result = optJsValue.orElseThrow(IllegalStateException::new);
+                optJsValue = Optional.empty();
+                return result;
+            }
+        };
     }
 
     @Override
@@ -194,7 +354,7 @@ public class JsonOptional implements JsonValue {
     }
 
     @Override
-    public boolean asBigDecimal() {
+    public BigDecimal asBigDecimal() {
         throw new ClassCastException();
     }
 
@@ -205,7 +365,7 @@ public class JsonOptional implements JsonValue {
 
     @Override
     public BigDecimal asBigDecimalOrDefault(BigDecimal defaultValue) {
-        return Optional.empty();
+        return defaultValue;
     }
 
     @Override
@@ -214,7 +374,7 @@ public class JsonOptional implements JsonValue {
     }
 
     @Override
-    public Optional<Boolean> asBigIntegerOptional() {
+    public Optional<BigInteger> asBigIntegerOptional() {
         return Optional.empty();
     }
 
@@ -271,5 +431,50 @@ public class JsonOptional implements JsonValue {
     @Override
     public int asInt() {
         throw new ClassCastException();
+    }
+
+    @Override
+    public <T> Map<Integer, T> asIntIndexedMapOf(Class<T> c, Map<Integer, T> map) {
+        if(!value.isPresent())
+           return  map;
+
+        T instance = Json.fromJsonValue(value.get(), c);
+        map.put(0, instance);
+        return map;
+    }
+
+    @Override
+    public Optional<Integer> asIntOptional() {
+        return Optional.empty();
+    }
+
+    @Override
+    public int asIntOrDefault(int defaultValue) {
+        return defaultValue;
+    }
+
+    @Override
+    public <T> List<T> asListOf(Class<T> cl, List<T> list) {
+
+    }
+
+    @Override
+    public <T> List<T> asListOf(Class<T> cl) {
+        return asListOf(cl, new ArrayList<>());
+    }
+
+    @Override
+    public long asLong() {
+        throw new ClassCastException();
+    }
+
+    @Override
+    public Optional<Long> asLongOptional() {
+        return Optional.empty();
+    }
+
+    @Override
+    public long asLongOrDefault(long defaultValue) {
+        return defaultValue;
     }
 }
