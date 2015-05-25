@@ -58,7 +58,6 @@ public class Json {
     }
 
     public static class OptionalConverter {
-
         public static JsonValue toJsonValue(Object opt, JsonValue jsonValue){
             Optional<?> value = (Optional<?>) opt;
             JsonValue result = JsonOptional.EMPTY;
