@@ -167,7 +167,7 @@ public class Json {
 
         // If not, then Apply default conversion strategies
         if (writerToJson.containsKey(cl)) {
-            fn = (BiFunction<Object, JsonValue, JsonValue>) writerToJson.get(cl);
+           fn = (BiFunction<Object, JsonValue, JsonValue>) writerToJson.get(cl);
         }
         else {
             if(cl.isArray())
@@ -215,24 +215,41 @@ public class Json {
         return fn.apply(jsonValue);
     }
 
-    public static <T> T fromJsonValue(JsonValue JsonValue, Class<T> expectedClass){
+    public static <T> T fromJsonValue(JsonValue jsonValue, Class<T> expectedClass){
+        return fromJsonValueOptional(jsonValue, expectedClass).orElseThrow(ClassCastException::new);
+    }
+
+    public static <T> Optional<T> fromJsonValueOptional(JsonValue JsonValue, Class<T> expectedClass){
 
         // First Check for User Defined conversion rules
         Function<JsonValue, Object> fn;
-        if(usersDefinedReadersFromJson.containsKey(expectedClass))
-            fn = (Function<JsonValue, Object>) usersDefinedReadersFromJson.get(expectedClass);
+        Optional<T> result;
+        try {
+            if(usersDefinedReadersFromJson.containsKey(expectedClass))
+                fn = (Function<JsonValue, Object>) usersDefinedReadersFromJson.get(expectedClass);
 
-            // Then Check for Default conversion rules
-        else if(readersFromJson.containsKey(expectedClass))
-            fn = (Function<JsonValue, Object>) readersFromJson.get(expectedClass);
-        else
-            throw new UnsupportedOperationException(
-                    String.format("Unable to convert from JsonValue because converter " +
-                            "for class %s is not registered", expectedClass)
-            );
+                // Then Check for Default conversion rules
+            else if(readersFromJson.containsKey(expectedClass))
+                fn = (Function<JsonValue, Object>) readersFromJson.get(expectedClass);
+            else
+                throw new UnsupportedOperationException(
+                        String.format("Unable to convert from JsonValue because converter " +
+                                "for class %s is not registered", expectedClass)
+                );
 
-        return (T) fn.apply(JsonValue);
+            result = Optional.of((T) fn.apply(JsonValue));
+        } catch(UnsupportedOperationException | ClassCastException e ) {
+            result = Optional.empty();
+        }
+
+        return result ;
     }
+
+
+    public static <T> T fromJsonValueOrDefault(JsonValue jsonValue, Class<T> expectedClass, T defaultValue){
+        return fromJsonValueOptional(jsonValue, expectedClass).orElse(defaultValue);
+    }
+
 
 
 

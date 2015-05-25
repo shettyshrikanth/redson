@@ -1,8 +1,7 @@
 package com.sidemash.redson;
 
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public interface JsonLiteral extends JsonValue {
 
@@ -98,5 +97,125 @@ public interface JsonLiteral extends JsonValue {
         throw new UnsupportedOperationException(
                 String.format("this operation is not supported by instance of %s", this.getClass())
         );
+    }
+
+
+    @Override
+    default <T> Map<Integer, T> asIntIndexedMapOf(Class<T> cl, Map<Integer, T> map) {
+        map.put(0, Json.fromJsonValue(this, cl));
+        return map;
+    }
+
+    @Override
+    default <T> List<T> asListOf(Class<T> cl, List<T> list) {
+        list.add(Json.fromJsonValue(this, cl));
+        return list;
+    }
+
+    @Override
+    default <T> List<T> asListOf(Class<T> cl) {
+        return asListOf(cl, new ArrayList<>());
+    }
+
+
+    @Override
+    default <T> Set<T> asSetOf(Class<T> cl, Set<T> set) {
+        set.add(Json.fromJsonValue(this, cl));
+        return set;
+    }
+
+    @Override
+    default <T> Set<T> asSetOf(Class<T> cl) {
+        return asSetOf(cl, new LinkedHashSet<>());
+    }
+
+    @Override
+    default <T> Map<String, T> asStringIndexedMapOf(Class<T> c) {
+        return asStringIndexedMapOf(c, new LinkedHashMap<>());
+    }
+
+    @Override
+    default <T> Map<String, T> asStringIndexedMapOf(Class<T> c, Map<String, T> map) {
+        map.put("0", Json.fromJsonValue(this, c));
+        return map;
+    }
+
+    @Override
+    default JsonValue distinct() {
+        return this;
+    }
+
+    @Override
+    default Set<Integer> getIndexSet() {
+        Set<Integer> set = new LinkedHashSet<>();
+        set.add(0);
+        return set;
+    }
+
+    @Override
+    default Set<JsonEntry<Integer>> getIntIndexedEntrySet() {
+        Set<JsonEntry<Integer>> set = new LinkedHashSet<>();
+        set.add(new JsonEntry<>(0, this));
+        return set;
+    }
+
+    @Override
+    default Set<JsonEntry<String>> getStringIndexedEntrySet() {
+        Set<JsonEntry<String>> set = new LinkedHashSet<>();
+        set.add(new JsonEntry<>("0", this));
+        return set;
+    }
+
+    @Override
+    default Set<String> keySet() {
+        Set<String> set = new LinkedHashSet<>();
+        set.add("0");
+        return set;
+    }
+
+    @Override
+    default JsonValue prepend(JsonValue jsValue) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    default JsonValue prepend(String key, JsonValue jsValue) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    default JsonValue prependIfAbsent(String key, JsonValue jsValue) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    default JsonValue reverse() {
+        return this;
+    }
+
+    @Override
+    default int size() {
+        return 1;
+    }
+
+
+    @Override
+    default Iterator<? extends JsonValue> valuesIterator() {
+        JsonValue that = this;
+        return new Iterator<JsonValue>() {
+            Optional<JsonValue> optJsValue = Optional.of(that);
+
+            @Override
+            public boolean hasNext() {
+                return optJsValue.isPresent();
+            }
+
+            @Override
+            public JsonValue next() {
+                JsonValue result = optJsValue.orElseThrow(IllegalStateException::new);
+                optJsValue = Optional.empty();
+                return result;
+            }
+        };
     }
 }

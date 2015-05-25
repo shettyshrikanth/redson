@@ -1,11 +1,10 @@
 package com.sidemash.redson;
 
 
-import javax.swing.text.html.Option;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
-import java.util.function.BiFunction;
+
 
 public class JsonOptional implements JsonValue {
 
@@ -42,72 +41,81 @@ public class JsonOptional implements JsonValue {
 
     @Override
     public <T> Optional<T> asOptionalOf(Class<T> c) {
-        return null;
+       if(value.isPresent()) return Optional.of(Json.fromJsonValue(value.get(), c));
+       else return Optional.empty();
     }
 
     @Override
     public <T> T asPojo(Class<T> cl) {
-        return null;
+        return Json.fromJsonValue(value.get(), cl);
     }
 
     @Override
-    public <T> Optional<T> asPojoOptional() {
-        return null;
+    public <T> Optional<T> asPojoOptional(Class<T> cl) {
+        if(!value.isPresent())
+            return Optional.empty();
+
+        return Json.fromJsonValueOptional(value.get(), cl);
     }
 
     @Override
-    public <T> T asPojoOrDefault(T defaultValue) {
-        return null;
+    public <T> T asPojoOrDefault(Class<T> cl, T defaultValue) {
+        if(!value.isPresent())
+            return defaultValue;
+
+        return Json.fromJsonValueOptional(value.get(), cl).orElse(defaultValue);
     }
 
     @Override
     public <T> Set<T> asSetOf(Class<T> cl, Set<T> set) {
-        return null;
+        value.ifPresent((jsonValue) -> set.add(Json.fromJsonValue(jsonValue, cl)));
+        return set;
     }
 
     @Override
     public <T> Set<T> asSetOf(Class<T> cl) {
-        return null;
+        return asSetOf(cl, new HashSet<>());
     }
 
     @Override
     public short asShort() {
-        return 0;
+        throw new ClassCastException();
     }
 
     @Override
     public Optional<Short> asShortOptional() {
-        return null;
+        return Optional.empty();
     }
 
     @Override
     public short asShortOrDefault(short defaultValue) {
-        return 0;
+        return defaultValue;
     }
 
     @Override
     public String asString() {
-        return null;
+        throw new ClassCastException();
     }
 
     @Override
     public <T> Map<String, T> asStringIndexedMapOf(Class<T> c) {
-        return null;
+        return asStringIndexedMapOf(c, new LinkedHashMap<>());
     }
 
     @Override
     public <T> Map<String, T> asStringIndexedMapOf(Class<T> c, Map<String, T> map) {
-        return null;
+        value.ifPresent(jsonValue -> map.put("0", Json.fromJsonValue(jsonValue, c)));
+        return map;
     }
 
     @Override
     public Optional<String> asStringOptional() {
-        return null;
+        return Optional.empty();
     }
 
     @Override
     public String asStringOrDefault(String defaultValue) {
-        return null;
+        return defaultValue;
     }
 
     @Override
@@ -136,32 +144,25 @@ public class JsonOptional implements JsonValue {
 
     @Override
     public JsonValue distinct() {
-        return null;
-    }
-
-    @Override
-    public <T> T foldBreadth(T seed, BiFunction<T, ? super JsonEntry, T> fn) {
-        return null;
-    }
-
-    @Override
-    public <T> T foldDepth(T seed, BiFunction<T, ? super JsonEntry, T> fn) {
-        return null;
-    }
-
-    @Override
-    public JsonValue foldDepth(BiFunction<? super JsonValue, ? super JsonEntry, ? extends JsonValue> fn) {
-        return null;
+        return this;
     }
 
     @Override
     public Set<Integer> getIndexSet() {
-        return null;
+        Set<Integer> set = new HashSet<>();
+        if(value.isPresent())
+            set.add(0);
+
+        return set;
     }
 
     @Override
     public Set<JsonEntry<Integer>> getIntIndexedEntrySet() {
-        return null;
+        Set<JsonEntry<Integer>> set = new HashSet<>();
+        if(value.isPresent())
+            set.add(new JsonEntry<>(0, value.get()));
+
+        return set;
     }
 
     @Override
@@ -231,7 +232,11 @@ public class JsonOptional implements JsonValue {
 
     @Override
     public Set<String> keySet() {
-        Set<String> result =
+        Set<String> result = new HashSet<>();
+        if(value.isPresent())
+            result.add("0");
+
+        return result;
     }
 
     @Override
@@ -294,7 +299,7 @@ public class JsonOptional implements JsonValue {
     @Override
     public Collection<? extends JsonValue> values() {
         List<JsonValue> result = new ArrayList<>();
-        value.ifPresent((jsonValue) -> result.add(jsonValue));
+        value.ifPresent(jsonValue -> result.add(jsonValue));
         return result;
     }
 
@@ -455,7 +460,10 @@ public class JsonOptional implements JsonValue {
 
     @Override
     public <T> List<T> asListOf(Class<T> cl, List<T> list) {
+        if(value.isPresent())
+            list.add(Json.fromJsonValue(value.get(), cl));
 
+        return list;
     }
 
     @Override
