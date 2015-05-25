@@ -28,7 +28,7 @@ public interface JsonStructure extends JsonValue {
 
     @Override
     default Optional<Character> asCharOptional() {
-        return Optional.empty();;
+        return Optional.empty();
     }
 
     @Override
@@ -73,7 +73,7 @@ public interface JsonStructure extends JsonValue {
 
     @Override
     default Optional<Integer> asIntOptional() {
-        return Optional.empty();;
+        return Optional.empty();
     }
 
     @Override
