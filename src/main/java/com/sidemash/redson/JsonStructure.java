@@ -1,6 +1,8 @@
 package com.sidemash.redson;
 
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Optional;
 
@@ -175,4 +177,185 @@ public interface JsonStructure extends JsonValue {
         return true;
     }
 
+    @Override
+    default byte asByte() {
+        throw new ClassCastException(String.format("instance of %s could not be get as Byte", this.getClass()));
+    }
+
+    @Override
+    default Optional<Byte> asByteOptional() {
+        return Optional.empty();
+    }
+
+    @Override
+    default byte asByteOrDefault(byte defaultValue) {
+        return defaultValue;
+    }
+
+    @Override
+    default BigDecimal asBigDecimal() {
+        throw new ClassCastException(String.format("instance of %s could not be get as BigDecimal", this.getClass()));
+    }
+
+    @Override
+    default Optional<BigDecimal> asBigDecimalOptional() {
+        return Optional.empty();
+    }
+
+    @Override
+    default BigDecimal asBigDecimalOrDefault(BigDecimal defaultValue) {
+        return defaultValue;
+    }
+
+    @Override
+    default BigInteger asBigInteger() {
+        throw new ClassCastException(String.format("instance of %s could not be get as BigInteger", this.getClass()));
+    }
+
+    @Override
+    default Optional<BigInteger> asBigIntegerOptional() {
+        return Optional.empty();
+    }
+
+    @Override
+    default BigInteger asBigIntegerOrDefault(BigInteger defaultValue) {
+        return defaultValue;
+    }
+
+    /*
+    @Override
+    public <T> Map<Integer, T> asIntIndexedMapOf(Class<T> c) {
+        return null;
+    }
+
+    @Override
+    public <T> Map<Integer, T> asIntIndexedMapOf(Class<T> c, Map<Integer, T> map) {
+        return null;
+    }
+
+    @Override
+    public <T> List<T> asListOf(Class<T> cl, List<T> list) {
+        return null;
+    }
+
+    @Override
+    public <T> List<T> asListOf(Class<T> cl) {
+        return null;
+    }
+
+    @Override
+    public <T> Optional<T> asOptionalOf(Class<T> c) {
+        return null;
+    }
+
+    @Override
+    public <T> T asPojo(Class<T> cl) {
+        return null;
+    }
+
+    @Override
+    public <T> T asPojoOrDefault(T defaultValue) {
+        return null;
+    }
+
+    @Override
+    public <T> Set<T> asSetOf(Class<T> cl, Set<T> set) {
+        return null;
+    }
+
+    @Override
+    public <T> Set<T> asSetOf(Class<T> cl) {
+        return null;
+    }
+
+    @Override
+    public <T> Map<String, T> asStringIndexedMapOf(Class<T> c) {
+        return null;
+    }
+
+    @Override
+    public <T> Map<String, T> asStringIndexedMapOf(Class<T> c, Map<String, T> map) {
+        return null;
+    }
+
+    @Override
+    public JsonValue distinct() {
+        return null;
+    }
+
+    @Override
+    public <T> T foldBreadth(T seed, BiFunction<T, ? super JsonEntry, T> fn) {
+        return null;
+    }
+
+    @Override
+    public <T> T foldDepth(T seed, BiFunction<T, ? super JsonEntry, T> fn) {
+        return null;
+    }
+
+    @Override
+    public JsonValue foldDepth(BiFunction<? super JsonValue, ? super JsonEntry, ? extends JsonValue> fn) {
+        return null;
+    }
+
+    @Override
+    public Set<Integer> getIndexSet() {
+        return null;
+    }
+
+    @Override
+    public Set<JsonEntry<Integer>> getIntIndexedEntrySet() {
+        return null;
+    }
+
+    @Override
+    public Set<JsonEntry<String>> getStringIndexedEntrySet() {
+        return null;
+    }
+
+    @Override
+    public Set<String> keySet() {
+        return null;
+    }
+
+    @Override
+    public JsonValue prepend(JsonValue jsValue) {
+        return null;
+    }
+
+    @Override
+    public JsonValue prepend(String key, JsonValue jsValue) {
+        return null;
+    }
+
+    @Override
+    public JsonValue prependIfAbsent(String key, JsonValue jsValue) {
+        return null;
+    }
+
+    @Override
+    public JsonValue reduceBreadth(BiFunction<? super JsonValue, ? super JsonEntry, ? extends JsonValue> fn) {
+        return null;
+    }
+
+    @Override
+    public JsonValue reverse() {
+        return null;
+    }
+
+    @Override
+    public int size() {
+        return 0;
+    }
+
+    @Override
+    public Collection<? extends JsonValue> values() {
+        return null;
+    }
+
+    @Override
+    public Iterator<? extends JsonValue> valuesIterator() {
+        return null;
+    }
+    */
 }

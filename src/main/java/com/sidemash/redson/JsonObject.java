@@ -239,4 +239,15 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>> {
         }
         return new JsonObject(mapBuilder.result());
     }
+
+    @Override
+    public Object getValue() {
+        scala.collection.Iterator<Tuple2<String, JsonValue>> iterator = bindings.iterator();
+        final java.util.Map<String, JsonValue> value = new LinkedHashMap<>();
+        while (iterator.hasNext()) {
+            Tuple2<String, JsonValue> element = iterator.next();
+            value.put(element._1(), element._2());
+        }
+        return Collections.unmodifiableMap(value);
+    }
 }
