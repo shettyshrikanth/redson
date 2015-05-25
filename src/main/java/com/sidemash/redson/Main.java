@@ -18,14 +18,13 @@ public class Main {
                 ;
         JsonObject jsValue2 = JsonObject.EMPTY;
 
-        JsonObject jsValue3 = JsonObject.of(
+        JsonObject jsValue3 =   JsonObject.of(
                                      JsonObject.of("name", JsonNumber.of(10)),
                                      JsonObject.of("age",  JsonNumber.of(10)),
                                      JsonObject.of("naming", JsonNumber.of(10)),
                                      JsonObject.of("text", JsonOptional.EMPTY)
                                 );
         timedOperation(() -> { jsValue3.toString(); return null; });
-
 
         System.out.println(jsValue3);
     }
