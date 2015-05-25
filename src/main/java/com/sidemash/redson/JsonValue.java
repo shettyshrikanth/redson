@@ -1,6 +1,8 @@
 package com.sidemash.redson;
 
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -26,25 +28,25 @@ public interface JsonValue {
 
     boolean asBooleanOrDefault(boolean defaultValue);
 
-    boolean asByte();
+    byte asByte();
 
-    Optional<Boolean> asByteOptional();
+    Optional<Byte> asByteOptional();
 
-    boolean asByteOrDefault(boolean defaultValue);
-
-
-    boolean asBigDecimal();
-
-    Optional<Boolean> asBigDecimalOptional();
-
-    boolean asBigDecimalOrDefault(boolean defaultValue);
+    byte asByteOrDefault(byte defaultValue);
 
 
-    boolean asBigInteger();
+    BigDecimal asBigDecimal();
 
-    Optional<Boolean> asBigIntegerOptional();
+    Optional<BigDecimal> asBigDecimalOptional();
 
-    boolean asBigIntegerOrDefault(boolean defaultValue);
+    BigDecimal asBigDecimalOrDefault(BigDecimal defaultValue);
+
+
+    BigInteger asBigInteger();
+
+    Optional<BigInteger> asBigIntegerOptional();
+
+    BigInteger asBigIntegerOrDefault(BigInteger defaultValue);
 
     char asChar();
 

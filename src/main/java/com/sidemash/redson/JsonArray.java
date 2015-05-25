@@ -1,12 +1,16 @@
 package com.sidemash.redson;
 
 
+import scala.collection.*;
 import scala.collection.immutable.Vector;
 import scala.collection.immutable.Vector$;
 import scala.collection.immutable.VectorIterator;
 import scala.collection.mutable.Builder;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -225,6 +229,16 @@ public class JsonArray implements JsonStructure, Iterable<JsonValue> {
             );
         }
         return null;
+    }
+
+    @Override
+    public Object getValue() {
+        scala.collection.Iterator<JsonValue> iterator = items.iterator();
+        final List<JsonValue> value = new ArrayList<>();
+        while (iterator.hasNext()) {
+            value.add(iterator.next());
+        }
+        return Collections.unmodifiableList(value);
     }
 
 }
