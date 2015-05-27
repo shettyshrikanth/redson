@@ -1,5 +1,8 @@
 package com.sidemash.redson;
 
+import com.sidemash.redson.converter.BooleanConverter;
+import com.sidemash.redson.converter.ByteConverter;
+import com.sidemash.redson.converter.JsonConverter;
 import com.sidemash.redson.converter.OptionalConverter;
 
 import java.lang.reflect.Array;
@@ -38,7 +41,9 @@ public class Json {
         // String
         writerToJson.put(String.class,   (String value, JsonValue jsonValue)     -> JsonString.of(value));
         // Optional
-        writerToJson.put(Optional.class,  OptionalConverter::toJsonValue);
+        registerConverter(Boolean.class,    new BooleanConverter());
+        registerConverter(Optional.class,   new OptionalConverter());
+        registerConverter(Byte.class,       new ByteConverter());
         // Array
         writerToJson.put(Array.class, (Object[] array, JsonValue jsonValue) -> JsonArray.of(array));
         // List
@@ -72,8 +77,7 @@ public class Json {
                 for (Field field : fields) {
                     modifier = Modifier.toString(field.getModifiers());
                     value = field.get(obj);
-                    System.out.println("Modifier :  " + modifier);
-                    // If the field is not transient AND is not a reference to currentObject being analyzed
+                     // If the field is not transient AND is not a reference to currentObject being analyzed
                     // the second part of this condition is to avoid circular reference;
                     if (!modifier.contains("transient") && value != obj)
                         attributeMap.put(field.getName(), value);
@@ -135,7 +139,6 @@ public class Json {
         // String
         readersFromJson.put(String.class,     JsonValue::asString);
         // Optional
-        readersFromJson.put(Optional.class,   OptionalConverter::fromJsonValue);
     }
 
 
@@ -199,6 +202,12 @@ public class Json {
 
     public static<T> void registerWriterToJson(Class<T> cl,BiFunction<T, JsonValue, JsonValue> writerFn){
         usersDefinedWriterToJson.put(cl, writerFn);
+    }
+
+
+    public static<T> void registerConverter(Class<T> cl, JsonConverter converter){
+        usersDefinedWriterToJson.put(cl, converter::toJsonValue);
+        usersDefinedReadersFromJson.put(cl, converter::fromJsonValue);
     }
 
 

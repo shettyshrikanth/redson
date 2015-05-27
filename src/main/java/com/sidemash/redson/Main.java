@@ -25,11 +25,21 @@ public class Main {
         JsonObject jsValue2 = JsonObject.EMPTY;
 
         Object[] array = new Object[]{ "Alice", "Jerome"};
-        List<String> listOfString = new ArrayList<>();
-        listOfString.add("Serge");
-        listOfString.add("Martial");
+
+
+
+        List<List<Map<BigInteger, Object>>> listOfString = new ArrayList<>();
+        List<Map<BigInteger, Object>> l2 = new ArrayList<>();
+        listOfString.add(l2);
+
         Map<BigInteger, Object> mapOfString = new HashMap<>();
         mapOfString.put(new BigInteger("1"), "Beau");
+        l2.add(mapOfString);
+        /*
+        List<String> s = new ArrayList<>();
+        s.add("MArtial");
+        listOfString.add(new ArrayList<>());
+        listOfString.add(s);*/
         //  JsonObject.of("friends", mapOfString) convert mapString into Map<String, Object> by calling toString() on the Key
         // and will return "friends":{ "1":"Beau" }
         // if you want to override this behaviour, write JsonObject.of("friends", JsonObject.of(mapString, intKey -> String.valueOf(intKey-1))
@@ -38,19 +48,17 @@ public class Main {
                 JsonObject.of(
                         JsonObject.of("age", 1),
                         JsonObject.of("naming", "Serge"),
-                        JsonObject.of("friends", array) // Homogeneous List
+                        JsonObject.of("friends", new TestValue()) // Homogeneous List
                 );
 
         synchronized (jsValue3) {
             timedOperation(() -> {
-                jsValue3.toString();
+                System.out.println(JsonValue.of(new TestValue()).prettyStringify());
                 return null;
             });
         }
 
 
-        System.out.println(JsonValue.Virus.VIH.getClass());
-        System.out.println(jsValue3.prettyStringify());
        // System.out.println(Json.fromJsonValue(jsValue3)); //.prettyStringify());
 
 
@@ -59,20 +67,26 @@ public class Main {
         // Implements equals and hashcode
         // Test
         // Document
+        // Implement ordered converter list Many Converetr for exemple for String
+        // Implment converter for date
         // Handle conversion to List Map, Arrays OK
         // Handle conversion of recursive Parent classes OK
-        // Handle conversion of recursive data structures ( List<List<String>>, List<List<Map<String, List<String>>>> )
+        // Handle conversion of recursive data structures ( List<List<String>>, List<List<Map<String, List<String>>>> ) OK
     }
 
 
     public static class TestValue{
         public int serge = 2;
         public String martial = "Rer";
-        public TestValue2 rt = new TestValue2();
 
-        public static class TestValue2 {
+
+        public static class TestValue2 extends TestValue {
             public int steph = 8;
             public String martial = "5";
+
+            static {
+                Json.registerWriterToJson(TestValue2.class, (o, js) -> JsonNumber.of(o.steph) );
+            }
         }
     }
 

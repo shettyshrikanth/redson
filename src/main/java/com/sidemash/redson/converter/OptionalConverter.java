@@ -6,9 +6,11 @@ import com.sidemash.redson.JsonValue;
 
 import java.util.Optional;
 
-public class OptionalConverter {
-    public static JsonValue toJsonValue(Object opt, JsonValue jsonValue){
-        Optional<?> value = (Optional<?>) opt;
+public class OptionalConverter implements JsonConverter<Optional<?>> {
+
+    @Override
+    public JsonValue toJsonValue(Optional<?> obj, JsonValue jsonValue) {
+        Optional<?> value = (Optional<?>) obj;
         JsonValue result = JsonOptional.EMPTY;
         if (value.isPresent()) {
             result =  JsonOptional.of(Json.toJsonValue(value.get()));
@@ -16,7 +18,8 @@ public class OptionalConverter {
         return result;
     }
 
-    public static Optional<?> fromJsonValue(JsonValue jsonValue){
+    @Override
+    public Optional<?> fromJsonValue(JsonValue jsonValue) {
         Optional<?> result;
         if (jsonValue.isJsonNull() || (jsonValue.isJsonOptional() && jsonValue.isEmpty()) ) {
             result = Optional.empty();
