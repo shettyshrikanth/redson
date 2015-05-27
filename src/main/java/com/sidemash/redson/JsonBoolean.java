@@ -1,10 +1,11 @@
 package com.sidemash.redson;
 
 
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Optional;
 
 public enum JsonBoolean implements JsonLiteral {
 

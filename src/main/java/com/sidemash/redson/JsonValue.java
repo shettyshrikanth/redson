@@ -4,13 +4,16 @@ package com.sidemash.redson;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 public interface JsonValue {
 
     Object getValue();
+
+    static JsonValue of(Object o){
+        return Json.toJsonValue(o);
+    }
 
     JsonValue append(JsonValue jsValue);
 
@@ -76,7 +79,9 @@ public interface JsonValue {
 
     <T> List<T> asListOf(Class<T> cl, List<T> list);
 
-    <T> List<T> asListOf(Class<T> cl);
+    default <T> List<T> asListOf(Class<T> cl) {
+        return asListOf(cl, new ArrayList<T>());
+    }
 
     long asLong();
 
@@ -88,7 +93,9 @@ public interface JsonValue {
         return Optional.of(this);
     }
 
-    <T> Optional<T> asOptionalOf(Class<T> c);
+    default <T> Optional<T> asOptionalOf(Class<T> cl){
+        return Json.fromJsonValueOptional(this, cl);
+    }
 
     default <T> T asPojo(Class<T> cl) {
         return Json.fromJsonValue(this, cl);
@@ -104,7 +111,9 @@ public interface JsonValue {
 
     <T> Set<T> asSetOf(Class<T> cl,  Set<T> set);
 
-    <T> Set<T> asSetOf(Class<T> cl);
+    default <T> Set<T> asSetOf(Class<T> cl){
+        return asSetOf(cl, new LinkedHashSet<>());
+    }
 
     short asShort();
 
@@ -114,7 +123,10 @@ public interface JsonValue {
 
     String  asString();
 
-    <T> Map<String, T> asStringIndexedMapOf(Class<T> c);
+    default <T> Map<String, T> asStringIndexedMapOf(Class<T> cl){
+        return asStringIndexedMapOf(cl, new LinkedHashMap<String, T>());
+    }
+
     <T> Map<String, T> asStringIndexedMapOf(Class<T> c,  Map<String, T> map);
 
     Optional<String> asStringOptional();
@@ -269,6 +281,12 @@ public interface JsonValue {
         return prettyStringify(indent, keepingNull, emptyValuesToNull);
     }
 
+    default String prettyStringify(boolean keepingNull) {
+        final int indent = 3;
+        final boolean emptyValuesToNull = false;
+        return prettyStringify(indent, keepingNull, emptyValuesToNull);
+    }
+
     default String prettyStringify(boolean keepingNull, boolean emptyValuesToNull) {
         final int indent = 3;
         return prettyStringify(indent, keepingNull, emptyValuesToNull);
@@ -311,7 +329,11 @@ public interface JsonValue {
 
     JsonValue unionAll(List<? extends JsonValue> jsonValues);
 
-    Collection<? extends JsonValue> values();
 
-    Iterator<? extends JsonValue> valuesIterator();
+    /**
+     * Created by Serge Martial on 27/05/2015.
+     */
+    enum Virus {
+        VIH;
+    }
 }

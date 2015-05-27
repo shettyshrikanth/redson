@@ -267,17 +267,12 @@ public class JsonString implements JsonLiteral {
 
     @Override
     public String prettyStringifyRecursive(int indent, int incrementAcc, boolean keepingNull, boolean emptyValuesToNull) {
-        return value;
+        return stringify(keepingNull, emptyValuesToNull);
     }
 
     @Override
     public String stringify(boolean keepingNull, boolean emptyValuesToNull) {
-        return  value;
-    }
-
-    @Override
-    public Collection<? extends JsonValue> values() {
-        return null;
+        return  String.format("\"%s\"", value);
     }
 
     @Override

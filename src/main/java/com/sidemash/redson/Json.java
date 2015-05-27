@@ -3,12 +3,11 @@ package com.sidemash.redson;
 import com.sidemash.redson.converter.OptionalConverter;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -40,6 +39,84 @@ public class Json {
         writerToJson.put(String.class,   (String value, JsonValue jsonValue)     -> JsonString.of(value));
         // Optional
         writerToJson.put(Optional.class,  OptionalConverter::toJsonValue);
+        // Array
+        writerToJson.put(Array.class, (Object[] array, JsonValue jsonValue) -> JsonArray.of(array));
+        // List
+        writerToJson.put(Iterable.class, (Iterable<?> list, JsonValue jsonValue) -> JsonArray.of(list));
+        // Map
+        writerToJson.put(Map.class, (Map<String, ?> map, JsonValue jsonValue) -> JsonObject.of(map));
+        // Enum
+        writerToJson.put(Enum.class, (Object en, JsonValue jsonValue) -> JsonString.of(en.toString()));
+        // Object
+        writerToJson.put(Object.class, Json::Object2JsonObject);
+
+    }
+
+    public static JsonObject Object2JsonObject(Object obj, JsonValue jsonValue){
+        // Build a LinkedHashMap of the K/V properties of this object
+        Map<String, Object> attributeMap = new LinkedHashMap<>();
+
+        // first take non transient fields
+        String modifier;
+        Object value;
+        List<Class<?>> classList = new ArrayList<>();
+        Class<?> current =  obj.getClass();
+        while (!current.equals(Object.class)) {
+            classList.add(current);
+            current = current.getSuperclass();
+        }
+        Collections.reverse(classList);
+        try {
+            for(Class<?> className : classList) {
+                Field[] fields = className.getDeclaredFields();
+                for (Field field : fields) {
+                    modifier = Modifier.toString(field.getModifiers());
+                    value = field.get(obj);
+                    System.out.println("Modifier :  " + modifier);
+                    // If the field is not transient AND is not a reference to currentObject being analyzed
+                    // the second part of this condition is to avoid circular reference;
+                    if (!modifier.contains("transient") && value != obj)
+                        attributeMap.put(field.getName(), value);
+                }
+            }
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+
+        return JsonObject.of(attributeMap);
+    }
+    public static JsonValue toJsonValue(Object o){
+        if(o == null)
+            return JsonNull.INSTANCE;
+
+        if(o instanceof JsonValue)
+            return (JsonValue) o;
+
+        // First Check for User Defined conversion rules
+        BiFunction<Object, JsonValue, JsonValue> fn;
+        Class<?> cl = o.getClass();
+        if (usersDefinedWriterToJson.containsKey(cl)) {
+            fn = (BiFunction<Object, JsonValue, JsonValue>) usersDefinedWriterToJson.get(cl);
+            return fn.apply(o, JsonObject.EMPTY);
+        }
+
+        // If not, then Apply default conversion strategies
+        if (writerToJson.containsKey(cl)) {
+            fn = (BiFunction<Object, JsonValue, JsonValue>) writerToJson.get(cl);
+        }
+        else {
+            if(cl.isArray())
+                fn = (BiFunction<Object, JsonValue, JsonValue>) writerToJson.get(Array.class);
+            else if(o instanceof Iterable)
+                fn = (BiFunction<Object, JsonValue, JsonValue>) writerToJson.get(Iterable.class);
+            else if(o instanceof Map)
+                fn = (BiFunction<Object, JsonValue, JsonValue>) writerToJson.get(Map.class);
+            else if(cl.isEnum())
+                fn = (BiFunction<Object, JsonValue, JsonValue>) writerToJson.get(Enum.class);
+            else
+                fn = (BiFunction<Object, JsonValue, JsonValue>) writerToJson.get(Object.class);
+        }
+        return fn.apply(o, JsonObject.EMPTY);
     }
 
 
@@ -153,36 +230,6 @@ public class Json {
     // JsonObject
 
 
-    public static JsonValue toJsonValue(Object o){
-        if(o == null)
-            return JsonNull.INSTANCE;
-
-        // First Check for User Defined conversion rules
-        BiFunction<Object, JsonValue, JsonValue> fn;
-        Class<?> cl = o.getClass();
-        if (usersDefinedWriterToJson.containsKey(cl)) {
-            fn = (BiFunction<Object, JsonValue, JsonValue>) usersDefinedWriterToJson.get(cl);
-            return fn.apply(o, JsonObject.EMPTY);
-        }
-
-        // If not, then Apply default conversion strategies
-        if (writerToJson.containsKey(cl)) {
-           fn = (BiFunction<Object, JsonValue, JsonValue>) writerToJson.get(cl);
-        }
-        else {
-            if(cl.isArray())
-                fn = (BiFunction<Object, JsonValue, JsonValue>) writerToJson.get(Array.class);
-            else if(o instanceof Iterable)
-                fn = (BiFunction<Object, JsonValue, JsonValue>) writerToJson.get(Iterable.class);
-            else if(o instanceof Map)
-                fn = (BiFunction<Object, JsonValue, JsonValue>) writerToJson.get(Map.class);
-            else if(cl.isEnum())
-                fn = (BiFunction<Object, JsonValue, JsonValue>) writerToJson.get(Enum.class);
-            else
-                fn = (BiFunction<Object, JsonValue, JsonValue>) writerToJson.get(Object.class);
-        }
-        return fn.apply(o, JsonObject.EMPTY);
-    }
 
 
 
@@ -251,7 +298,17 @@ public class Json {
     }
 
 
+   protected static boolean isEligibleForStringify(JsonValue jsonValue, boolean keepingNull, boolean emptyValuesToNull){
+       // If we add a key/value to the final string, either :
+       //      1 - The value is null and we want to keep null values
+       //      2 - The value is NOT an Empty instance of JsonOptional
+       if(!keepingNull  && jsonValue.isJsonNull())
+           return false;
+       if(jsonValue.isJsonOptional() && jsonValue.isEmpty())
+           return false;
 
+       return true;
+   }
 
 /*
     public static JsonValue parse(String s);

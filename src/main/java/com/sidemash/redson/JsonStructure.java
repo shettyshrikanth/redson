@@ -5,7 +5,6 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Optional;
-import java.util.Set;
 
 public interface JsonStructure extends JsonValue {
 
@@ -102,11 +101,6 @@ public interface JsonStructure extends JsonValue {
     @Override
     default Optional<? extends JsonValue> asOptional() {
         return Optional.of(this);
-    }
-
-    @Override
-    default <T> Optional<T> asPojoOptional() {
-        return null;
     }
 
     @Override

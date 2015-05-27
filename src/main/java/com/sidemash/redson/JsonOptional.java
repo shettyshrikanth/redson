@@ -15,8 +15,16 @@ public class JsonOptional implements JsonValue {
         this.value = value;
     }
 
-    public static JsonOptional of(JsonValue jsonValue) {
-        return new JsonOptional(Optional.of(jsonValue));
+    public static<T> JsonOptional of(List<T> items) {
+        return new JsonOptional(Optional.of(JsonArray.of(items)));
+    }
+    public static<T> JsonOptional of(T value) {
+        if(value instanceof Optional){
+            Optional<?> v = (Optional<?>) value;
+            if(v.isPresent()) return new JsonOptional(v.map(Json::toJsonValue));
+            else return JsonOptional.EMPTY;
+        }
+        return new JsonOptional(Optional.of(Json.toJsonValue(value)));
     }
 
     @Override
@@ -294,32 +302,6 @@ public class JsonOptional implements JsonValue {
     @Override
     public JsonValue unionAll(List<? extends JsonValue> jsonValues) {
         throw new UnsupportedOperationException("UnionAll on instance of JsonOptional");
-    }
-
-    @Override
-    public Collection<? extends JsonValue> values() {
-        List<JsonValue> result = new ArrayList<>();
-        value.ifPresent(jsonValue -> result.add(jsonValue));
-        return result;
-    }
-
-    @Override
-    public Iterator<? extends JsonValue> valuesIterator() {
-        return new Iterator<JsonValue>() {
-            Optional<JsonValue> optJsValue = value;
-
-            @Override
-            public boolean hasNext() {
-                return optJsValue.isPresent();
-            }
-
-            @Override
-            public JsonValue next() {
-                JsonValue result = optJsValue.orElseThrow(IllegalStateException::new);
-                optJsValue = Optional.empty();
-                return result;
-            }
-        };
     }
 
     @Override

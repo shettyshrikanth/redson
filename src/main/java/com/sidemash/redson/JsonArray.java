@@ -1,16 +1,12 @@
 package com.sidemash.redson;
 
 
-import scala.collection.Iterator;
-import scala.collection.immutable.*;
 import scala.collection.immutable.Vector;
+import scala.collection.immutable.Vector$;
+import scala.collection.immutable.VectorIterator;
 import scala.collection.mutable.Builder;
 
-import java.lang.Iterable;
 import java.util.*;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -23,19 +19,18 @@ public class JsonArray implements JsonStructure, Iterable<JsonValue> {
     }
 
 
-    public static JsonArray of(JsonValue jsonValue1, JsonValue... jsonValues){
-        Builder<JsonValue, Vector<JsonValue>> vectorBuilder = Vector$.MODULE$.<JsonValue>newBuilder();
-        vectorBuilder.$plus$eq(jsonValue1);
-        for(JsonValue jv : jsonValues){
-            vectorBuilder.$plus$eq(jv);
-        }
-        return new JsonArray(vectorBuilder.result());
+    public static JsonArray of(Object... values){
+        return JsonArray.of(Arrays.asList(values));
     }
 
-    public static JsonArray of(List<? extends JsonValue> jsonValues){
+    public static JsonArray of(Iterable<?> values){
+        if(!values.iterator().hasNext())
+            return JsonArray.EMPTY;
+
+        System.out.println("Is not empty");
         Builder<JsonValue, Vector<JsonValue>> vectorBuilder = Vector$.MODULE$.<JsonValue>newBuilder();
-        for(JsonValue jv : jsonValues){
-            vectorBuilder.$plus$eq(jv);
+        for(Object value : values){
+            vectorBuilder.$plus$eq(Json.toJsonValue(value));
         }
         return new JsonArray(vectorBuilder.result());
     }
@@ -100,6 +95,7 @@ public class JsonArray implements JsonStructure, Iterable<JsonValue> {
         return false;
     }
 
+    @Override
     public Iterator<JsonValue> iterator() {
         return new Iterator<JsonValue>() {
 
@@ -121,7 +117,7 @@ public class JsonArray implements JsonStructure, Iterable<JsonValue> {
     public String prettyStringifyRecursive(int indent, int incrementAcc, boolean keepingNull, boolean emptyValuesToNull)  {
         String result;
         if (this.isEmpty()) {
-            result = toString();
+            result = "[]";
         }
         else {
             StringBuilder startInc = new StringBuilder();
@@ -140,7 +136,7 @@ public class JsonArray implements JsonStructure, Iterable<JsonValue> {
                 value = jsonValue;
                 if (emptyValuesToNull && value.isJsonOptional() && value.isEmpty())
                     value = JsonNull.INSTANCE;
-                if (keepingNull && value.isJsonNull() || !value.isJsonNull()){
+                if(Json.isEligibleForStringify(value, keepingNull, emptyValuesToNull)){
                     sj = sj.add(
                             String.format("%s%s",
                                     startIncrementation,
@@ -166,6 +162,9 @@ public class JsonArray implements JsonStructure, Iterable<JsonValue> {
 
     @Override
     public String stringify(boolean keepingNull, boolean emptyValuesToNull){
+        if (this.isEmpty())
+            return "[]";
+
         StringJoiner sj = new StringJoiner(",", "[", "]");
         VectorIterator<JsonValue> iterator = items.iterator();
         JsonValue value;
@@ -173,7 +172,7 @@ public class JsonArray implements JsonStructure, Iterable<JsonValue> {
             value = iterator.next();
             if (emptyValuesToNull && value.isJsonOptional() && value.isEmpty())
                 value = JsonNull.INSTANCE;
-            if (keepingNull && value.isJsonNull() || !value.isJsonNull()){
+            if(Json.isEligibleForStringify(value, keepingNull, emptyValuesToNull)){
                 sj = sj.add(value.stringify());
             }
         }
@@ -251,6 +250,18 @@ public class JsonArray implements JsonStructure, Iterable<JsonValue> {
     }
 
     @Override
+    public Set<JsonEntry<String>> getStringIndexedEntrySet() {
+        Set<JsonEntry<String>> result = new LinkedHashSet<>();
+        scala.collection.Iterator<JsonValue> iterator = items.iterator();
+        int i = 0;
+        while (iterator.hasNext()) {
+            result.add(new JsonEntry<>(String.valueOf(i), iterator.next()));
+            i++;
+        }
+        return result;
+    }
+
+    @Override
     public <T> List<T> asListOf(Class<T> cl, List<T> list) {
         for (int i = 0; i < items.length(); i++) {
             list.add(Json.fromJsonValue(items.apply(i), cl));
@@ -258,9 +269,10 @@ public class JsonArray implements JsonStructure, Iterable<JsonValue> {
         return list;
     }
 
+
     @Override
     public <T> Set<T> asSetOf(Class<T> cl, Set<T> set) {
-        final Iterator<JsonValue> iterator = items.iterator();
+        final scala.collection.Iterator <JsonValue> iterator = items.iterator();
         while (iterator.hasNext())
             set.add(Json.fromJsonValue(iterator.next(), cl));
         return set;
@@ -327,21 +339,6 @@ public class JsonArray implements JsonStructure, Iterable<JsonValue> {
     @Override
     public int size() {
         return items.size();
-    }
-
-    @Override
-    public Collection<? extends JsonValue> values() {
-        scala.collection.Iterator<JsonValue> iterator = items.iterator();
-        final List<JsonValue> values = new ArrayList<>();
-        while (iterator.hasNext()) {
-            values.add(iterator.next());
-        }
-        return Collections.unmodifiableList(values);
-    }
-
-    @Override
-    public java.util.Iterator<? extends JsonValue> valuesIterator() {
-        return values().iterator();
     }
 
 }

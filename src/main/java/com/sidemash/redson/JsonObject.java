@@ -2,13 +2,12 @@ package com.sidemash.redson;
 
 
 import scala.Tuple2;
-import scala.collection.Iterator;
 import scala.collection.immutable.Map;
 import scala.collection.immutable.Map$;
 import scala.collection.mutable.Builder;
 
 import java.util.*;
-import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -21,8 +20,24 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>> {
         this.bindings = bindings;
     }
 
-    public static JsonObject of(String key, JsonValue jsonValue){
-        Tuple2<String, JsonValue> tuple = new Tuple2<>(key, jsonValue);
+    public static <V> JsonObject of(java.util.Map<String, V> map){
+        Builder<Tuple2<String, JsonValue>, Map> mapBuilder = Map$.MODULE$.newBuilder();
+        for(java.util.Map.Entry<String, V> entry : map.entrySet()){
+            mapBuilder.$plus$eq(new Tuple2<>(entry.getKey(), Json.toJsonValue(entry.getValue())));
+        }
+        return new JsonObject(mapBuilder.result());
+    }
+
+    public static<K,V> JsonObject of(java.util.Map<K, V> map, Function<K, String> kToString){
+        Builder<Tuple2<String, JsonValue>, Map> mapBuilder = Map$.MODULE$.newBuilder();
+        for(java.util.Map.Entry<K, V> entry : map.entrySet()){
+            mapBuilder.$plus$eq(new Tuple2<>(kToString.apply(entry.getKey()), Json.toJsonValue(entry.getValue())));
+        }
+        return new JsonObject(mapBuilder.result());
+    }
+
+    public static JsonObject of(String key, Object o){
+        Tuple2<String, JsonValue> tuple = new Tuple2<>(key, Json.toJsonValue(o));
         Map<String, JsonValue> map = Map$.MODULE$.<String, JsonValue>empty();
 
         return new JsonObject(map.$plus(tuple));
@@ -106,6 +121,7 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>> {
         return true;
     }
 
+    @Override
     public Iterator<JsonEntry<String>> iterator() {
         return new Iterator<JsonEntry<String>>() {
 
@@ -151,12 +167,12 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>> {
                 value = entry.getValue();
                 if(emptyValuesToNull && value.isJsonOptional() && value.isEmpty())
                     value = JsonNull.INSTANCE;
-                if(keepingNull && value.isJsonNull() || !value.isJsonNull()){
+                if(Json.isEligibleForStringify(value, keepingNull, emptyValuesToNull)){
                     sj = sj.add(
                             String.format("%s\"%s\":%s",
                                     startIncrementation,
                                     entry.getKey(),
-                                    entry.getValue().prettyStringifyRecursive(indent,
+                                    value.prettyStringifyRecursive(indent,
                                             incrementAcc + indent,
                                             keepingNull,
                                             emptyValuesToNull)
@@ -188,8 +204,8 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>> {
             value = next._2();
             if(emptyValuesToNull && value.isJsonOptional() && value.isEmpty())
                 value = JsonNull.INSTANCE;
-            if(keepingNull && value.isJsonNull() || !value.isJsonNull())
-                sj = sj.add(String.format("\"%s\":%s", next._1(), next._2().toString()));
+            if(Json.isEligibleForStringify(value, keepingNull, emptyValuesToNull))
+                sj = sj.add(String.format("\"%s\":%s", next._1(), next._2().stringify(keepingNull, emptyValuesToNull)));
         }
 
         return sj.toString();
@@ -275,8 +291,24 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>> {
     }
 
     @Override
+    public JsonValue distinct() {
+        return this;
+    }
+
+    @Override
+    public Set<JsonEntry<String>> getStringIndexedEntrySet() {
+        Set<JsonEntry<String>> result = new LinkedHashSet<>();
+        scala.collection.Iterator<Tuple2<String, JsonValue>> iterator = bindings.iterator();
+        while (iterator.hasNext()) {
+            Tuple2<String, JsonValue> element = iterator.next();
+            result.add(new JsonEntry<>(element._1(), element._2()));
+        }
+        return result;
+    }
+
+    @Override
     public <T> Set<T> asSetOf(Class<T> cl, Set<T> set) {
-        final Iterator<JsonValue> valuesIterator = bindings.valuesIterator();
+        final scala.collection.Iterator<JsonValue> valuesIterator = bindings.valuesIterator();
         while (valuesIterator.hasNext())
             set.add(Json.fromJsonValue(valuesIterator.next(), cl));
         return set;
@@ -284,7 +316,7 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>> {
 
     @Override
     public <T> java.util.Map<String, T> asStringIndexedMapOf(Class<T> c, java.util.Map<String, T> map) {
-        Iterator<Tuple2<String, JsonValue>> iterator = bindings.iterator();
+        scala.collection.Iterator<Tuple2<String, JsonValue>> iterator = bindings.iterator();
         while (iterator.hasNext()) {
             Tuple2<String, JsonValue> element = iterator.next();
             map.put(element._1(), Json.fromJsonValue(element._2(), c));
@@ -303,7 +335,7 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>> {
     @Override
     public Set<JsonEntry<Integer>> getIntIndexedEntrySet() {
         Set<JsonEntry<Integer>> indexes = new LinkedHashSet<>();
-        Iterator<Tuple2<String, JsonValue>> iterator = bindings.iterator();
+        scala.collection.Iterator<Tuple2<String, JsonValue>> iterator = bindings.iterator();
         int i = 0;
         while (iterator.hasNext()) {
             Tuple2<String, JsonValue> element = iterator.next();
@@ -316,7 +348,7 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>> {
     @Override
     public Set<String> keySet() {
         Set<String> indexes = new LinkedHashSet<>();
-        Iterator<Tuple2<String, JsonValue>> iterator = bindings.iterator();
+        scala.collection.Iterator<Tuple2<String, JsonValue>> iterator = bindings.iterator();
         while (iterator.hasNext())
             indexes.add(iterator.next()._1());
         return indexes;
@@ -330,7 +362,8 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>> {
 
     @Override
     public JsonValue prepend(String key, JsonValue jsValue) {
-        Builder<Tuple2<String, JsonValue>, Map<String, JsonValue>> builder = bindings.newBuilder();
+
+        Builder<Tuple2<String,JsonValue>,Map> builder = Map$.MODULE$.<String, JsonValue>newBuilder();
         builder.$plus$eq(new Tuple2<String, JsonValue>(key, jsValue));
         builder.$plus$plus$eq(bindings);
         return new JsonObject(builder.result());
@@ -346,8 +379,8 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>> {
 
     @Override
     public JsonValue reverse() {
-        Iterator<Tuple2<String, JsonValue>> iterator = bindings.reversed().iterator();
-        Builder<Tuple2<String, JsonValue>, Map<String, JsonValue>> builder = bindings.newBuilder();
+        scala.collection.Iterator<Tuple2<String, JsonValue>> iterator = bindings.reversed().iterator();
+        Builder<Tuple2<String,JsonValue>,Map> builder = Map$.MODULE$.<String, JsonValue>newBuilder();
         while (iterator.hasNext()) {
             builder.$plus$eq(iterator.next());
         }
@@ -359,19 +392,5 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>> {
         return bindings.size();
     }
 
-    @Override
-    public Collection<? extends JsonValue> values() {
-        scala.collection.Iterator<JsonValue> iterator = bindings.valuesIterator();
-        final List<JsonValue> values = new ArrayList<>();
-        while (iterator.hasNext()) {
-            values.add(iterator.next());
-        }
-        return Collections.unmodifiableList(values);
-    }
-
-    @Override
-    public java.util.Iterator<? extends JsonValue> valuesIterator() {
-        return values().iterator();
-    }
 
 }

@@ -29,7 +29,11 @@ public class JsonNumber implements JsonLiteral {
     public static JsonNumber of(float value){
         return JsonNumber.of(BigDecimal.valueOf(value));
     }
-    public static JsonNumber of(double value){
+    public static JsonNumber of(double value){return JsonNumber.of(BigDecimal.valueOf(value)); }
+    public static JsonNumber of(byte value){
+        return JsonNumber.of(BigDecimal.valueOf(value));
+    }
+    public static JsonNumber of(short value){
         return JsonNumber.of(BigDecimal.valueOf(value));
     }
     public static JsonNumber of(String value){
@@ -306,11 +310,6 @@ public class JsonNumber implements JsonLiteral {
     @Override
     public String stringify(boolean keepingNull, boolean emptyValuesToNull) {
         return value.toString();
-    }
-
-    @Override
-    public Collection<? extends JsonValue> values() {
-        return null;
     }
 
     @Override

@@ -199,23 +199,4 @@ public interface JsonLiteral extends JsonValue {
     }
 
 
-    @Override
-    default Iterator<? extends JsonValue> valuesIterator() {
-        JsonValue that = this;
-        return new Iterator<JsonValue>() {
-            Optional<JsonValue> optJsValue = Optional.of(that);
-
-            @Override
-            public boolean hasNext() {
-                return optJsValue.isPresent();
-            }
-
-            @Override
-            public JsonValue next() {
-                JsonValue result = optJsValue.orElseThrow(IllegalStateException::new);
-                optJsValue = Optional.empty();
-                return result;
-            }
-        };
-    }
 }
