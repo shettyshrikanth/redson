@@ -4,16 +4,16 @@ package com.sidemash.redson.converter;
 import com.sidemash.redson.JsonNumber;
 import com.sidemash.redson.JsonValue;
 
-public enum ByteConverter implements  JsonConverter<Byte> {
+public enum LongConverter implements  JsonConverter<Long> {
     INSTANCE
     ;
     @Override
-    public Byte fromJsonValue(JsonValue jsonValue) {
-        return jsonValue.asByte();
+    public Long fromJsonValue(JsonValue jsonValue) {
+        return jsonValue.asLong();
     }
 
     @Override
-    public JsonValue toJsonValue(Byte obj, JsonValue jsonValue) {
+    public JsonValue toJsonValue(Long obj, JsonValue jsonValue) {
         return JsonNumber.of(obj);
     }
 }

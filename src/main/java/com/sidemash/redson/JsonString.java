@@ -15,12 +15,15 @@ public class JsonString implements JsonLiteral {
     }
 
 
-    public static JsonValue of(Character character) {
+    public static JsonValue of(char character) {
         return new JsonString(String.valueOf(character));
     }
 
     public static JsonValue of(String s) {
         return new JsonString(s);
+    }
+    public static JsonValue of(CharSequence ch) {
+        return new JsonString(ch.toString());
     }
 
     @Override

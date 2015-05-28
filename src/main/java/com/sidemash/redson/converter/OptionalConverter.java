@@ -6,8 +6,10 @@ import com.sidemash.redson.JsonValue;
 
 import java.util.Optional;
 
-public class OptionalConverter implements JsonConverter<Optional<?>> {
+public enum OptionalConverter implements JsonConverter<Optional<?>> {
 
+    INSTANCE
+    ;
     @Override
     public JsonValue toJsonValue(Optional<?> obj, JsonValue jsonValue) {
         Optional<?> value = (Optional<?>) obj;

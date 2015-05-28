@@ -148,7 +148,7 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>> {
                                             boolean emptyValuesToNull) {
         String result;
         if (this.isEmpty()) {
-            result = toString();
+            result = "{}";
         }
         else {
             StringBuilder startInc = new StringBuilder();
@@ -194,6 +194,9 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>> {
 
     @Override
     public String stringify(boolean keepingNull, boolean emptyValuesToNull){
+        if (this.isEmpty())
+            return "{}";
+
         StringJoiner sj = new StringJoiner(",", "{", "}");
         scala.collection.Iterator<Tuple2<String, JsonValue>> iterator =
                 (scala.collection.Iterator<Tuple2<String, JsonValue>>) bindings.iterator();

@@ -16,12 +16,9 @@ public class Main {
                         JsonObject.of("age",  JsonNumber.of(10))
                 );
 
-
-
-
         JsonValue jsValue1 =
-                JsonArray.of(JsonNumber.of(10), JsonObject.EMPTY,  JsonNumber.of(10))
-                ;
+                JsonArray.of(JsonNumber.of(10), JsonObject.EMPTY, JsonNumber.of(10));
+
         JsonObject jsValue2 = JsonObject.EMPTY;
 
         Object[] array = new Object[]{ "Alice", "Jerome"};
@@ -51,24 +48,20 @@ public class Main {
                         JsonObject.of("friends", new TestValue()) // Homogeneous List
                 );
 
-        synchronized (jsValue3) {
             timedOperation(() -> {
-                System.out.println(JsonValue.of(new TestValue()).prettyStringify());
+                System.out.println(jsValue1.prettyStringify());
                 return null;
             });
-        }
 
 
-       // System.out.println(Json.fromJsonValue(jsValue3)); //.prettyStringify());
-
-
+        // System.out.println(Json.fromJsonValue(jsValue3)); //.prettyStringify());
         // Implements monadic methods on JsonValue
         // Give sense to all Exceptions
         // Implements equals and hashcode
         // Test
         // Document
         // Implement ordered converter list Many Converetr for exemple for String
-        // Implment converter for date
+        // Implement converter for date
         // Handle conversion to List Map, Arrays OK
         // Handle conversion of recursive Parent classes OK
         // Handle conversion of recursive data structures ( List<List<String>>, List<List<Map<String, List<String>>>> ) OK
@@ -76,7 +69,7 @@ public class Main {
 
 
     public static class TestValue{
-        public int serge = 2;
+        public static int serge = 2;
         public String martial = "Rer";
 
 
@@ -85,7 +78,7 @@ public class Main {
             public String martial = "5";
 
             static {
-                Json.registerWriterToJson(TestValue2.class, (o, js) -> JsonNumber.of(o.steph) );
+                Json.registerWriter(TestValue2.class, (o, js) -> JsonNumber.of(o.steph));
             }
         }
     }

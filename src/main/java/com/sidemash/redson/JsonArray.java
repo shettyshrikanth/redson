@@ -27,7 +27,6 @@ public class JsonArray implements JsonStructure, Iterable<JsonValue> {
         if(!values.iterator().hasNext())
             return JsonArray.EMPTY;
 
-        System.out.println("Is not empty");
         Builder<JsonValue, Vector<JsonValue>> vectorBuilder = Vector$.MODULE$.<JsonValue>newBuilder();
         for(Object value : values){
             vectorBuilder.$plus$eq(Json.toJsonValue(value));

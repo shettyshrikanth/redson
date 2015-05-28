@@ -204,7 +204,7 @@ public interface JsonStructure extends JsonValue {
 
     @Override
     default BigInteger asBigInteger() {
-        throw new ClassCastException(String.format("instance of %s could not be get as BigInteger", this.getClass()));
+        throw new ClassCastException(String.format("instance of %s could not be get as BigIntegerConverter", this.getClass()));
     }
 
     @Override

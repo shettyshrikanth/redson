@@ -5,5 +5,5 @@ import com.sidemash.redson.JsonValue;
 
 public interface JsonWriter<T> {
 
-    JsonValue toJsonValue(T object, JsonValue jsonValue);
+    JsonValue toJsonValue(T obj, JsonValue jsonValue);
 }

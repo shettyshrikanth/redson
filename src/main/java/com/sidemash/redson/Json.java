@@ -1,13 +1,8 @@
 package com.sidemash.redson;
 
-import com.sidemash.redson.converter.BooleanConverter;
-import com.sidemash.redson.converter.ByteConverter;
-import com.sidemash.redson.converter.JsonConverter;
-import com.sidemash.redson.converter.OptionalConverter;
+import com.sidemash.redson.converter.*;
 
 import java.lang.reflect.Array;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
@@ -19,77 +14,42 @@ public class Json {
     private static final Map<Class<?>, Function<JsonValue, ?>>
             readersFromJson =  new HashMap<>();
     private static final Map<Class<?>, BiFunction<?, JsonValue, JsonValue>>
-            writerToJson =  new HashMap<>();
+            writersToJson =  new HashMap<>();
 
     private static final Map<Class<?>, Function<JsonValue, ?>>
             usersDefinedReadersFromJson =  new HashMap<>();
     private static final Map<Class<?>, BiFunction<?, JsonValue, JsonValue>>
-            usersDefinedWriterToJson =  new HashMap<>();
+            usersDefinedWritersToJson =  new HashMap<>();
+
 
     static {
-        // Primitives
-        writerToJson.put(Boolean.class,   (Boolean value, JsonValue jsonValue)    -> JsonBoolean.of(value));
-        writerToJson.put(Byte.class,      (Byte value, JsonValue jsonValue)       -> JsonNumber.of(value));
-        writerToJson.put(BigDecimal.class,(BigDecimal value, JsonValue jsonValue) -> JsonNumber.of(value));
-        writerToJson.put(BigInteger.class,(BigInteger value, JsonValue jsonValue) -> JsonNumber.of(value));
-        writerToJson.put(Character.class, (Character value, JsonValue jsonValue)  -> JsonString.of(value));
-        writerToJson.put(Double.class,    (Double value, JsonValue jsonValue)     -> JsonNumber.of(value));
-        writerToJson.put(Float.class,     (Float value, JsonValue jsonValue)      -> JsonNumber.of(value));
-        writerToJson.put(Integer.class,   (Integer value, JsonValue jsonValue)    -> JsonNumber.of(value));
-        writerToJson.put(Long.class,      (Long value, JsonValue jsonValue)       -> JsonNumber.of(value));
-        writerToJson.put(Short.class,     (Short value, JsonValue jsonValue)      -> JsonNumber.of(value));
-        // String
-        writerToJson.put(String.class,   (String value, JsonValue jsonValue)     -> JsonString.of(value));
-        // Optional
-        registerConverter(Boolean.class,    new BooleanConverter());
-        registerConverter(Optional.class,   new OptionalConverter());
-        registerConverter(Byte.class,       new ByteConverter());
-        // Array
-        writerToJson.put(Array.class, (Object[] array, JsonValue jsonValue) -> JsonArray.of(array));
-        // List
-        writerToJson.put(Iterable.class, (Iterable<?> list, JsonValue jsonValue) -> JsonArray.of(list));
-        // Map
-        writerToJson.put(Map.class, (Map<String, ?> map, JsonValue jsonValue) -> JsonObject.of(map));
-        // Enum
-        writerToJson.put(Enum.class, (Object en, JsonValue jsonValue) -> JsonString.of(en.toString()));
-        // Object
-        writerToJson.put(Object.class, Json::Object2JsonObject);
+        registerDefaultConverter(Boolean.class,    BooleanConverter.INSTANCE);
+        registerDefaultConverter(Byte.class,       ByteConverter.INSTANCE);
+        registerDefaultConverter(BigDecimal.class, BigDecimalConverter.INSTANCE);
+        registerDefaultConverter(BigInteger.class, BigIntegerConverter.INSTANCE);
+        registerDefaultConverter(Character.class,  CharacterConverter.INSTANCE);
+        registerDefaultConverter(Double.class,     DoubleConverter.INSTANCE);
+        registerDefaultConverter(Float.class,      FloatConverter.INSTANCE);
+        registerDefaultConverter(Integer.class,    IntegerConverter.INSTANCE);
+        registerDefaultConverter(Long.class,       LongConverter.INSTANCE);
+        registerDefaultConverter(Short.class,      ShortConverter.INSTANCE);
+        registerDefaultConverter(String.class,     StringConverter.INSTANCE);
+        registerDefaultConverter(Optional.class,   OptionalConverter.INSTANCE);
+        registerDefaultConverter(Iterable.class,   IterableConverter.INSTANCE);
+        registerDefaultConverter(Map.class,        DefaultMapConverter.INSTANCE);
+        registerDefaultConverter(Object.class,     DefaultObjectConverter.INSTANCE);
+        registerDefaultConverter(Enum.class,       EnumConverter.INSTANCE);
 
+
+        // Each String{], int[], Object[]... is a separate type hence we register JsonReader
+        // Arrays  are handled particularly because there is no base class of array in java
+        // and JsonWriter separately.
+        writersToJson.put(Array.class, (Object[] array, JsonValue jsonValue) -> JsonArray.of(array));
     }
 
-    public static JsonObject Object2JsonObject(Object obj, JsonValue jsonValue){
-        // Build a LinkedHashMap of the K/V properties of this object
-        Map<String, Object> attributeMap = new LinkedHashMap<>();
 
-        // first take non transient fields
-        String modifier;
-        Object value;
-        List<Class<?>> classList = new ArrayList<>();
-        Class<?> current =  obj.getClass();
-        while (!current.equals(Object.class)) {
-            classList.add(current);
-            current = current.getSuperclass();
-        }
-        Collections.reverse(classList);
-        try {
-            for(Class<?> className : classList) {
-                Field[] fields = className.getDeclaredFields();
-                for (Field field : fields) {
-                    modifier = Modifier.toString(field.getModifiers());
-                    value = field.get(obj);
-                     // If the field is not transient AND is not a reference to currentObject being analyzed
-                    // the second part of this condition is to avoid circular reference;
-                    if (!modifier.contains("transient") && value != obj)
-                        attributeMap.put(field.getName(), value);
-                }
-            }
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        }
-
-        return JsonObject.of(attributeMap);
-    }
     public static JsonValue toJsonValue(Object o){
+
         if(o == null)
             return JsonNull.INSTANCE;
 
@@ -99,48 +59,30 @@ public class Json {
         // First Check for User Defined conversion rules
         BiFunction<Object, JsonValue, JsonValue> fn;
         Class<?> cl = o.getClass();
-        if (usersDefinedWriterToJson.containsKey(cl)) {
-            fn = (BiFunction<Object, JsonValue, JsonValue>) usersDefinedWriterToJson.get(cl);
+        if (usersDefinedWritersToJson.containsKey(cl)) {
+            fn = (BiFunction<Object, JsonValue, JsonValue>) usersDefinedWritersToJson.get(cl);
             return fn.apply(o, JsonObject.EMPTY);
         }
 
         // If not, then Apply default conversion strategies
-        if (writerToJson.containsKey(cl)) {
-            fn = (BiFunction<Object, JsonValue, JsonValue>) writerToJson.get(cl);
+        if (writersToJson.containsKey(cl)) {
+            fn = (BiFunction<Object, JsonValue, JsonValue>) writersToJson.get(cl);
         }
         else {
             if(cl.isArray())
-                fn = (BiFunction<Object, JsonValue, JsonValue>) writerToJson.get(Array.class);
+                fn = (BiFunction<Object, JsonValue, JsonValue>) writersToJson.get(Array.class);
             else if(o instanceof Iterable)
-                fn = (BiFunction<Object, JsonValue, JsonValue>) writerToJson.get(Iterable.class);
+                fn = (BiFunction<Object, JsonValue, JsonValue>) writersToJson.get(Iterable.class);
             else if(o instanceof Map)
-                fn = (BiFunction<Object, JsonValue, JsonValue>) writerToJson.get(Map.class);
+                fn = (BiFunction<Object, JsonValue, JsonValue>) writersToJson.get(Map.class);
             else if(cl.isEnum())
-                fn = (BiFunction<Object, JsonValue, JsonValue>) writerToJson.get(Enum.class);
+                fn = (BiFunction<Object, JsonValue, JsonValue>) writersToJson.get(Enum.class);
             else
-                fn = (BiFunction<Object, JsonValue, JsonValue>) writerToJson.get(Object.class);
+                fn = (BiFunction<Object, JsonValue, JsonValue>) writersToJson.get(Object.class);
         }
+
         return fn.apply(o, JsonObject.EMPTY);
     }
-
-
-    static {
-        // Primitives
-        readersFromJson.put(Boolean.class,    JsonValue::asBoolean);
-        readersFromJson.put(Byte.class,       JsonValue::asByte);
-        readersFromJson.put(BigDecimal.class, JsonValue::asBigDecimal);
-        readersFromJson.put(BigInteger.class, JsonValue::asBigInteger);
-        readersFromJson.put(Character.class,  JsonValue::asChar);
-        readersFromJson.put(Double.class,     JsonValue::asDouble);
-        readersFromJson.put(Float.class,      JsonValue::asFloat);
-        readersFromJson.put(Integer.class,    JsonValue::asInt);
-        readersFromJson.put(Long.class,       JsonValue::asLong);
-        readersFromJson.put(Short.class,      JsonValue::asShort);
-        // String
-        readersFromJson.put(String.class,     JsonValue::asString);
-        // Optional
-    }
-
 
 
     private Json(){}
@@ -200,15 +142,29 @@ public class Json {
         usersDefinedReadersFromJson.put(cl, readerFn);
     }
 
-    public static<T> void registerWriterToJson(Class<T> cl,BiFunction<T, JsonValue, JsonValue> writerFn){
-        usersDefinedWriterToJson.put(cl, writerFn);
+    public static<T> void registerWriter(Class<T> cl, BiFunction<T, JsonValue, JsonValue> writerFn){
+        usersDefinedWritersToJson.put(cl, writerFn);
     }
 
 
     public static<T> void registerConverter(Class<T> cl, JsonConverter converter){
-        usersDefinedWriterToJson.put(cl, converter::toJsonValue);
+        usersDefinedWritersToJson.put(cl, converter::toJsonValue);
         usersDefinedReadersFromJson.put(cl, converter::fromJsonValue);
     }
+
+
+    public static<T> void registerConverter(Class<T> cl,
+                                            Function<JsonValue, T> readerFn,
+                                            BiFunction<T, JsonValue, JsonValue> writerFn){
+        usersDefinedWritersToJson.put(cl, writerFn);
+        usersDefinedReadersFromJson.put(cl,readerFn );
+    }
+
+    public static<T> void registerDefaultConverter(Class<T> cl,JsonConverter converter){
+        writersToJson.put(cl, converter::toJsonValue);
+        readersFromJson.put(cl, converter::fromJsonValue);
+    }
+
 
 
     // By default (  defaults conversions )

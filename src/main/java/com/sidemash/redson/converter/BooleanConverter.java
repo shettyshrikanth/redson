@@ -4,7 +4,9 @@ package com.sidemash.redson.converter;
 import com.sidemash.redson.JsonBoolean;
 import com.sidemash.redson.JsonValue;
 
-public class BooleanConverter implements  JsonConverter<Boolean> {
+public enum BooleanConverter implements  JsonConverter<Boolean> {
+    INSTANCE;
+
     @Override
     public Boolean fromJsonValue(JsonValue jsonValue) {
         return jsonValue.asBoolean();
