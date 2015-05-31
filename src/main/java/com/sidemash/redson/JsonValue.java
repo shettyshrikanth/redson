@@ -9,8 +9,6 @@ import java.util.function.Supplier;
 
 public interface JsonValue {
 
-    Object getValue();
-
     static JsonValue of(Object o){
         return Json.toJsonValue(o);
     }
@@ -25,6 +23,18 @@ public interface JsonValue {
         return function.apply(this);
     }
 
+    BigDecimal asBigDecimal();
+
+    Optional<BigDecimal> asBigDecimalOptional();
+
+    BigDecimal asBigDecimalOrDefault(BigDecimal defaultValue);
+
+    BigInteger asBigInteger();
+
+    Optional<BigInteger> asBigIntegerOptional();
+
+    BigInteger asBigIntegerOrDefault(BigInteger defaultValue);
+
     boolean asBoolean();
 
     Optional<Boolean> asBooleanOptional();
@@ -36,20 +46,6 @@ public interface JsonValue {
     Optional<Byte> asByteOptional();
 
     byte asByteOrDefault(byte defaultValue);
-
-
-    BigDecimal asBigDecimal();
-
-    Optional<BigDecimal> asBigDecimalOptional();
-
-    BigDecimal asBigDecimalOrDefault(BigDecimal defaultValue);
-
-
-    BigInteger asBigInteger();
-
-    Optional<BigInteger> asBigIntegerOptional();
-
-    BigInteger asBigIntegerOrDefault(BigInteger defaultValue);
 
     char asChar();
 
@@ -73,6 +69,10 @@ public interface JsonValue {
 
     <T> Map<Integer, T> asIntIndexedMapOf(Class<T> c, Map<Integer, T> map);
 
+    default <T> Map<Integer, T> asIntIndexedMapOf(Class<T> c) {
+        return asIntIndexedMapOf(c, new LinkedHashMap<>());
+    }
+
     Optional<Integer> asIntOptional();
 
     int asIntOrDefault(int defaultValue);
@@ -80,7 +80,7 @@ public interface JsonValue {
     <T> List<T> asListOf(Class<T> cl, List<T> list);
 
     default <T> List<T> asListOf(Class<T> cl) {
-        return asListOf(cl, new ArrayList<T>());
+        return asListOf(cl, new ArrayList<>());
     }
 
     long asLong();
@@ -124,7 +124,7 @@ public interface JsonValue {
     String  asString();
 
     default <T> Map<String, T> asStringIndexedMapOf(Class<T> cl){
-        return asStringIndexedMapOf(cl, new LinkedHashMap<String, T>());
+        return asStringIndexedMapOf(cl, new LinkedHashMap<>());
     }
 
     <T> Map<String, T> asStringIndexedMapOf(Class<T> c,  Map<String, T> map);
@@ -143,11 +143,54 @@ public interface JsonValue {
 
     JsonValue distinct();
 
+    JsonValue get(int index);
+
+    JsonValue get(String key);
+
     Set<Integer> getIndexSet();
 
     Set<JsonEntry<Integer>> getIntIndexedEntrySet();
 
+    Optional<JsonValue> getOptional(int index);
+
+    Optional<JsonValue> getOptional(String key);
+
+    JsonValue getOrDefault(int index, JsonValue jsonValue);
+
+    JsonValue getOrDefault(String key, JsonValue jsonValue);
+
     Set<JsonEntry<String>> getStringIndexedEntrySet();
+
+    Object getValue();
+/*
+    <T> T ifJsonArray(Function<? super JsonValue, ? extends T> thenFn,Function<? super JsonValue, ? extends T> elseFn);
+
+    JsonValue ifJsonArrayElseThis(Function<? super JsonValue, ? extends JsonValue> thenFn);
+
+    <T> T ifJsonBoolean(Function<? super JsonValue, ? extends T> thenFn,Function<? super JsonValue, ? extends T> elseFn);
+
+    JsonValue ifJsonBooleanElseThis(Function<? super JsonValue, ? extends JsonValue> thenFn);
+
+    <T> T ifJsonLiteral(Function<? super JsonValue, ? extends T> thenFn,Function<? super JsonValue, ? extends T> elseFn);
+
+    JsonValue ifJsonLiteralElseThis(Function<? super JsonValue, ? extends JsonValue> thenFn);
+
+    <T> T ifJsonNull(Function<? super JsonValue, ? extends T> thenFn,Function<? super JsonValue, ? extends T> elseFn);
+
+    JsonValue ifJsonNullElseThis(Function<? super JsonValue, ? extends JsonValue> thenFn);
+
+    <T> T ifJsonNumber(Function<? super JsonValue, ? extends T> thenFn,Function<? super JsonValue, ? extends T> elseFn);
+
+    JsonValue ifJsonNumberElseThis(Function<? super JsonValue, ? extends JsonValue> thenFn);
+
+    <T> T ifJsonObject(Function<? super JsonValue, ? extends T> thenFn, Function<? super JsonValue, ? extends T> elseFn);
+
+    JsonValue ifJsonObjectElseThis(Function<? super JsonValue, ? extends JsonValue> thenFn);
+
+    <T> T ifJsonString(Function<? super JsonValue, ? extends T> thenFn, Function<? super JsonValue, ? extends T> elseFn);
+
+    JsonValue ifJsonStringElseThis(Function<? super JsonValue, ? extends JsonValue> thenFn);
+*/
 
     /**
      * Executes thenFn callback if conditionFn function is true, and elseFn if false.
@@ -181,35 +224,7 @@ public interface JsonValue {
         else
             return this;
     }
-/*
-    <T> T ifJsonArray(Function<? super JsonValue, ? extends T> thenFn,Function<? super JsonValue, ? extends T> elseFn);
 
-    JsonValue ifJsonArrayElseThis(Function<? super JsonValue, ? extends JsonValue> thenFn);
-
-    <T> T ifJsonBoolean(Function<? super JsonValue, ? extends T> thenFn,Function<? super JsonValue, ? extends T> elseFn);
-
-    JsonValue ifJsonBooleanElseThis(Function<? super JsonValue, ? extends JsonValue> thenFn);
-
-    <T> T ifJsonLitteral(Function<? super JsonValue, ? extends T> thenFn,Function<? super JsonValue, ? extends T> elseFn);
-
-    JsonValue ifJsonLitteralElseThis(Function<? super JsonValue, ? extends JsonValue> thenFn);
-
-    <T> T ifJsonNull(Function<? super JsonValue, ? extends T> thenFn,Function<? super JsonValue, ? extends T> elseFn);
-
-    JsonValue ifJsonNullElseThis(Function<? super JsonValue, ? extends JsonValue> thenFn);
-
-    <T> T ifJsonNumber(Function<? super JsonValue, ? extends T> thenFn,Function<? super JsonValue, ? extends T> elseFn);
-
-    JsonValue ifJsonNumberElseThis(Function<? super JsonValue, ? extends JsonValue> thenFn);
-
-    <T> T ifJsonObject(Function<? super JsonValue, ? extends T> thenFn, Function<? super JsonValue, ? extends T> elseFn);
-
-    JsonValue ifJsonObjectElseThis(Function<? super JsonValue, ? extends JsonValue> thenFn);
-
-    <T> T ifJsonString(Function<? super JsonValue, ? extends T> thenFn, Function<? super JsonValue, ? extends T> elseFn);
-
-    JsonValue ifJsonStringElseThis(Function<? super JsonValue, ? extends JsonValue> thenFn);
-*/
     /**
      * Executes thenFn callback if the object is a JsonStructure, and elseFn if not.
      *
@@ -261,7 +276,6 @@ public interface JsonValue {
         return (!isEmpty());
     }
 
-
     Set<String> keySet();
 
     JsonValue prepend(JsonValue jsValue);
@@ -302,10 +316,6 @@ public interface JsonValue {
 
     int size();
 
-    static JsonValue ofObject(Object o){
-        return Json.toJsonValue(o);
-    }
-
     default String stringify(){
         final boolean keepingNull = false;
         final boolean emptyValuesToNull = false;
@@ -319,21 +329,9 @@ public interface JsonValue {
         return stringify(keepingNull, emptyValuesToNull);
     }
 
-
-    default <T> Map<Integer, T> asIntIndexedMapOf(Class<T> c) {
-        return asIntIndexedMapOf(c, new LinkedHashMap<>());
-    }
-
-
     JsonValue union(JsonValue jsonValue);
 
     JsonValue unionAll(List<? extends JsonValue> jsonValues);
 
 
-    /**
-     * Created by Serge Martial on 27/05/2015.
-     */
-    enum Virus {
-        VIH;
-    }
 }

@@ -3,7 +3,6 @@ package com.sidemash.redson;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.Collection;
 import java.util.Optional;
 
 public class JsonNumber implements JsonLiteral {
@@ -17,69 +16,35 @@ public class JsonNumber implements JsonLiteral {
     public static JsonNumber of(BigInteger value){
         return new JsonNumber(new BigDecimal(value));
     }
+
     public static JsonNumber of(BigDecimal value){
         return new JsonNumber(value);
     }
+
     public static JsonNumber of(int value){
         return JsonNumber.of(BigDecimal.valueOf(value));
     }
+
     public static JsonNumber of(long value){
         return JsonNumber.of(BigDecimal.valueOf(value));
     }
+
     public static JsonNumber of(float value){
         return JsonNumber.of(BigDecimal.valueOf(value));
     }
+
     public static JsonNumber of(double value){return JsonNumber.of(BigDecimal.valueOf(value)); }
+
     public static JsonNumber of(byte value){
         return JsonNumber.of(BigDecimal.valueOf(value));
     }
+
     public static JsonNumber of(short value){
         return JsonNumber.of(BigDecimal.valueOf(value));
     }
+
     public static JsonNumber of(String value){
         return JsonNumber.of(new BigDecimal(value));
-    }
-
-    @Override
-    public BigDecimal getValue() {
-        return value;
-    }
-
-    @Override
-    public boolean asBoolean() {
-        throw new ClassCastException();
-    }
-
-    @Override
-    public Optional<Boolean> asBooleanOptional() {
-        return Optional.empty();
-    }
-
-    @Override
-    public boolean asBooleanOrDefault(boolean defaultValue) {
-        return defaultValue;
-    }
-
-    @Override
-    public byte asByte() {
-        return asByteOptional().orElseThrow(ClassCastException::new);
-    }
-
-    @Override
-    public Optional<Byte> asByteOptional() {
-        Optional<Byte> result;
-        try {
-            result = Optional.of(value.byteValueExact());
-        }
-        catch (Exception e){
-            result = Optional.empty();
-        }
-        return result;
-    }
-
-    @Override
-    public byte asByteOrDefault(byte defaultValue) {
-        return asByteOptional().orElse(defaultValue);
     }
 
     @Override
@@ -117,6 +82,43 @@ public class JsonNumber implements JsonLiteral {
     @Override
     public BigInteger asBigIntegerOrDefault(BigInteger defaultValue) {
         return asBigIntegerOptional().orElse(defaultValue);
+    }
+
+    @Override
+    public boolean asBoolean() {
+        throw new ClassCastException();
+    }
+
+    @Override
+    public Optional<Boolean> asBooleanOptional() {
+        return Optional.empty();
+    }
+
+    @Override
+    public boolean asBooleanOrDefault(boolean defaultValue) {
+        return defaultValue;
+    }
+
+    @Override
+    public byte asByte() {
+        return asByteOptional().orElseThrow(ClassCastException::new);
+    }
+
+    @Override
+    public Optional<Byte> asByteOptional() {
+        Optional<Byte> result;
+        try {
+            result = Optional.of(value.byteValueExact());
+        }
+        catch (Exception e){
+            result = Optional.empty();
+        }
+        return result;
+    }
+
+    @Override
+    public byte asByteOrDefault(byte defaultValue) {
+        return asByteOptional().orElse(defaultValue);
     }
 
     @Override
@@ -280,6 +282,26 @@ public class JsonNumber implements JsonLiteral {
     @Override
     public boolean containsValue(Object value) {
         return value.equals(value);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        JsonNumber that = (JsonNumber) o;
+
+        return value.equals(that.value);
+    }
+
+    @Override
+    public BigDecimal getValue() {
+        return value;
+    }
+
+    @Override
+    public int hashCode() {
+        return value.hashCode();
     }
 
     @Override

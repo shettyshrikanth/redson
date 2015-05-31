@@ -3,8 +3,6 @@ package com.sidemash.redson;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Optional;
 
 public enum JsonBoolean implements JsonLiteral {
@@ -22,6 +20,7 @@ public enum JsonBoolean implements JsonLiteral {
     },
 
     FALSE(false) {
+
         @Override
         public String prettyStringifyRecursive(int indent, int incrementAcc, boolean keepingNull, boolean emptyValuesToNull) {
             return  "false";
@@ -33,7 +32,7 @@ public enum JsonBoolean implements JsonLiteral {
         }
     };
 
-    private boolean value;
+    private final boolean value;
 
     JsonBoolean(boolean value) {
         this.value = value;
@@ -41,78 +40,6 @@ public enum JsonBoolean implements JsonLiteral {
 
     public static JsonBoolean  of(boolean b) {
         if(b) return JsonBoolean.TRUE; else return JsonBoolean.FALSE;
-    }
-
-    @Override
-    public boolean containsKey(String key) {
-        throw new UnsupportedOperationException("This operation is not supported for JsonBoolean.");
-    }
-
-    @Override
-    public boolean containsValue(Object value) {
-        return value.equals(value);
-    }
-
-    @Override
-    public boolean isJsonBoolean() {
-        return true;
-    }
-
-    @Override
-    public boolean isJsonNull() {
-        return false;
-    }
-
-    @Override
-    public boolean isJsonNumber() {
-        return false;
-    }
-
-    @Override
-    public boolean isJsonString() {
-        return false;
-    }
-
-    @Override
-    public String toString() {
-        return "JsonBoolean{" +
-                "value=" + value +
-                '}';
-    }
-
-    @Override
-    public Boolean getValue() {
-        return value;
-    }
-
-    @Override
-    public boolean asBoolean() {
-        return value;
-    }
-
-    @Override
-    public Optional<Boolean> asBooleanOptional() {
-        return Optional.of(value);
-    }
-
-    @Override
-    public boolean asBooleanOrDefault(boolean defaultValue) {
-        return value;
-    }
-
-    @Override
-    public byte asByte() {
-        throw new ClassCastException();
-    }
-
-    @Override
-    public Optional<Byte> asByteOptional() {
-        return Optional.empty();
-    }
-
-    @Override
-    public byte asByteOrDefault(byte defaultValue) {
-        return defaultValue;
     }
 
     @Override
@@ -142,6 +69,36 @@ public enum JsonBoolean implements JsonLiteral {
 
     @Override
     public BigInteger asBigIntegerOrDefault(BigInteger defaultValue) {
+        return defaultValue;
+    }
+
+    @Override
+    public boolean asBoolean() {
+        return value;
+    }
+
+    @Override
+    public Optional<Boolean> asBooleanOptional() {
+        return Optional.of(value);
+    }
+
+    @Override
+    public boolean asBooleanOrDefault(boolean defaultValue) {
+        return value;
+    }
+
+    @Override
+    public byte asByte() {
+        throw new ClassCastException();
+    }
+
+    @Override
+    public Optional<Byte> asByteOptional() {
+        return Optional.empty();
+    }
+
+    @Override
+    public byte asByteOrDefault(byte defaultValue) {
         return defaultValue;
     }
 
@@ -256,6 +213,41 @@ public enum JsonBoolean implements JsonLiteral {
     }
 
     @Override
+    public boolean containsKey(String key) {
+        throw new UnsupportedOperationException("This operation is not supported for JsonBoolean.");
+    }
+
+    @Override
+    public boolean containsValue(Object value) {
+        return value instanceof Boolean && value.equals(this.value);
+    }
+
+    @Override
+    public Boolean getValue() {
+        return value;
+    }
+
+    @Override
+    public boolean isJsonBoolean() {
+        return true;
+    }
+
+    @Override
+    public boolean isJsonNull() {
+        return false;
+    }
+
+    @Override
+    public boolean isJsonNumber() {
+        return false;
+    }
+
+    @Override
+    public boolean isJsonString() {
+        return false;
+    }
+
+    @Override
     public String prettyStringifyRecursive(int indent, int incrementAcc, boolean keepingNull, boolean emptyValuesToNull) {
         return String.valueOf(value);
     }
@@ -264,4 +256,14 @@ public enum JsonBoolean implements JsonLiteral {
     public String stringify(boolean keepingNull, boolean emptyValuesToNull) {
         return String.valueOf(value);
     }
+
+    @Override
+    public String toString() {
+        return "JsonBoolean{" +
+                "value=" + value +
+                '}';
+    }
+
+
+
 }

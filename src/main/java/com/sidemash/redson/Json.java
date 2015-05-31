@@ -38,6 +38,7 @@ public class Json {
         registerDefaultConverter(Iterable.class,   IterableConverter.INSTANCE);
         registerDefaultConverter(Map.class,        DefaultMapConverter.INSTANCE);
         registerDefaultConverter(Object.class,     DefaultObjectConverter.INSTANCE);
+        registerDefaultConverter(JsonValue.class,  JsonValueConverter.INSTANCE);
         registerDefaultConverter(Enum.class,       EnumConverter.INSTANCE);
 
 
@@ -54,35 +55,44 @@ public class Json {
             return JsonNull.INSTANCE;
 
         if(o instanceof JsonValue)
-            return (JsonValue) o;
+            return (JsonValue)o;
+
+        BiFunction<Object, JsonValue, JsonValue> fnResult;
+        fnResult = (BiFunction<Object, JsonValue, JsonValue>) getJsonWriterFunctionFor(o.getClass());
+        return fnResult.apply(o, JsonObject.EMPTY);
+    }
+
+
+    public static BiFunction<?, JsonValue, JsonValue> getJsonWriterFunctionFor(Class<?> cl){
+        Objects.requireNonNull(cl, "cl parameter should not be null");
 
         // First Check for User Defined conversion rules
-        BiFunction<Object, JsonValue, JsonValue> fn;
-        Class<?> cl = o.getClass();
+        BiFunction<Object, JsonValue, JsonValue> fnResult;
         if (usersDefinedWritersToJson.containsKey(cl)) {
-            fn = (BiFunction<Object, JsonValue, JsonValue>) usersDefinedWritersToJson.get(cl);
-            return fn.apply(o, JsonObject.EMPTY);
+            fnResult = (BiFunction<Object, JsonValue, JsonValue>) usersDefinedWritersToJson.get(cl);
         }
-
         // If not, then Apply default conversion strategies
-        if (writersToJson.containsKey(cl)) {
-            fn = (BiFunction<Object, JsonValue, JsonValue>) writersToJson.get(cl);
+        else if (writersToJson.containsKey(cl)) {
+            fnResult = (BiFunction<Object, JsonValue, JsonValue>) writersToJson.get(cl);
         }
         else {
-            if(cl.isArray())
-                fn = (BiFunction<Object, JsonValue, JsonValue>) writersToJson.get(Array.class);
-            else if(o instanceof Iterable)
-                fn = (BiFunction<Object, JsonValue, JsonValue>) writersToJson.get(Iterable.class);
-            else if(o instanceof Map)
-                fn = (BiFunction<Object, JsonValue, JsonValue>) writersToJson.get(Map.class);
-            else if(cl.isEnum())
-                fn = (BiFunction<Object, JsonValue, JsonValue>) writersToJson.get(Enum.class);
+            if( cl.isArray() )
+                fnResult = (BiFunction<Object, JsonValue, JsonValue>) writersToJson.get(Array.class);
+            else if( Iterable.class.isAssignableFrom(cl) )
+                fnResult = (BiFunction<Object, JsonValue, JsonValue>) writersToJson.get(Iterable.class);
+            else if( Map.class.isAssignableFrom(cl) )
+                fnResult = (BiFunction<Object, JsonValue, JsonValue>) writersToJson.get(Map.class);
+            else if( cl.isEnum() )
+                fnResult = (BiFunction<Object, JsonValue, JsonValue>) writersToJson.get(Enum.class);
+            else if(JsonValue.class.isAssignableFrom(cl))
+                fnResult = (BiFunction<Object, JsonValue, JsonValue>) writersToJson.get(JsonValue.class);
             else
-                fn = (BiFunction<Object, JsonValue, JsonValue>) writersToJson.get(Object.class);
+                fnResult = (BiFunction<Object, JsonValue, JsonValue>) writersToJson.get(Object.class);
         }
 
-        return fn.apply(o, JsonObject.EMPTY);
+        return fnResult;
     }
+
 
 
     private Json(){}
@@ -160,7 +170,7 @@ public class Json {
         usersDefinedReadersFromJson.put(cl,readerFn );
     }
 
-    public static<T> void registerDefaultConverter(Class<T> cl,JsonConverter converter){
+    private static<T> void registerDefaultConverter(Class<T> cl,JsonConverter converter){
         writersToJson.put(cl, converter::toJsonValue);
         readersFromJson.put(cl, converter::fromJsonValue);
     }
@@ -233,14 +243,14 @@ public class Json {
 
     public static <T> Optional<T> fromJsonValueOptional(JsonValue JsonValue, Class<T> expectedClass){
 
-        // First Check for User Defined conversion rules
         Function<JsonValue, Object> fn;
         Optional<T> result;
         try {
+            // First Check for User Defined conversion rules
             if(usersDefinedReadersFromJson.containsKey(expectedClass))
                 fn = (Function<JsonValue, Object>) usersDefinedReadersFromJson.get(expectedClass);
 
-                // Then Check for Default conversion rules
+            // Then Check for Default conversion rules
             else if(readersFromJson.containsKey(expectedClass))
                 fn = (Function<JsonValue, Object>) readersFromJson.get(expectedClass);
             else
@@ -263,7 +273,7 @@ public class Json {
     }
 
 
-   protected static boolean isEligibleForStringify(JsonValue jsonValue, boolean keepingNull, boolean emptyValuesToNull){
+   static boolean isEligibleForStringify(JsonValue jsonValue, boolean keepingNull){
        // If we add a key/value to the final string, either :
        //      1 - The value is null and we want to keep null values
        //      2 - The value is NOT an Empty instance of JsonOptional
@@ -275,16 +285,28 @@ public class Json {
        return true;
    }
 
+    public static boolean isWriterRegisteredFor(Class<?> cl) {
+        return usersDefinedWritersToJson.containsKey(cl) || writersToJson.containsKey(cl);
+    }
+
+    public static boolean isReaderRegisteredFor(Class<?> cl) {
+        return usersDefinedReadersFromJson.containsKey(cl) || readersFromJson.containsKey(cl);
+    }
+
 /*
     public static JsonValue parse(String s);
-    public static Object parseAsObject(String s); // Will apply defaults conversions
-    public static <T> T parseAsObject(String s, Class<T> cl); // Will apply registered conversions with default fallback
+
+    // if nullToOptional is false, then null values will be mapped to JsonNull.
+    // and then, when doing type conversion (asString(), asInt(), ... )
+    // The default value for the type will be returned hence asString() -> null ,
+    //  asBool() -> false, asInt(), asLong() -> 0 , etc ...
+    public static JsonValue parse(String s, boolean nullToOptional);
 
     // replace Void by JsonNode
-    public static Void toJsonNode(JsonValue jsonValue);
-    public static Void toJsonNode(JsonValue jsonValue,  Function<JsonValue, Void> converterFn));
+    public static JsonNode toJsonNode(JsonValue jsonValue);
+    public static JsonNode toJsonNode(JsonValue jsonValue,  Function<JsonValue, JsonNode> converterFn));
     public static <T> Void toJsonNode(T instance);
-    public static <T> Void toJsonNode(T instance , Function<JsonValue, Void> converterFn);
+    public static <T> Void toJsonNode(T instance, Function<JsonValue, Void> converterFn);
 */
 
 

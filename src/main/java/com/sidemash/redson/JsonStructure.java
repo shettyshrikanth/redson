@@ -9,6 +9,36 @@ import java.util.Optional;
 public interface JsonStructure extends JsonValue {
 
     @Override
+    default BigDecimal asBigDecimal() {
+        throw new ClassCastException(String.format("instance of %s could not be get as BigDecimal", this.getClass()));
+    }
+
+    @Override
+    default Optional<BigDecimal> asBigDecimalOptional() {
+        return Optional.empty();
+    }
+
+    @Override
+    default BigDecimal asBigDecimalOrDefault(BigDecimal defaultValue) {
+        return defaultValue;
+    }
+
+    @Override
+    default BigInteger asBigInteger() {
+        throw new ClassCastException(String.format("instance of %s could not be get as BigIntegerConverter", this.getClass()));
+    }
+
+    @Override
+    default Optional<BigInteger> asBigIntegerOptional() {
+        return Optional.empty();
+    }
+
+    @Override
+    default BigInteger asBigIntegerOrDefault(BigInteger defaultValue) {
+        return defaultValue;
+    }
+
+    @Override
     default boolean asBoolean() {
         throw new ClassCastException(String.format("instance of %s could not be get as Boolean", this.getClass()));
     }
@@ -20,6 +50,21 @@ public interface JsonStructure extends JsonValue {
 
     @Override
     default boolean asBooleanOrDefault(boolean defaultValue) {
+        return defaultValue;
+    }
+
+    @Override
+    default byte asByte() {
+        throw new ClassCastException(String.format("instance of %s could not be get as Byte", this.getClass()));
+    }
+
+    @Override
+    default Optional<Byte> asByteOptional() {
+        return Optional.empty();
+    }
+
+    @Override
+    default byte asByteOrDefault(byte defaultValue) {
         return defaultValue;
     }
 
@@ -170,51 +215,6 @@ public interface JsonStructure extends JsonValue {
     @Override
     default boolean isJsonStructure() {
         return true;
-    }
-
-    @Override
-    default byte asByte() {
-        throw new ClassCastException(String.format("instance of %s could not be get as Byte", this.getClass()));
-    }
-
-    @Override
-    default Optional<Byte> asByteOptional() {
-        return Optional.empty();
-    }
-
-    @Override
-    default byte asByteOrDefault(byte defaultValue) {
-        return defaultValue;
-    }
-
-    @Override
-    default BigDecimal asBigDecimal() {
-        throw new ClassCastException(String.format("instance of %s could not be get as BigDecimal", this.getClass()));
-    }
-
-    @Override
-    default Optional<BigDecimal> asBigDecimalOptional() {
-        return Optional.empty();
-    }
-
-    @Override
-    default BigDecimal asBigDecimalOrDefault(BigDecimal defaultValue) {
-        return defaultValue;
-    }
-
-    @Override
-    default BigInteger asBigInteger() {
-        throw new ClassCastException(String.format("instance of %s could not be get as BigIntegerConverter", this.getClass()));
-    }
-
-    @Override
-    default Optional<BigInteger> asBigIntegerOptional() {
-        return Optional.empty();
-    }
-
-    @Override
-    default BigInteger asBigIntegerOrDefault(BigInteger defaultValue) {
-        return defaultValue;
     }
 
 }

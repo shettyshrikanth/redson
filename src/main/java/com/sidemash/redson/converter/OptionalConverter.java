@@ -11,16 +11,6 @@ public enum OptionalConverter implements JsonConverter<Optional<?>> {
     INSTANCE
     ;
     @Override
-    public JsonValue toJsonValue(Optional<?> obj, JsonValue jsonValue) {
-        Optional<?> value = (Optional<?>) obj;
-        JsonValue result = JsonOptional.EMPTY;
-        if (value.isPresent()) {
-            result =  JsonOptional.of(Json.toJsonValue(value.get()));
-        }
-        return result;
-    }
-
-    @Override
     public Optional<?> fromJsonValue(JsonValue jsonValue) {
         Optional<?> result;
         if (jsonValue.isJsonNull() || (jsonValue.isJsonOptional() && jsonValue.isEmpty()) ) {
@@ -28,6 +18,15 @@ public enum OptionalConverter implements JsonConverter<Optional<?>> {
         }
         else {
             result = Optional.of(Json.fromJsonValue(jsonValue.asOptional().get()));
+        }
+        return result;
+    }
+
+    @Override
+    public JsonValue toJsonValue(Optional<?> obj, JsonValue jsonValue) {
+         JsonValue result = JsonOptional.EMPTY;
+        if (obj.isPresent()) {
+            result =  JsonOptional.of(Json.toJsonValue(obj.get()));
         }
         return result;
     }

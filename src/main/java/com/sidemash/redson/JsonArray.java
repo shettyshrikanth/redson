@@ -1,6 +1,7 @@
 package com.sidemash.redson;
 
 
+import com.sidemash.redson.util.ImmutableVector;
 import scala.collection.immutable.Vector;
 import scala.collection.immutable.Vector$;
 import scala.collection.immutable.VectorIterator;
@@ -10,7 +11,7 @@ import java.util.*;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-public class JsonArray implements JsonStructure, Iterable<JsonValue> {
+public class JsonArray implements JsonStructure, Iterable<JsonValue>, ImmutableVector<JsonValue> {
 
     public static final JsonArray EMPTY = new JsonArray(Vector$.MODULE$.empty());
     private final Vector<JsonValue> items;
@@ -50,6 +51,39 @@ public class JsonArray implements JsonStructure, Iterable<JsonValue> {
     }
 
     @Override
+    public <T> Map<Integer, T> asIntIndexedMapOf(Class<T> c, Map<Integer, T> map) {
+        if (items.isEmpty())
+            return map;
+        for (int i = 0; i < items.length(); i++) {
+            map.put(i, Json.fromJsonValue(items.apply(i), c));
+        }
+        return map;
+    }
+
+    @Override
+    public <T> List<T> asListOf(Class<T> cl, List<T> list) {
+        for (int i = 0; i < items.length(); i++) {
+            list.add(Json.fromJsonValue(items.apply(i), cl));
+        }
+        return list;
+    }
+
+    @Override
+    public <T> Set<T> asSetOf(Class<T> cl, Set<T> set) {
+        final scala.collection.Iterator <JsonValue> iterator = items.iterator();
+        while (iterator.hasNext())
+            set.add(Json.fromJsonValue(iterator.next(), cl));
+        return set;
+    }
+
+    @Override
+    public <T> Map<String, T> asStringIndexedMapOf(Class<T> c, Map<String, T> map) {
+        for (int i = 0; i < items.length(); i++)
+            map.put(String.valueOf(i), Json.fromJsonValue(items.apply(i), c));
+        return map;
+    }
+
+    @Override
     public boolean containsAll(List<? extends JsonValue> jsValues) {
         // FIXME find a better way
         for (JsonValue jsonValue: jsValues) {
@@ -67,6 +101,95 @@ public class JsonArray implements JsonStructure, Iterable<JsonValue> {
     @Override
     public boolean containsValue(Object value) {
         return items.contains(value);
+    }
+
+    @Override
+    public JsonValue distinct() {
+        return new JsonArray(items.distinct().toVector());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        JsonArray that = (JsonArray) o;
+
+        return items.equals(that.items);
+
+    }
+
+    @Override
+    public JsonValue get(int index) {
+        return items.apply(index);
+    }
+
+    @Override
+    public JsonValue get(String key) {
+        throw new UnsupportedOperationException("Get an item by key on a JsonArray");
+    }
+
+    @Override
+    public Set<Integer> getIndexSet() {
+        final Set<Integer> indexes = new LinkedHashSet<>();
+        for (int i = 0; i < items.length(); i++)
+            indexes.add(i);
+        return indexes;
+    }
+
+    @Override
+    public Set<JsonEntry<Integer>> getIntIndexedEntrySet() {
+        final Set<JsonEntry<Integer>> indexes = new LinkedHashSet<>();
+        for (int i = 0; i < items.length(); i++)
+            indexes.add(new JsonEntry<>(i, items.apply(i)));
+        return indexes;
+    }
+
+    @Override
+    public Optional<JsonValue> getOptional(int index) {
+        return (items.isDefinedAt(index)) ? Optional.of(items.apply(index)) : Optional.<JsonValue>empty() ;
+    }
+
+    @Override
+    public Optional<JsonValue> getOptional(String key) {
+        return Optional.empty();
+    }
+
+    @Override
+    public JsonValue getOrDefault(int index, JsonValue jsonValue) {
+        return (items.isDefinedAt(index)) ? items.apply(index) : jsonValue ;
+    }
+
+    @Override
+    public JsonValue getOrDefault(String key, JsonValue jsonValue) {
+        return jsonValue;
+    }
+
+    @Override
+    public Set<JsonEntry<String>> getStringIndexedEntrySet() {
+        Set<JsonEntry<String>> result = new LinkedHashSet<>();
+        scala.collection.Iterator<JsonValue> iterator = items.iterator();
+        int i = 0;
+        while (iterator.hasNext()) {
+            result.add(new JsonEntry<>(String.valueOf(i), iterator.next()));
+            i++;
+        }
+        return result;
+    }
+
+    @Override
+    public List<JsonValue> getValue() {
+        scala.collection.Iterator<JsonValue> iterator = items.iterator();
+        final List<JsonValue> value = new ArrayList<>();
+        while (iterator.hasNext()) {
+            value.add(iterator.next());
+        }
+        return value;
+    }
+
+    @Override
+    public int hashCode() {
+        return items.hashCode();
     }
 
     @Override
@@ -98,7 +221,7 @@ public class JsonArray implements JsonStructure, Iterable<JsonValue> {
     public Iterator<JsonValue> iterator() {
         return new Iterator<JsonValue>() {
 
-            scala.collection.Iterator<JsonValue> iterator = items.iterator();
+            final scala.collection.Iterator<JsonValue> iterator = items.iterator();
 
             @Override
             public boolean hasNext() {
@@ -110,6 +233,31 @@ public class JsonArray implements JsonStructure, Iterable<JsonValue> {
                 return iterator.next();
             }
         };
+    }
+
+    @Override
+    public Set<String> keySet() {
+        final Set<String> indexes = new LinkedHashSet<>();
+        for (int i = 0; i < items.length(); i++)
+            indexes.add(String.valueOf(i));
+        return indexes;
+    }
+
+    @Override
+    public JsonValue prepend(JsonValue jsValue) {
+        return new JsonArray(items.appendFront(jsValue));
+    }
+
+    @Override
+    public JsonValue prepend(String key, JsonValue jsValue) {
+        throw new UnsupportedOperationException(
+                String.format("unsupported operation for instance of %s ", this.getClass()));
+    }
+
+    @Override
+    public JsonValue prependIfAbsent(String key, JsonValue jsValue) {
+        throw new UnsupportedOperationException(
+                String.format("unsupported operation for instance of %s ", this.getClass()));
     }
 
     @Override
@@ -135,7 +283,7 @@ public class JsonArray implements JsonStructure, Iterable<JsonValue> {
                 value = jsonValue;
                 if (emptyValuesToNull && value.isJsonOptional() && value.isEmpty())
                     value = JsonNull.INSTANCE;
-                if(Json.isEligibleForStringify(value, keepingNull, emptyValuesToNull)){
+                if(Json.isEligibleForStringify(value, keepingNull)){
                     sj = sj.add(
                             String.format("%s%s",
                                     startIncrementation,
@@ -150,6 +298,16 @@ public class JsonArray implements JsonStructure, Iterable<JsonValue> {
         }
 
         return result;
+    }
+
+    @Override
+    public JsonValue reverse() {
+        return new JsonArray(items.reverse().toVector());
+    }
+
+    @Override
+    public int size() {
+        return items.size();
     }
 
     public Stream<JsonValue> stream(){
@@ -171,7 +329,7 @@ public class JsonArray implements JsonStructure, Iterable<JsonValue> {
             value = iterator.next();
             if (emptyValuesToNull && value.isJsonOptional() && value.isEmpty())
                 value = JsonNull.INSTANCE;
-            if(Json.isEligibleForStringify(value, keepingNull, emptyValuesToNull)){
+            if(Json.isEligibleForStringify(value, keepingNull)){
                 sj = sj.add(value.stringify());
             }
         }
@@ -226,118 +384,6 @@ public class JsonArray implements JsonStructure, Iterable<JsonValue> {
             );
         }
         return null;
-    }
-
-    @Override
-    public Object getValue() {
-        scala.collection.Iterator<JsonValue> iterator = items.iterator();
-        final List<JsonValue> value = new ArrayList<>();
-        while (iterator.hasNext()) {
-            value.add(iterator.next());
-        }
-        return Collections.unmodifiableList(value);
-    }
-
-    @Override
-    public <T> Map<Integer, T> asIntIndexedMapOf(Class<T> c, Map<Integer, T> map) {
-        if (items.isEmpty())
-            return map;
-        for (int i = 0; i < items.length(); i++) {
-            map.put(i, Json.fromJsonValue(items.apply(i), c));
-        }
-        return map;
-    }
-
-    @Override
-    public Set<JsonEntry<String>> getStringIndexedEntrySet() {
-        Set<JsonEntry<String>> result = new LinkedHashSet<>();
-        scala.collection.Iterator<JsonValue> iterator = items.iterator();
-        int i = 0;
-        while (iterator.hasNext()) {
-            result.add(new JsonEntry<>(String.valueOf(i), iterator.next()));
-            i++;
-        }
-        return result;
-    }
-
-    @Override
-    public <T> List<T> asListOf(Class<T> cl, List<T> list) {
-        for (int i = 0; i < items.length(); i++) {
-            list.add(Json.fromJsonValue(items.apply(i), cl));
-        }
-        return list;
-    }
-
-
-    @Override
-    public <T> Set<T> asSetOf(Class<T> cl, Set<T> set) {
-        final scala.collection.Iterator <JsonValue> iterator = items.iterator();
-        while (iterator.hasNext())
-            set.add(Json.fromJsonValue(iterator.next(), cl));
-        return set;
-    }
-
-    @Override
-    public <T> Map<String, T> asStringIndexedMapOf(Class<T> c, Map<String, T> map) {
-        for (int i = 0; i < items.length(); i++)
-            map.put(String.valueOf(i), Json.fromJsonValue(items.apply(i), c));
-        return map;
-    }
-
-    @Override
-    public JsonValue distinct() {
-        return new JsonArray(items.distinct().toVector());
-    }
-
-    @Override
-    public Set<Integer> getIndexSet() {
-        final Set<Integer> indexes = new LinkedHashSet<>();
-        for (int i = 0; i < items.length(); i++)
-            indexes.add(i);
-        return indexes;
-    }
-
-    @Override
-    public Set<JsonEntry<Integer>> getIntIndexedEntrySet() {
-        final Set<JsonEntry<Integer>> indexes = new LinkedHashSet<>();
-        for (int i = 0; i < items.length(); i++)
-            indexes.add(new JsonEntry<>(i, items.apply(i)));
-        return indexes;
-    }
-
-    @Override
-    public Set<String> keySet() {
-        final Set<String> indexes = new LinkedHashSet<>();
-        for (int i = 0; i < items.length(); i++)
-            indexes.add(String.valueOf(i));
-        return indexes;
-    }
-
-    @Override
-    public JsonValue prepend(JsonValue jsValue) {
-        return new JsonArray(items.appendFront(jsValue));
-    }
-
-    @Override
-    public JsonValue prepend(String key, JsonValue jsValue) {
-        throw new UnsupportedOperationException(
-                String.format("unsupported operation for instance of %s ", this.getClass()));
-    }
-
-    @Override
-    public JsonValue prependIfAbsent(String key, JsonValue jsValue) {
-        throw new UnsupportedOperationException(
-                String.format("unsupported operation for instance of %s ", this.getClass()));
-    }
-
-    @Override
-    public JsonValue reverse() {
-        return new JsonArray(items.reverse().toVector());
-    }
-
-    @Override
-    public int size() {
-        return items.size();
     }
 
 }

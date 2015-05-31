@@ -43,7 +43,165 @@ public class JsonOptional implements JsonValue {
     }
 
     @Override
-    public Optional<? extends JsonValue> asOptional() {
+    public BigDecimal asBigDecimal() {
+        throw new ClassCastException();
+    }
+
+    @Override
+    public Optional<BigDecimal> asBigDecimalOptional() {
+        return Optional.empty();
+    }
+
+    @Override
+    public BigDecimal asBigDecimalOrDefault(BigDecimal defaultValue) {
+        return defaultValue;
+    }
+
+    @Override
+    public BigInteger asBigInteger() {
+        throw new ClassCastException();
+    }
+
+    @Override
+    public Optional<BigInteger> asBigIntegerOptional() {
+        return Optional.empty();
+    }
+
+    @Override
+    public BigInteger asBigIntegerOrDefault(BigInteger defaultValue) {
+        return defaultValue;
+    }
+
+    @Override
+    public boolean asBoolean() {
+        throw new ClassCastException();
+    }
+
+    @Override
+    public Optional<Boolean> asBooleanOptional() {
+        return Optional.empty();
+    }
+
+    @Override
+    public boolean asBooleanOrDefault(boolean defaultValue) {
+        return defaultValue;
+    }
+
+    @Override
+    public byte asByte() {
+        throw new ClassCastException();
+    }
+
+    @Override
+    public Optional<Byte> asByteOptional() {
+        return Optional.empty();
+    }
+
+    @Override
+    public byte asByteOrDefault(byte defaultValue) {
+        return defaultValue;
+    }
+
+    @Override
+    public char asChar() {
+        throw new ClassCastException();
+    }
+
+    @Override
+    public Optional<Character> asCharOptional() {
+        return Optional.empty();
+    }
+
+    @Override
+    public char asCharOrDefault(char defaultValue) {
+        return defaultValue;
+    }
+
+    @Override
+    public double asDouble() {
+        throw new ClassCastException();
+    }
+
+    @Override
+    public Optional<Double> asDoubleOptional() {
+        return Optional.empty();
+    }
+
+    @Override
+    public double asDoubleOrDefault(double defaultValue) {
+        return defaultValue;
+    }
+
+    @Override
+    public float asFloat() {
+        throw new ClassCastException();
+    }
+
+    @Override
+    public Optional<Float> asFloatOptional() {
+        return Optional.empty();
+    }
+
+    @Override
+    public float asFloatOrDefault(float defaultValue) {
+        return defaultValue;
+    }
+
+    @Override
+    public int asInt() {
+        throw new ClassCastException();
+    }
+
+    @Override
+    public <T> Map<Integer, T> asIntIndexedMapOf(Class<T> c, Map<Integer, T> map) {
+        if(!value.isPresent())
+           return  map;
+
+        T instance = Json.fromJsonValue(value.get(), c);
+        map.put(0, instance);
+        return map;
+    }
+
+    @Override
+    public Optional<Integer> asIntOptional() {
+        return Optional.empty();
+    }
+
+    @Override
+    public int asIntOrDefault(int defaultValue) {
+        return defaultValue;
+    }
+
+    @Override
+    public <T> List<T> asListOf(Class<T> cl, List<T> list) {
+        if(value.isPresent())
+            list.add(Json.fromJsonValue(value.get(), cl));
+
+        return list;
+    }
+
+    @Override
+    public <T> List<T> asListOf(Class<T> cl) {
+        return asListOf(cl, new ArrayList<>());
+    }
+
+    @Override
+    public long asLong() {
+        throw new ClassCastException();
+    }
+
+    @Override
+    public Optional<Long> asLongOptional() {
+        return Optional.empty();
+    }
+
+    @Override
+    public long asLongOrDefault(long defaultValue) {
+        return defaultValue;
+    }
+
+    @Override
+    public Optional<JsonValue> asOptional() {
         return value;
     }
 
@@ -156,6 +314,26 @@ public class JsonOptional implements JsonValue {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        JsonOptional that = (JsonOptional) o;
+
+        return value.equals(that.value);
+    }
+
+    @Override
+    public JsonValue get(int index) {
+        throw new UnsupportedOperationException("Get item by index on JsonOptional");
+    }
+
+    @Override
+    public JsonValue get(String key) {
+        throw new UnsupportedOperationException("Get item by key on JsonOptional");
+    }
+
+    @Override
     public Set<Integer> getIndexSet() {
         Set<Integer> set = new HashSet<>();
         if(value.isPresent())
@@ -174,8 +352,39 @@ public class JsonOptional implements JsonValue {
     }
 
     @Override
+    public Optional<JsonValue> getOptional(int index) {
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<JsonValue> getOptional(String key) {
+        return Optional.empty();
+    }
+
+    @Override
+    public JsonValue getOrDefault(int index, JsonValue jsonValue) {
+        return jsonValue;
+    }
+
+    @Override
+    public JsonValue getOrDefault(String key, JsonValue jsonValue) {
+        return jsonValue;
+    }
+
+    @Override
     public Set<JsonEntry<String>> getStringIndexedEntrySet() {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Object getValue() {
+        if(value.isPresent()) return Optional.of(value.get().getValue());
+        else return Optional.empty();
+    }
+
+    @Override
+    public int hashCode() {
+        return value.hashCode();
     }
 
     @Override
@@ -302,169 +511,5 @@ public class JsonOptional implements JsonValue {
     @Override
     public JsonValue unionAll(List<? extends JsonValue> jsonValues) {
         throw new UnsupportedOperationException("UnionAll on instance of JsonOptional");
-    }
-
-    @Override
-    public Object getValue() {
-        if(value.isPresent()) return Optional.of(value.get().getValue());
-        else return Optional.empty();
-    }
-
-    @Override
-    public boolean asBoolean() {
-        throw new ClassCastException();
-    }
-
-    @Override
-    public Optional<Boolean> asBooleanOptional() {
-        return Optional.empty();
-    }
-
-    @Override
-    public boolean asBooleanOrDefault(boolean defaultValue) {
-        return defaultValue;
-    }
-
-    @Override
-    public byte asByte() {
-        throw new ClassCastException();
-    }
-
-    @Override
-    public Optional<Byte> asByteOptional() {
-        return Optional.empty();
-    }
-
-    @Override
-    public byte asByteOrDefault(byte defaultValue) {
-        return defaultValue;
-    }
-
-    @Override
-    public BigDecimal asBigDecimal() {
-        throw new ClassCastException();
-    }
-
-    @Override
-    public Optional<BigDecimal> asBigDecimalOptional() {
-        return Optional.empty();
-    }
-
-    @Override
-    public BigDecimal asBigDecimalOrDefault(BigDecimal defaultValue) {
-        return defaultValue;
-    }
-
-    @Override
-    public BigInteger asBigInteger() {
-        throw new ClassCastException();
-    }
-
-    @Override
-    public Optional<BigInteger> asBigIntegerOptional() {
-        return Optional.empty();
-    }
-
-    @Override
-    public BigInteger asBigIntegerOrDefault(BigInteger defaultValue) {
-        return defaultValue;
-    }
-
-    @Override
-    public char asChar() {
-        throw new ClassCastException();
-    }
-
-    @Override
-    public Optional<Character> asCharOptional() {
-        return Optional.empty();
-    }
-
-    @Override
-    public char asCharOrDefault(char defaultValue) {
-        return defaultValue;
-    }
-
-    @Override
-    public double asDouble() {
-        throw new ClassCastException();
-    }
-
-    @Override
-    public Optional<Double> asDoubleOptional() {
-        return Optional.empty();
-    }
-
-    @Override
-    public double asDoubleOrDefault(double defaultValue) {
-        return defaultValue;
-    }
-
-    @Override
-    public float asFloat() {
-        throw new ClassCastException();
-    }
-
-    @Override
-    public Optional<Float> asFloatOptional() {
-        return Optional.empty();
-    }
-
-    @Override
-    public float asFloatOrDefault(float defaultValue) {
-        return defaultValue;
-    }
-
-    @Override
-    public int asInt() {
-        throw new ClassCastException();
-    }
-
-    @Override
-    public <T> Map<Integer, T> asIntIndexedMapOf(Class<T> c, Map<Integer, T> map) {
-        if(!value.isPresent())
-           return  map;
-
-        T instance = Json.fromJsonValue(value.get(), c);
-        map.put(0, instance);
-        return map;
-    }
-
-    @Override
-    public Optional<Integer> asIntOptional() {
-        return Optional.empty();
-    }
-
-    @Override
-    public int asIntOrDefault(int defaultValue) {
-        return defaultValue;
-    }
-
-    @Override
-    public <T> List<T> asListOf(Class<T> cl, List<T> list) {
-        if(value.isPresent())
-            list.add(Json.fromJsonValue(value.get(), cl));
-
-        return list;
-    }
-
-    @Override
-    public <T> List<T> asListOf(Class<T> cl) {
-        return asListOf(cl, new ArrayList<>());
-    }
-
-    @Override
-    public long asLong() {
-        throw new ClassCastException();
-    }
-
-    @Override
-    public Optional<Long> asLongOptional() {
-        return Optional.empty();
-    }
-
-    @Override
-    public long asLongOrDefault(long defaultValue) {
-        return defaultValue;
     }
 }

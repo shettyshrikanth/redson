@@ -3,7 +3,6 @@ package com.sidemash.redson;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.Collection;
 import java.util.Optional;
 
 public class JsonString implements JsonLiteral {
@@ -24,41 +23,6 @@ public class JsonString implements JsonLiteral {
     }
     public static JsonValue of(CharSequence ch) {
         return new JsonString(ch.toString());
-    }
-
-    @Override
-    public String getValue() {
-        return value;
-    }
-
-    @Override
-    public boolean asBoolean() {
-       throw new ClassCastException();
-    }
-
-    @Override
-    public Optional<Boolean> asBooleanOptional() {
-        return Optional.empty();
-    }
-
-    @Override
-    public boolean asBooleanOrDefault(boolean defaultValue) {
-        return defaultValue;
-    }
-
-    @Override
-    public byte asByte() {
-        throw new ClassCastException();
-    }
-
-    @Override
-    public Optional<Byte> asByteOptional() {
-        return Optional.empty();
-    }
-
-    @Override
-    public byte asByteOrDefault(byte defaultValue) {
-        return defaultValue;
     }
 
     @Override
@@ -88,6 +52,36 @@ public class JsonString implements JsonLiteral {
 
     @Override
     public BigInteger asBigIntegerOrDefault(BigInteger defaultValue) {
+        return defaultValue;
+    }
+
+    @Override
+    public boolean asBoolean() {
+       throw new ClassCastException();
+    }
+
+    @Override
+    public Optional<Boolean> asBooleanOptional() {
+        return Optional.empty();
+    }
+
+    @Override
+    public boolean asBooleanOrDefault(boolean defaultValue) {
+        return defaultValue;
+    }
+
+    @Override
+    public byte asByte() {
+        throw new ClassCastException();
+    }
+
+    @Override
+    public Optional<Byte> asByteOptional() {
+        return Optional.empty();
+    }
+
+    @Override
+    public byte asByteOrDefault(byte defaultValue) {
         return defaultValue;
     }
 
@@ -246,6 +240,26 @@ public class JsonString implements JsonLiteral {
     @Override
     public boolean containsValue(Object value) {
         return this.value.equals(value);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        JsonString that = (JsonString) o;
+
+        return value.equals(that.value);
+    }
+
+    @Override
+    public String getValue() {
+        return value;
+    }
+
+    @Override
+    public int hashCode() {
+        return value.hashCode();
     }
 
     @Override
