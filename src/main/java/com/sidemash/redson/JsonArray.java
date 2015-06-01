@@ -8,10 +8,13 @@ import scala.collection.immutable.VectorIterator;
 import scala.collection.mutable.Builder;
 
 import java.util.*;
+import java.util.function.UnaryOperator;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-public class JsonArray implements JsonStructure, Iterable<JsonValue>, ImmutableVector<JsonValue> {
+
+public class JsonArray implements JsonStructure, Iterable<JsonEntry<Integer>>, ImmutableVector<JsonValue> {
 
     public static final JsonArray EMPTY = new JsonArray(Vector$.MODULE$.empty());
     private final Vector<JsonValue> items;
@@ -35,19 +38,8 @@ public class JsonArray implements JsonStructure, Iterable<JsonValue>, ImmutableV
         return new JsonArray(vectorBuilder.result());
     }
 
-    @Override
-    public JsonValue append(JsonValue jsValue) {
-        return new JsonArray(items.appendBack(jsValue));
-    }
-
-    @Override
-    public JsonValue append(String key, JsonValue jsValue) {
-        throw new UnsupportedOperationException("This operation is not supported for JsonArray.");
-    }
-
-    @Override
-    public JsonValue appendIfAbsent(String key, JsonValue jsValue) {
-        throw new UnsupportedOperationException("This operation is not supported for JsonArray.");
+    public JsonArray append(JsonArray jsonArray) {
+        return new JsonArray(items.appendBack(jsonArray));
     }
 
     @Override
@@ -83,19 +75,12 @@ public class JsonArray implements JsonStructure, Iterable<JsonValue>, ImmutableV
         return map;
     }
 
-    @Override
-    public boolean containsAll(List<? extends JsonValue> jsValues) {
-        // FIXME find a better way
-        for (JsonValue jsonValue: jsValues) {
-            if(!containsValue(jsonValue))
-                return false;
-        }
-        return true;
+    public boolean containsAllValues(Object... values) {
+        return containsAllValues(Arrays.asList(values));
     }
 
-    @Override
-    public boolean containsKey(String key) {
-        throw new UnsupportedOperationException("This operation is not supported for JsonArray.");
+    public boolean containsAllValues(List<?> values) {
+        return values.stream().allMatch(items::contains);
     }
 
     @Override
@@ -103,7 +88,6 @@ public class JsonArray implements JsonStructure, Iterable<JsonValue>, ImmutableV
         return items.contains(value);
     }
 
-    @Override
     public JsonValue distinct() {
         return new JsonArray(items.distinct().toVector());
     }
@@ -129,7 +113,6 @@ public class JsonArray implements JsonStructure, Iterable<JsonValue>, ImmutableV
         throw new UnsupportedOperationException("Get an item by key on a JsonArray");
     }
 
-    @Override
     public Set<Integer> getIndexSet() {
         final Set<Integer> indexes = new LinkedHashSet<>();
         for (int i = 0; i < items.length(); i++)
@@ -137,7 +120,6 @@ public class JsonArray implements JsonStructure, Iterable<JsonValue>, ImmutableV
         return indexes;
     }
 
-    @Override
     public Set<JsonEntry<Integer>> getIntIndexedEntrySet() {
         final Set<JsonEntry<Integer>> indexes = new LinkedHashSet<>();
         for (int i = 0; i < items.length(); i++)
@@ -192,14 +174,29 @@ public class JsonArray implements JsonStructure, Iterable<JsonValue>, ImmutableV
         return items.hashCode();
     }
 
-    @Override
-    public boolean isDefinedAt(int index) {
-        return items.isDefinedAt(index);
+    public Iterator<Integer> indexesIterator() {
+        return new Iterator<Integer>() {
+
+            int index = -1;
+
+            @Override
+            public boolean hasNext() {
+                return (index +1) < items.size() ;
+            }
+
+            @Override
+            public Integer next() {
+                return  (index++);
+            }
+        };
     }
 
-    @Override
-    public boolean isDefinedAt(String key) {
-        return false;
+    public IntStream indexesStream(){
+        return IntStream.range(0, items.size());
+    }
+
+    public boolean isDefinedAt(int index) {
+        return items.isDefinedAt(index);
     }
 
     @Override
@@ -218,10 +215,11 @@ public class JsonArray implements JsonStructure, Iterable<JsonValue>, ImmutableV
     }
 
     @Override
-    public Iterator<JsonValue> iterator() {
-        return new Iterator<JsonValue>() {
+    public Iterator<JsonEntry<Integer>> iterator() {
+        return new Iterator<JsonEntry<Integer>>() {
 
             final scala.collection.Iterator<JsonValue> iterator = items.iterator();
+            int index = -1;
 
             @Override
             public boolean hasNext() {
@@ -229,35 +227,15 @@ public class JsonArray implements JsonStructure, Iterable<JsonValue>, ImmutableV
             }
 
             @Override
-            public JsonValue next() {
-                return iterator.next();
+            public JsonEntry<Integer> next() {
+                index++;
+                return new JsonEntry<>(index, iterator.next());
             }
         };
     }
 
-    @Override
-    public Set<String> keySet() {
-        final Set<String> indexes = new LinkedHashSet<>();
-        for (int i = 0; i < items.length(); i++)
-            indexes.add(String.valueOf(i));
-        return indexes;
-    }
-
-    @Override
     public JsonValue prepend(JsonValue jsValue) {
         return new JsonArray(items.appendFront(jsValue));
-    }
-
-    @Override
-    public JsonValue prepend(String key, JsonValue jsValue) {
-        throw new UnsupportedOperationException(
-                String.format("unsupported operation for instance of %s ", this.getClass()));
-    }
-
-    @Override
-    public JsonValue prependIfAbsent(String key, JsonValue jsValue) {
-        throw new UnsupportedOperationException(
-                String.format("unsupported operation for instance of %s ", this.getClass()));
     }
 
     @Override
@@ -279,8 +257,8 @@ public class JsonArray implements JsonStructure, Iterable<JsonValue>, ImmutableV
             final String endIncrementation = endInc.toString();
             StringJoiner sj = new StringJoiner(",\n", "[\n", String.format("\n%s]", endIncrementation));
             JsonValue value;
-            for (JsonValue jsonValue : this) {
-                value = jsonValue;
+            for (JsonEntry<Integer> jsonValue : this) {
+                value = jsonValue.getValue();
                 if (emptyValuesToNull && value.isJsonOptional() && value.isEmpty())
                     value = JsonNull.INSTANCE;
                 if(Json.isEligibleForStringify(value, keepingNull)){
@@ -300,7 +278,13 @@ public class JsonArray implements JsonStructure, Iterable<JsonValue>, ImmutableV
         return result;
     }
 
-    @Override
+    public JsonArray removeAt(int index){
+        Builder<JsonValue, Vector<JsonValue>> vectorBuilder = Vector$.MODULE$.<JsonValue>newBuilder();
+        vectorBuilder.$plus$plus$eq(this.items.take(index));
+        vectorBuilder.$plus$plus$eq(this.items.drop(index+1));
+        return new JsonArray(vectorBuilder.result());
+    }
+
     public JsonValue reverse() {
         return new JsonArray(items.reverse().toVector());
     }
@@ -310,9 +294,13 @@ public class JsonArray implements JsonStructure, Iterable<JsonValue>, ImmutableV
         return items.size();
     }
 
-    public Stream<JsonValue> stream(){
+    public Stream<JsonEntry<Integer>> stream(){
         return StreamSupport.stream(
-                Spliterators.spliteratorUnknownSize(iterator(), Spliterator.NONNULL | Spliterator.IMMUTABLE),
+                Spliterators.spliterator(
+                        iterator(),
+                        items.size(),
+                        Spliterator.NONNULL | Spliterator.ORDERED | Spliterator.IMMUTABLE | Spliterator.DISTINCT
+                ),
                 false
         );
     }
@@ -343,14 +331,7 @@ public class JsonArray implements JsonStructure, Iterable<JsonValue>, ImmutableV
                 '}';
     }
 
-    @Override
-    public JsonArray union(JsonValue jsonValue) {
-        if (!(jsonValue instanceof JsonArray)) {
-            throw new IllegalArgumentException(
-                    String.format("union is not possible between JsonArray and %s", jsonValue.getClass())
-            );
-        }
-        JsonArray jsonArray = (JsonArray) jsonValue;
+    public JsonArray union(JsonArray jsonArray) {
         JsonArray result;
         if(isEmpty()) {
             result  = jsonArray;
@@ -366,24 +347,51 @@ public class JsonArray implements JsonStructure, Iterable<JsonValue>, ImmutableV
         return result;
     }
 
-    @Override
-    public JsonArray unionAll(List<? extends JsonValue> jsonValues) {
+    public JsonArray unionAll(List<JsonArray> jsonArrays) {
         Builder<JsonValue, Vector<JsonValue>> vectorBuilder = Vector$.MODULE$.<JsonValue>newBuilder();
-        JsonArray temp = null;
-        int i = 0;
-        try {
-            for(JsonValue jo : jsonValues) {
-                temp = (JsonArray) jo;
-                ++i;
-                vectorBuilder.$plus$plus$eq(temp.items);
+        vectorBuilder.$plus$plus$eq(this.items);
+        for(JsonArray array : jsonArrays)
+           vectorBuilder.$plus$plus$eq(array.items);
+        return new JsonArray(vectorBuilder.result());
+    }
+
+    public JsonArray updateValue(int index, JsonValue newJsonValue){
+        return updateValue(index, UnaryOperator.identity());
+    }
+
+    public JsonArray updateValue(int index, UnaryOperator<JsonValue> operator){
+        if(!items.isDefinedAt(index))
+            return this;
+
+       return this.updateValue(index, operator.apply(items.apply(index)));
+    }
+
+    public Iterator<JsonValue> valuesIterator() {
+        return new Iterator<JsonValue>() {
+
+            final scala.collection.Iterator<JsonValue> iterator = items.iterator();
+
+            @Override
+            public boolean hasNext() {
+                return iterator.hasNext();
             }
-        }
-        catch (ClassCastException e) {
-            throw new IllegalArgumentException(
-                    String.format("union is not possible between JsonArray and %s (item %d of list)", temp.getClass(), i)
-            );
-        }
-        return null;
+
+            @Override
+            public JsonValue next() {
+                return iterator.next();
+            }
+        };
+    }
+
+    public Stream<JsonValue> valuesStream(){
+        return StreamSupport.stream(
+                Spliterators.spliterator(
+                        valuesIterator(),
+                        items.size(),
+                        Spliterator.NONNULL | Spliterator.ORDERED | Spliterator.IMMUTABLE | Spliterator.DISTINCT
+                ),
+                false
+        );
     }
 
 }

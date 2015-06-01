@@ -1,4 +1,9 @@
 
 
 val f = Map[String, Int]()
-f("Serge")
+val t = f.updated("Serge", 16)
+t.s
+val l = Vector(1, 2, 3)
+l.-
+
+

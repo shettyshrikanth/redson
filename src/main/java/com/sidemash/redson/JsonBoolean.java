@@ -212,15 +212,6 @@ public enum JsonBoolean implements JsonLiteral {
         return defaultValue;
     }
 
-    @Override
-    public boolean containsKey(String key) {
-        throw new UnsupportedOperationException("This operation is not supported for JsonBoolean.");
-    }
-
-    @Override
-    public boolean containsValue(Object value) {
-        return value instanceof Boolean && value.equals(this.value);
-    }
 
     @Override
     public Boolean getValue() {
@@ -263,7 +254,4 @@ public enum JsonBoolean implements JsonLiteral {
                 "value=" + value +
                 '}';
     }
-
-
-
 }

@@ -11,7 +11,9 @@ public interface ImmutableVector<T> {
 
     boolean contains(Object elem);
 
-    Optional<T> find(Predicate<? super T> predicate);
+    <U> U foldLeft(U seed, BiFunction<U, T, U> op);
+
+    <U> U foldRight(U seed, BiFunction<T, U, U> op);
 
     boolean isDefinedAt(int index);
 

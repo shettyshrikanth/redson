@@ -273,16 +273,6 @@ public class JsonNumber implements JsonLiteral {
         return asStringOptional().orElse(defaultValue);
     }
 
-    @Override
-    public boolean containsKey(String key) {
-        throw new UnsupportedOperationException(
-                String.format("this operation is not supported by instance of %s", this.getClass()));
-    }
-
-    @Override
-    public boolean containsValue(Object value) {
-        return value.equals(value);
-    }
 
     @Override
     public boolean equals(Object o) {

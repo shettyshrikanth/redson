@@ -77,7 +77,7 @@ public enum DefaultObjectConverter implements  JsonConverter<Object> {
                             attributeMap.put(field.getName(), fieldValue);
                     }
                     // System.out.println("\nBefore : " + result.stringify());
-                    result = result.union(JsonObject.of(attributeMap));
+                    result = ((JsonObject) result).union(JsonObject.of(attributeMap));
                     // System.out.println();
                 }
                 // System.out.println(result.prettyStringify());

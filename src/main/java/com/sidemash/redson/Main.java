@@ -40,15 +40,19 @@ public class Main {
         // and will return "friends":{ "1":"Beau" }
         // if you want to override this behaviour, write JsonObject.of("friends", JsonObject.of(mapString, intKey -> String.valueOf(intKey-1))
         // and will return "friends":{ "0":"Beau" }
-/*
+
         JsonObject jsValue3 =
                 JsonObject.of(
                         JsonObject.of("age", 1),
                         JsonObject.of("naming", "Serge"),
-                        JsonObject.of("friends", new TestValue()) // Homogeneous List
+                        JsonObject.of("friends", null) // Homogeneous List
                 );
 
-*/
+        List<String>  list = new ArrayList<>();
+
+        System.out.println(jsValue3.prettyStringify());
+
+        /*
         System.out.println(JsonValue.of(listOfString).prettyStringify());
         TestValue.TestValue2 test = new TestValue.TestValue2(12, "Cailloux");
         synchronized (test) {
@@ -61,7 +65,7 @@ public class Main {
         }
 
 
-
+*/
         // System.out.println(Json.fromJsonValue(jsValue3)); //.prettyStringify());
         // Cannot transform nested classes to Json by reflexion
         // Implements monadic methods on JsonValue

@@ -201,17 +201,6 @@ public enum JsonNull implements JsonLiteral {
     }
 
     @Override
-    public boolean containsKey(String key) {
-        throw new UnsupportedOperationException(
-                String.format("this operation is not supported by instance of %s", this.getClass()));
-    }
-
-    @Override
-    public boolean containsValue(Object value) {
-        return value == null;
-    }
-
-    @Override
     public Object getValue() {
         throw new NoSuchElementException();
     }

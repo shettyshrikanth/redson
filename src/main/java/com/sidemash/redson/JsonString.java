@@ -231,16 +231,6 @@ public class JsonString implements JsonLiteral {
         return value;
     }
 
-    @Override
-    public boolean containsKey(String key) {
-        throw new UnsupportedOperationException(
-                String.format("this operation is not supported by instance of %s", this.getClass()));
-    }
-
-    @Override
-    public boolean containsValue(Object value) {
-        return this.value.equals(value);
-    }
 
     @Override
     public boolean equals(Object o) {

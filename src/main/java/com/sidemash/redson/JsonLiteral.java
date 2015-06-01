@@ -6,21 +6,6 @@ import java.util.*;
 public interface JsonLiteral extends JsonValue {
 
     @Override
-    default JsonValue append(JsonValue jsValue) {
-        throw new UnsupportedOperationException("This operation is not supported for JsonLiteral.");
-    }
-
-    @Override
-    default JsonValue append(String key, JsonValue jsValue) {
-        throw new UnsupportedOperationException("This operation is not supported for JsonLiteral.");
-    }
-
-    @Override
-    default JsonValue appendIfAbsent(String key, JsonValue jsValue) {
-        throw new UnsupportedOperationException("This operation is not supported for JsonLiteral.");
-    }
-
-    @Override
     default <T> Map<Integer, T> asIntIndexedMapOf(Class<T> cl, Map<Integer, T> map) {
         map.put(0, Json.fromJsonValue(this, cl));
         return map;
@@ -60,26 +45,6 @@ public interface JsonLiteral extends JsonValue {
     }
 
     @Override
-    default boolean containsAll(JsonValue... jsValues) {
-        return containsAll(Arrays.asList(jsValues));
-    }
-
-    @Override
-    default boolean containsAll(List<? extends JsonValue> jsValues) {
-        if(jsValues.size() > 1)
-            return false;
-        else if (jsValues.size() == 1)
-            return containsValue(jsValues.get(0));
-        else
-            return false;
-    }
-
-    @Override
-    default JsonValue distinct() {
-        return this;
-    }
-
-    @Override
     default JsonValue get(int index) {
         throw new UnsupportedOperationException(String.format("Get item by index " +
                 "on JsonLiteral of type %s", this.getClass().getSimpleName()));
@@ -89,20 +54,6 @@ public interface JsonLiteral extends JsonValue {
     default JsonValue get(String key) {
         throw new UnsupportedOperationException(String.format("Get item by key " +
                 "on JsonLiteral of type %s", this.getClass().getSimpleName()));
-    }
-
-    @Override
-    default Set<Integer> getIndexSet() {
-        Set<Integer> set = new LinkedHashSet<>();
-        set.add(0);
-        return set;
-    }
-
-    @Override
-    default Set<JsonEntry<Integer>> getIntIndexedEntrySet() {
-        Set<JsonEntry<Integer>> set = new LinkedHashSet<>();
-        set.add(new JsonEntry<>(0, this));
-        return set;
     }
 
     @Override
@@ -123,23 +74,6 @@ public interface JsonLiteral extends JsonValue {
     @Override
     default JsonValue getOrDefault(String key, JsonValue jsonValue) {
         return jsonValue;
-    }
-
-    @Override
-    default Set<JsonEntry<String>> getStringIndexedEntrySet() {
-        Set<JsonEntry<String>> set = new LinkedHashSet<>();
-        set.add(new JsonEntry<>("0", this));
-        return set;
-    }
-
-    @Override
-    default boolean isDefinedAt(int index) {
-        return (index == 0);
-    }
-
-    @Override
-    default boolean isDefinedAt(String key) {
-        return false;
     }
 
     @Override
@@ -173,28 +107,6 @@ public interface JsonLiteral extends JsonValue {
     }
 
     @Override
-    default Set<String> keySet() {
-        Set<String> set = new LinkedHashSet<>();
-        set.add("0");
-        return set;
-    }
-
-    @Override
-    default JsonValue prepend(JsonValue jsValue) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    default JsonValue prepend(String key, JsonValue jsValue) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    default JsonValue prependIfAbsent(String key, JsonValue jsValue) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     default String prettyStringify() {
         return toString();
     }
@@ -203,31 +115,5 @@ public interface JsonLiteral extends JsonValue {
     default String prettyStringify(int ident) {
         return toString();
     }
-
-    @Override
-    default JsonValue reverse() {
-        return this;
-    }
-
-    @Override
-    default int size() {
-        return 1;
-    }
-
-    @Override
-    default JsonValue union(JsonValue jsonValue){
-        throw new UnsupportedOperationException(
-                String.format("this operation is not supported by instance of %s", this.getClass())
-        );
-    }
-
-    @Override
-    default JsonValue unionAll(List<? extends JsonValue> jsonValues){
-        throw new UnsupportedOperationException(
-                String.format("this operation is not supported by instance of %s", this.getClass())
-        );
-    }
-
-
 
 }

@@ -28,21 +28,6 @@ public class JsonOptional implements JsonValue {
     }
 
     @Override
-    public JsonValue append(JsonValue jsValue) {
-        throw new UnsupportedOperationException("instance of JsonOptional does not permit this operation");
-    }
-
-    @Override
-    public JsonValue append(String key, JsonValue jsValue) {
-        throw new UnsupportedOperationException("instance of JsonOptional does not permit this operation");
-    }
-
-    @Override
-    public JsonValue appendIfAbsent(String key, JsonValue jsValue) {
-        throw new UnsupportedOperationException("instance of JsonOptional does not permit this operation");
-    }
-
-    @Override
     public BigDecimal asBigDecimal() {
         throw new ClassCastException();
     }
@@ -284,33 +269,8 @@ public class JsonOptional implements JsonValue {
         return defaultValue;
     }
 
-    @Override
-    public boolean containsAll(JsonValue... jsValues) {
-        return containsAll(Arrays.asList(jsValues));
-    }
-
-    @Override
-    public boolean containsAll(List<? extends JsonValue> jsValues) {
-        for (JsonValue value : jsValues){
-            if(!this.containsValue(value))
-                return false;
-        }
-        return true;
-    }
-
-    @Override
-    public boolean containsKey(String key) {
-        return false;
-    }
-
-    @Override
     public boolean containsValue(Object value) {
         return this.value.isPresent() && this.value.get().equals(value);
-    }
-
-    @Override
-    public JsonValue distinct() {
-        return this;
     }
 
     @Override
@@ -334,24 +294,6 @@ public class JsonOptional implements JsonValue {
     }
 
     @Override
-    public Set<Integer> getIndexSet() {
-        Set<Integer> set = new HashSet<>();
-        if(value.isPresent())
-            set.add(0);
-
-        return set;
-    }
-
-    @Override
-    public Set<JsonEntry<Integer>> getIntIndexedEntrySet() {
-        Set<JsonEntry<Integer>> set = new HashSet<>();
-        if(value.isPresent())
-            set.add(new JsonEntry<>(0, value.get()));
-
-        return set;
-    }
-
-    @Override
     public Optional<JsonValue> getOptional(int index) {
         return Optional.empty();
     }
@@ -371,10 +313,6 @@ public class JsonOptional implements JsonValue {
         return jsonValue;
     }
 
-    @Override
-    public Set<JsonEntry<String>> getStringIndexedEntrySet() {
-        throw new UnsupportedOperationException();
-    }
 
     @Override
     public Object getValue() {
@@ -385,16 +323,6 @@ public class JsonOptional implements JsonValue {
     @Override
     public int hashCode() {
         return value.hashCode();
-    }
-
-    @Override
-    public boolean isDefinedAt(int index) {
-        return (index == 0 && value.isPresent());
-    }
-
-    @Override
-    public boolean isDefinedAt(String key) {
-        return false;
     }
 
     @Override
@@ -448,40 +376,10 @@ public class JsonOptional implements JsonValue {
     }
 
     @Override
-    public Set<String> keySet() {
-        Set<String> result = new HashSet<>();
-        if(value.isPresent())
-            result.add("0");
-
-        return result;
-    }
-
-    @Override
-    public JsonValue prepend(JsonValue jsValue) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public JsonValue prepend(String key, JsonValue jsValue) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public JsonValue prependIfAbsent(String key, JsonValue jsValue) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public String prettyStringifyRecursive(int indent, int incrementAcc, boolean keepingNull, boolean emptyValuesToNull) {
         return stringify(keepingNull, emptyValuesToNull);
     }
 
-    @Override
-    public JsonValue reverse() {
-        return this;
-    }
-
-    @Override
     public int size() {
         return (value.isPresent()) ? 1 : 0;
     }
@@ -503,13 +401,4 @@ public class JsonOptional implements JsonValue {
                 '}';
     }
 
-    @Override
-    public JsonValue union(JsonValue jsonValue) {
-        throw new UnsupportedOperationException("Union on instance of JsonOptional");
-    }
-
-    @Override
-    public JsonValue unionAll(List<? extends JsonValue> jsonValues) {
-        throw new UnsupportedOperationException("UnionAll on instance of JsonOptional");
-    }
 }

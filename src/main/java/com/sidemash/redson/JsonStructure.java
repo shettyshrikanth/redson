@@ -3,8 +3,8 @@ package com.sidemash.redson;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.Arrays;
 import java.util.Optional;
+import java.util.Set;
 
 public interface JsonStructure extends JsonValue {
 
@@ -178,9 +178,9 @@ public interface JsonStructure extends JsonValue {
         return defaultValue;
     }
 
-    default boolean containsAll(JsonValue... jsValues) {
-        return containsAll(Arrays.asList(jsValues));
-    }
+    boolean containsValue(Object value);
+
+    Set<JsonEntry<String>> getStringIndexedEntrySet();
 
     @Override
     default boolean isJsonBoolean() {
@@ -217,4 +217,5 @@ public interface JsonStructure extends JsonValue {
         return true;
     }
 
+    int size();
 }

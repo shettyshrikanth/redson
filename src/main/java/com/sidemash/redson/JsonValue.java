@@ -13,16 +13,6 @@ public interface JsonValue {
         return Json.toJsonValue(o);
     }
 
-    JsonValue append(JsonValue jsValue);
-
-    JsonValue append(String key, JsonValue jsValue);
-
-    JsonValue appendIfAbsent(String key, JsonValue jsValue);
-
-    default JsonValue applyFn(Function<JsonValue, JsonValue> function) {
-        return function.apply(this);
-    }
-
     BigDecimal asBigDecimal();
 
     Optional<BigDecimal> asBigDecimalOptional();
@@ -133,23 +123,10 @@ public interface JsonValue {
 
     String  asStringOrDefault(String defaultValue);
 
-    boolean containsAll(JsonValue... jsValues);
-
-    boolean containsAll(List<? extends JsonValue> jsValues);
-
-    boolean containsKey(String key);
-
-    boolean containsValue(Object value);
-
-    JsonValue distinct();
 
     JsonValue get(int index);
 
     JsonValue get(String key);
-
-    Set<Integer> getIndexSet();
-
-    Set<JsonEntry<Integer>> getIntIndexedEntrySet();
 
     Optional<JsonValue> getOptional(int index);
 
@@ -158,8 +135,6 @@ public interface JsonValue {
     JsonValue getOrDefault(int index, JsonValue jsonValue);
 
     JsonValue getOrDefault(String key, JsonValue jsonValue);
-
-    Set<JsonEntry<String>> getStringIndexedEntrySet();
 
     Object getValue();
 /*
@@ -247,11 +222,6 @@ public interface JsonValue {
     default JsonValue ifJsonStructureElseThis(Function<? super JsonValue, ? extends JsonValue> thenFn) {
         return ifConditionElseThis(this::isJsonStructure, thenFn);
     }
-
-    boolean isDefinedAt(int index);
-
-    boolean isDefinedAt(String key);
-
     boolean isEmpty();
 
     boolean isJsonArray();
@@ -275,14 +245,6 @@ public interface JsonValue {
     default boolean isNotEmpty() {
         return (!isEmpty());
     }
-
-    Set<String> keySet();
-
-    JsonValue prepend(JsonValue jsValue);
-
-    JsonValue prepend(String key, JsonValue jsValue);
-
-    JsonValue prependIfAbsent(String key, JsonValue jsValue);
 
     default String prettyStringify() {
         final int indent = 3;
@@ -312,10 +274,6 @@ public interface JsonValue {
 
     String prettyStringifyRecursive(int indent, int incrementAcc, boolean keepingNull, boolean emptyValuesToNull);
 
-    JsonValue reverse();
-
-    int size();
-
     default String stringify(){
         final boolean keepingNull = false;
         final boolean emptyValuesToNull = false;
@@ -328,10 +286,6 @@ public interface JsonValue {
         final boolean emptyValuesToNull = false;
         return stringify(keepingNull, emptyValuesToNull);
     }
-
-    JsonValue union(JsonValue jsonValue);
-
-    JsonValue unionAll(List<? extends JsonValue> jsonValues);
 
 
 }
