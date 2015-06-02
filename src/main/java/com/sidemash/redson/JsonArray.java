@@ -9,6 +9,7 @@ import scala.collection.mutable.Builder;
 
 import java.util.*;
 import java.util.function.UnaryOperator;
+import java.util.stream.Collector;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -73,6 +74,9 @@ public class JsonArray implements JsonStructure, Iterable<JsonEntry<Integer>>, I
         for (int i = 0; i < items.length(); i++)
             map.put(String.valueOf(i), Json.fromJsonValue(items.apply(i), c));
         return map;
+    }
+
+    public static Collector<? super JsonValue,Object,Object> collector() {
     }
 
     public boolean containsAllValues(Object... values) {
@@ -388,7 +392,7 @@ public class JsonArray implements JsonStructure, Iterable<JsonEntry<Integer>>, I
                 Spliterators.spliterator(
                         valuesIterator(),
                         items.size(),
-                        Spliterator.NONNULL | Spliterator.ORDERED | Spliterator.IMMUTABLE | Spliterator.DISTINCT
+                        Spliterator.NONNULL | Spliterator.ORDERED | Spliterator.IMMUTABLE
                 ),
                 false
         );

@@ -2,6 +2,7 @@ package com.sidemash.redson;
 
 import java.util.*;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public class Main {
 
@@ -20,7 +21,7 @@ public class Main {
         System.out.println();
         JsonObject jsValue2 = JsonObject.EMPTY;
 
-        Object[] array = new Object[]{ "Alice", "Jerome"};
+        Object[] array = new Object[]{"Alice", "Jerome"};
 
 
 
@@ -53,91 +54,21 @@ public class Main {
         System.out.println(jsValue3.prettyStringify());
 
         /*
-        System.out.println(JsonValue.of(listOfString).prettyStringify());
-        TestValue.TestValue2 test = new TestValue.TestValue2(12, "Cailloux");
-        synchronized (test) {
-            timedOperation(() -> {
-                System.out.println(JsonValue.of(new TestValue.TestValue3(13, "pains")).prettyStringify());
-                //System.out.println(JsonValue.of(test).asPojo(TestValue.TestValue2.class).equals(test));
-                //System.out.println(JsonValue.of(test).prettyStringify());
-                return null;
-            });
-        }
+
+        */
 
 
-*/
-        // System.out.println(Json.fromJsonValue(jsValue3)); //.prettyStringify());
         // Cannot transform nested classes to Json by reflexion
-        // Implements monadic methods on JsonValue
+        // Implements monadic methods on JsonValue DONE with STREAM
         // Give sense to all Exceptions
-        // Implements equals and hashcode
+        // Implements equals and hashcode OK
         // Test
         // Document
-        // Implement ordered converter list Many Converetr for exemple for String
+        // Implement ordered converter list, Many Converetr for exemple for String OK
         // Implement converter for date
         // Handle conversion to List Map, Arrays OK
         // Handle conversion of recursive Parent classes OK
         // Handle conversion of recursive data structures ( List<List<String>>, List<List<Map<String, List<String>>>> ) OK
-    }
-
-
-    public static class TestValue {
-        public static int serge = 2;
-        public char c = 'e';
-        public String martial = "Rer";
-
-
-        public static class TestValue3 extends TestValue2 {
-            public String janvier = "5 Janvier 2014";
-            public TestValue3(int steph, String martial) {
-                super(steph, martial);
-            }
-        }
-        public static class TestValue2 extends TestValue {
-            public int steph = 8;
-            public String martial = "5";
-
-            public TestValue2(int steph, String martial) {
-                this.steph = steph;
-                this.martial = martial;
-            }
-
-            @Override
-            public boolean equals(Object o) {
-                if (this == o) return true;
-                if (o == null || getClass() != o.getClass()) return false;
-
-                TestValue2 that = (TestValue2) o;
-
-                if (steph != that.steph) return false;
-                return martial.equals(that.martial);
-            }
-
-            @Override
-            public int hashCode() {
-                int result = steph;
-                result = 31 * result + martial.hashCode();
-                return result;
-            }
-
-            @Override
-            public String toString() {
-                return "TestValue2{" +
-                        "steph=" + steph +
-                        ", martial='" + martial + '\'' +
-                        '}';
-            }
-
-            static {
-                Json.registerWriter(TestValue2.class, (TestValue2 o, JsonValue js) -> {
-                    System.out.println("I have been callled");
-                    return JsonObject.EMPTY;
-                });
-                Json.registerReaderFromJson(TestValue2.class, (JsonValue js) ->
-                                new TestValue2(js.get("steph").asInt(), js.get("martial").asString())
-                );
-            }
-        }
     }
 
 
