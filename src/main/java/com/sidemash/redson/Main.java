@@ -3,6 +3,7 @@ package com.sidemash.redson;
 import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class Main {
 
@@ -53,7 +54,24 @@ public class Main {
 
         System.out.println(jsValue3.prettyStringify());
 
-        /*
+        System.out.println(
+                JsonArray.of(IntStream.range(1, 7))
+                        .streamValues()
+                        .mapToInt(JsonValue::asInt)
+                        .max()
+        );
+
+        System.out.println(
+                JsonArray.of(IntStream.range(1, 7)).reverse().stringify()
+        );
+
+         /*
+        System.out.println(
+                JsonArray.of(1, 10, 20)
+                         .flatMap(i -> JsonArray.of(IntStream.range(i.getValue().asInt(), i.getValue().asInt() + 10)))
+                         .stringify()
+        );
+
 
         */
 

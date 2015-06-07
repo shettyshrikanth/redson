@@ -102,7 +102,7 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>>, I
         return keys.stream().allMatch(bindings::contains);
     }
 
-    public boolean containsAllValues(List<?> values) {
+    public <E> boolean containsAllValues(List<E> values) {
         // FIXME find a better way
         return values.stream().allMatch(this::containsValue);
     }

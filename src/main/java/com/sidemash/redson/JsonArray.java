@@ -8,17 +8,23 @@ import scala.collection.immutable.VectorIterator;
 import scala.collection.mutable.Builder;
 
 import java.util.*;
-import java.util.function.UnaryOperator;
-import java.util.stream.Collector;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
+import java.util.function.*;
+import java.util.stream.*;
 
 
-public class JsonArray implements JsonStructure, Iterable<JsonEntry<Integer>>, ImmutableVector<JsonValue> {
+public class JsonArray implements
+        JsonStructure, Iterable<JsonEntry<Integer>>, ImmutableVector<JsonValue> {
 
     public static final JsonArray EMPTY = new JsonArray(Vector$.MODULE$.empty());
     private final Vector<JsonValue> items;
+
+    private static JsonArray createJsonArray(Vector<JsonValue> items){
+        if(items.isEmpty())
+            return EMPTY;
+        else
+            return new JsonArray(items);
+    }
+
     private JsonArray(Vector<JsonValue> items) {
         this.items = items;
     }
@@ -28,19 +34,28 @@ public class JsonArray implements JsonStructure, Iterable<JsonEntry<Integer>>, I
         return JsonArray.of(Arrays.asList(values));
     }
 
-    public static JsonArray of(Iterable<?> values){
-        if(!values.iterator().hasNext())
+    public static <T,S extends BaseStream<T, S>> JsonArray of(BaseStream<T, S> stream){
+        return JsonArray.of(stream.iterator());
+    }
+
+
+    public static <E> JsonArray of(Iterator<E> it){
+        if(!it.hasNext())
             return JsonArray.EMPTY;
 
         Builder<JsonValue, Vector<JsonValue>> vectorBuilder = Vector$.MODULE$.<JsonValue>newBuilder();
-        for(Object value : values){
-            vectorBuilder.$plus$eq(Json.toJsonValue(value));
+        while(it.hasNext()){
+            vectorBuilder.$plus$eq(Json.toJsonValue(it.next()));
         }
-        return new JsonArray(vectorBuilder.result());
+        return createJsonArray(vectorBuilder.result());
+    }
+
+    public static <E> JsonArray of(Iterable<E> values){
+        return JsonArray.of(values.iterator());
     }
 
     public JsonArray append(JsonArray jsonArray) {
-        return new JsonArray(items.appendBack(jsonArray));
+        return createJsonArray(items.appendBack(jsonArray));
     }
 
     @Override
@@ -76,14 +91,12 @@ public class JsonArray implements JsonStructure, Iterable<JsonEntry<Integer>>, I
         return map;
     }
 
-    public static Collector<? super JsonValue,Object,Object> collector() {
-    }
 
     public boolean containsAllValues(Object... values) {
         return containsAllValues(Arrays.asList(values));
     }
 
-    public boolean containsAllValues(List<?> values) {
+    public <E>  boolean containsAllValues(List<E> values) {
         return values.stream().allMatch(items::contains);
     }
 
@@ -92,8 +105,73 @@ public class JsonArray implements JsonStructure, Iterable<JsonEntry<Integer>>, I
         return items.contains(value);
     }
 
-    public JsonValue distinct() {
-        return new JsonArray(items.distinct().toVector());
+    public boolean containsIndex(int value) {
+        return items.isDefinedAt(value);
+    }
+
+    public JsonArray distinct() {
+        return createJsonArray(items.distinct().toVector());
+    }
+
+    @Override
+    public JsonArray skip(int nb) {
+        return new JsonArray(items.drop(nb));
+    }
+
+    @Override
+    public JsonArray skipRight(int nb) {
+        return new JsonArray(items.dropRight(nb));
+    }
+
+    @Override
+    public JsonArray take(int nb) {
+        return new JsonArray(items.take(nb));
+    }
+
+    @Override
+    public JsonArray limit(int nb) {
+        return this.take(nb);
+    }
+
+    @Override
+    public JsonArray takeRight(int nb) {
+        return new JsonArray(items.takeRight(nb));
+    }
+
+    @Override
+    public JsonArray limitRight(int nb) {
+        return new JsonArray(items.takeRight(nb));
+    }
+
+    @Override
+    public JsonArray skipWhile(Predicate<? super JsonValue> predicate) {
+        final VectorIterator<JsonValue> iterator = items.iterator();
+        boolean skipAgain = true;
+        int index = 0;
+        while (skipAgain && iterator.hasNext()) {
+            skipAgain = predicate.test(iterator.next());
+            index++;
+        }
+
+        return new JsonArray(items.drop(index));
+    }
+
+    @Override
+    public JsonArray takeWhile(Predicate<? super JsonValue> predicate) {
+        final VectorIterator<JsonValue> iterator = items.iterator();
+        boolean takeAgain = true;
+        int index = 0;
+        while (takeAgain && iterator.hasNext()) {
+            takeAgain = predicate.test(iterator.next());
+            index++;
+        }
+
+        return new JsonArray(items.take(index));
+    }
+
+    @Override
+    public JsonArray sorted(Comparator<? super JsonValue> comparator) {
+        return JsonArray.of(this.streamValues().sorted(comparator));
     }
 
     @Override
@@ -110,6 +188,27 @@ public class JsonArray implements JsonStructure, Iterable<JsonEntry<Integer>>, I
     @Override
     public JsonValue get(int index) {
         return items.apply(index);
+    }
+
+    @Override
+    public JsonValue getHead() {
+        if(items.isEmpty())
+            throw new NoSuchElementException("Head of an empty JsonArray");
+        return items.head();
+    }
+
+    @Override
+    public JsonArray getTail() {
+        if(items.isEmpty())
+            throw new NoSuchElementException("Tail of an empty JsonArray");
+        return createJsonArray(items.tail());
+    }
+
+    @Override
+    public JsonValue getLast() {
+        if(items.isEmpty())
+            throw new NoSuchElementException("Last of an Empty JsonArray");
+        return items.last();
     }
 
     @Override
@@ -131,6 +230,7 @@ public class JsonArray implements JsonStructure, Iterable<JsonEntry<Integer>>, I
         return indexes;
     }
 
+
     @Override
     public Optional<JsonValue> getOptional(int index) {
         return (items.isDefinedAt(index)) ? Optional.of(items.apply(index)) : Optional.<JsonValue>empty() ;
@@ -139,6 +239,32 @@ public class JsonArray implements JsonStructure, Iterable<JsonEntry<Integer>>, I
     @Override
     public Optional<JsonValue> getOptional(String key) {
         return Optional.empty();
+    }
+
+    public<R> JsonArray map(Function<? super JsonEntry<Integer>, R> mapper){
+        return JsonArray.of(this.stream().map(mapper.andThen(Json::toJsonValue)));
+    }
+
+    public JsonArray flatMap(Function<? super JsonEntry<Integer>, ? extends JsonArray> mapper){
+        Function<? super JsonEntry<Integer>, ? extends Stream<? extends JsonEntry<Integer>>>
+                adapterMapper = integerJsonEntry -> mapper.apply(integerJsonEntry).stream();
+        return JsonArray.of(this.stream().flatMap(adapterMapper));
+    }
+
+    public JsonArray flatten(){
+
+        if(this.isEmpty())
+            return JsonArray.EMPTY;
+
+        Builder<JsonValue, Vector<JsonValue>> vectorBuilder = Vector$.MODULE$.<JsonValue>newBuilder();
+        scala.collection.Iterator<JsonValue> it = items.iterator();
+        JsonValue value;
+        while(it.hasNext()){
+            value = it.next();
+            if(value.isJsonArray()) vectorBuilder.$plus$plus$eq(((JsonArray)value).flatten().items);
+            else vectorBuilder.$plus$eq(value);
+        }
+        return createJsonArray(vectorBuilder.result());
     }
 
     @Override
@@ -239,7 +365,7 @@ public class JsonArray implements JsonStructure, Iterable<JsonEntry<Integer>>, I
     }
 
     public JsonValue prepend(JsonValue jsValue) {
-        return new JsonArray(items.appendFront(jsValue));
+        return createJsonArray(items.appendFront(jsValue));
     }
 
     @Override
@@ -286,11 +412,24 @@ public class JsonArray implements JsonStructure, Iterable<JsonEntry<Integer>>, I
         Builder<JsonValue, Vector<JsonValue>> vectorBuilder = Vector$.MODULE$.<JsonValue>newBuilder();
         vectorBuilder.$plus$plus$eq(this.items.take(index));
         vectorBuilder.$plus$plus$eq(this.items.drop(index+1));
-        return new JsonArray(vectorBuilder.result());
+        return createJsonArray(vectorBuilder.result());
     }
 
-    public JsonValue reverse() {
-        return new JsonArray(items.reverse().toVector());
+    public JsonArray reverse() {
+        Iterator<JsonValue> it =  new Iterator<JsonValue>() {
+            final scala.collection.Iterator<JsonValue> iterator = items.reverseIterator();
+
+            @Override
+            public boolean hasNext() {
+                return iterator.hasNext();
+            }
+
+            @Override
+            public JsonValue next() {
+                return iterator.next();
+            }
+        };
+        return JsonArray.of(it);
     }
 
     @Override
@@ -327,6 +466,17 @@ public class JsonArray implements JsonStructure, Iterable<JsonEntry<Integer>>, I
         }
         return sj.toString();
     }
+    @Override
+    public <U> U foldLeft(U seed, BiFunction<U, JsonValue, U> op) {
+        U result = seed;
+        VectorIterator<JsonValue> iterator = items.iterator();
+        while(iterator.hasNext()){
+            result = op.apply(result, iterator.next());
+        }
+        return result;
+    }
+
+
 
     @Override
     public String toString() {
@@ -336,19 +486,35 @@ public class JsonArray implements JsonStructure, Iterable<JsonEntry<Integer>>, I
     }
 
     public JsonArray union(JsonArray jsonArray) {
-        JsonArray result;
-        if(isEmpty()) {
-            result  = jsonArray;
-        }
+        if(isEmpty())
+            return  jsonArray;
+
+        else if(jsonArray.isEmpty())
+            return this;
+
         else {
             Builder<JsonValue, Vector<JsonValue>> vectorBuilder = Vector$.MODULE$.<JsonValue>newBuilder();
             vectorBuilder
                     .$plus$plus$eq(this.items)
                     .$plus$plus$eq(jsonArray.items);
-            result = new JsonArray(vectorBuilder.result());
+            return  createJsonArray(vectorBuilder.result());
         }
+    }
 
-        return result;
+
+    public JsonArray intersect(JsonArray jsonArray) {
+        if(isEmpty() || jsonArray.isEmpty())
+            return EMPTY;
+        else {
+            JsonArray temp, other;
+            if(jsonArray.size() < this.size()) { temp = jsonArray; other = this; }
+            else { temp = this; other = jsonArray;  }
+
+            return JsonArray.of(
+                    temp.streamValues()
+                            .filter(other::containsValue)
+            );
+        }
     }
 
     public JsonArray unionAll(List<JsonArray> jsonArrays) {
@@ -356,18 +522,30 @@ public class JsonArray implements JsonStructure, Iterable<JsonEntry<Integer>>, I
         vectorBuilder.$plus$plus$eq(this.items);
         for(JsonArray array : jsonArrays)
            vectorBuilder.$plus$plus$eq(array.items);
-        return new JsonArray(vectorBuilder.result());
+        return createJsonArray(vectorBuilder.result());
     }
+
 
     public JsonArray updateValue(int index, JsonValue newJsonValue){
-        return updateValue(index, UnaryOperator.identity());
+        return updateValue(index, ignored -> newJsonValue );
     }
 
+    @Override
     public JsonArray updateValue(int index, UnaryOperator<JsonValue> operator){
         if(!items.isDefinedAt(index))
             return this;
 
        return this.updateValue(index, operator.apply(items.apply(index)));
+    }
+
+    @Override
+    public JsonArray filterNot(Predicate<? super JsonValue> predicate) {
+        return this.filter(predicate.negate());
+    }
+
+    @Override
+    public JsonArray filter(Predicate<? super JsonValue> predicate) {
+        return JsonArray.of(this.streamValues().filter(predicate));
     }
 
     public Iterator<JsonValue> valuesIterator() {
@@ -387,7 +565,7 @@ public class JsonArray implements JsonStructure, Iterable<JsonEntry<Integer>>, I
         };
     }
 
-    public Stream<JsonValue> valuesStream(){
+    public Stream<JsonValue> streamValues(){
         return StreamSupport.stream(
                 Spliterators.spliterator(
                         valuesIterator(),
@@ -397,5 +575,6 @@ public class JsonArray implements JsonStructure, Iterable<JsonEntry<Integer>>, I
                 false
         );
     }
+
 
 }

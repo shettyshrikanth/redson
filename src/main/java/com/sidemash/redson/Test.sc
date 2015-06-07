@@ -1,9 +1,6 @@
+import scala.concurrent.Future
 
+val l = Vector(1,2)
+l.flatMap( x => Vector("Serge"," MArtial"))
 
-val f = Map[String, Int]()
-val t = f.updated("Serge", 16)
-t.s
-val l = Vector(1, 2, 3)
-l.-
-
-
+l.intersect()

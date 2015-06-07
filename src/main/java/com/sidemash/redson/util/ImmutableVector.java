@@ -1,64 +1,111 @@
 package com.sidemash.redson.util;
 
 
-public interface ImmutableVector<T> {
+import com.sidemash.redson.JsonValue;
+
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
+import java.util.stream.Stream;
+
+public interface ImmutableVector<T>  {
+
+    <U> U foldLeft(U seed, BiFunction<U, T, U> op);
+
+    default  <U> U foldRight(U seed, BiFunction<T, U, U> op) {
+        // Since parameters are reversed for 'op' function ( in foldLeft and foldRight )
+        // we need to create an adapter function if we want to reuse foldLeft implementation
+        BiFunction<U, T, U> adapterFunc = (acc, value) -> op.apply(value, acc);
+
+        return this.reverse().foldLeft(seed,adapterFunc);
+    }
 
     T get(int index);
-/*
+
     T getHead();
 
     T getLast();
 
-    boolean contains(Object elem);
-
-    <U> U foldLeft(U seed, BiFunction<U, T, U> op);
-
-    <U> U foldRight(U seed, BiFunction<T, U, U> op);
+    ImmutableVector<T> getTail();
 
     boolean isDefinedAt(int index);
 
-    boolean exists(Predicate<? super T> predicate);
+    ImmutableVector<T> reverse();
 
-    ImmutableVector<T>  filterNot(Predicate<? super T> predicate);
+    Iterator<T> valuesIterator();
 
-    ImmutableVector<T>  filter(Predicate<? super T> predicate);
+    Stream<T> streamValues();
+
+    ImmutableVector<T> updateValue(int index, T elem);
+
+    ImmutableVector<T> updateValue(int index, UnaryOperator<T> elem);
+/*
+    ImmutableVector<T> updateWhile(Predicate<? super T> predicate, T elem);
+    ImmutableVector<T> updateWhile(Predicate<? super T> predicate, UnaryOperator<T> elem);
+
+    ImmutableVector<T> updateFirst(Predicate<? super T> predicate, T elem);
+    ImmutableVector<T> updateFirst(Predicate<? super T> predicate, UnaryOperator<T> elem);
+
+    ImmutableVector<T> updateWhere(Predicate<? super T> predicate, T elem);
+    ImmutableVector<T> updateWhere(Predicate<? super T> predicate, UnaryOperator<T> elem);
+
+    int firstIndexWhere(Predicate<? super T> predicate);
+    int firstIndexWhere(Predicate<? super T> predicate, int from);
+
+    List<Integer> indexWhere(Predicate<? super T> predicate);
+    List<Integer> indexWhere(Predicate<? super T> predicate, int from);
+
+    int firstIndexOf(T elem);
+    int firstIndexOf(T elem, int from);
+
+    List<Integer> indexOf(T elem);
+    List<Integer> indexOf(T elem, int from);
+
+    ImmutableVector<T> slice(int from, int until);
+    */
+
+
+    ImmutableVector<T> filterNot(Predicate<? super T> predicate);
+
+    ImmutableVector<T> filter(Predicate<? super T> predicate);
 
     ImmutableVector<T> distinct();
 
-    T getTail();
+    ImmutableVector<T> skip(int nb);
 
-    ImmutableVector<T> drop(int nb);
+    ImmutableVector<T> skipRight(int nb);
 
-    ImmutableVector<T> dropRight(int nb);
+    ImmutableVector<T> limit(int nb);
+
+    ImmutableVector<T> limitRight(int nb);
+
+    default ImmutableVector<T> take(int nb) {
+        return limit(nb);
+    }
 
     ImmutableVector<T> takeRight(int nb);
 
-    ImmutableVector<T> dropWhile(Predicate<? super T> predicate);
+    ImmutableVector<T> skipWhile(Predicate<? super T> predicate);
 
     ImmutableVector<T> takeWhile(Predicate<? super T> predicate);
 
+    ImmutableVector<T> sorted(Comparator<? super T> comparator);
+
+
+/*
+    boolean exists(Predicate<? super T> predicate);
+
     ImmutableVector<T> count(Predicate<? super T> predicate);
 
-    ImmutableVector<T> take(int nb);
 
-    ImmutableVector<T> updated(int index, T elem);
+    Optional<T> max(Comparator<? super T> comparator);
 
-    ImmutableVector<T> updated(int index, UnaryOperator<? super T> elem);
+    Optional<T> min(Comparator<? super T> comparator);
 
-    ImmutableVector<T> updated(Predicate<Integer> predicate, UnaryOperator<? super T> elem);
+*/
 
-    ImmutableVector<T> sortWith(Comparator<? super T> comparator);
-
-    ImmutableVector<T> maxWith(Comparator<? super T> comparator);
-
-    ImmutableVector<T> minWith(Comparator<? super T> comparator);
-
-    Iterator<T> iterator();
-
-    ImmutableVector<T> reverse();
-
-    <R> ImmutableVector<R> map(Function<? super T, ? extends R> mapper);
-
-    Stream<T> stream();
-    */
 }
