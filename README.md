@@ -11,17 +11,18 @@ Redson is a new Java 8 Json library that aims to handle Json in the way that :
 
 ## What is not Redson ? 
 - Not an implementation of [JSR  353](https://jcp.org/en/jsr/detail?id=353)
+
 Highly inspired from this JSR, we unfortunately decided to not follow this specification because of the functionnal stae of our API. for example, our JsonArray does not implements List interface because we would like to provide an immutable data structure. Hence some methods signature were uncompatible. for exemple, lets see the remove method : 
 ```java
-// Let suppose we have an List<E> from where we want to remove the element at the specified position in this list
+// Let suppose we have an List<E> from where we want to remove the element at the specified position
 
-// in Java List interface this is the signature of the remove operation
+// in Java List interface, this is the signature of the remove operation
 E remove(int index)
 
 // in an immutable List, this would be the signature of the remove operation
-List<E> remove(in index)
+List<E> remove(int index)
 ```
-Clearly, these 2 signatures clashes! So we choosen not to implement the List interface and picked the second signature. This choice of making our JsonArray not implementing the List interface among others de facto made redson not follow this JSR : We took inspiration from it and many of redson methods names were directly inspired by this JSR. 
+Clearly, these 2 signatures clashes! So we choosen not to implement the List interface and picked the second signature. This choice of making our JsonArray not implementing the List interface among others, de facto made redson not to follow this JSR : We took inspiration from it and many of redson methods names were directly inspired by this JSR. 
 
 
 ## Quickstart
@@ -49,7 +50,6 @@ We said that this library will be a simple one : Look at this (these result on t
 ```java
 JsonArray.of(1)                         // -> [1]
 JsonArray.of(1,2,3)                     // -> [1, 2, 3]
-JsonArray.of(IntStream.range(0,7))      // -> [0, 1, 2, 3, 4, 5, 6]
 ```
 Simple Right ?  
 Let's complicate thing. Since in JSON, it allowed to have mixed element in array, you can create a such array
@@ -64,6 +64,7 @@ list.add("World");
 JsonArray.of(list)  // -> ["Hello", "World"]
 
 // Its possible to create a JsonArray from Java Array, Iterable, Iterator and Stream
+JsonArray.of(IntStream.range(0,7))      // -> [0, 1, 2, 3, 4, 5, 6]
 ```
 
 #### Creating JsonObject
