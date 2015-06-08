@@ -161,3 +161,8 @@ jsonValue.get(0).get("user").get("unknownKey")      // -> NoSuchElementException
 #### Streams & Iterators methods
 
 
+
+
+## Authors
+Serge Martial N.
+Stephane Tankoua
