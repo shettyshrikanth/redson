@@ -77,13 +77,13 @@ public class Json {
         }
         else {
             if( cl.isArray() )
-                fnResult = (BiFunction<Object, JsonValue, JsonValue>) writersToJson.get(Array.class);
+                fnResult = (BiFunction<Object, JsonValue, JsonValue>) writersToJson.get(cl);
             else if( Iterable.class.isAssignableFrom(cl) )
                 fnResult = (BiFunction<Object, JsonValue, JsonValue>) writersToJson.get(Iterable.class);
             else if( Map.class.isAssignableFrom(cl) )
                 fnResult = (BiFunction<Object, JsonValue, JsonValue>) writersToJson.get(Map.class);
             else if( cl.isEnum() )
-                fnResult = (BiFunction<Object, JsonValue, JsonValue>) writersToJson.get(Enum.class);
+                fnResult = (BiFunction<Object, JsonValue, JsonValue>) writersToJson.get(cl);
             else if(JsonValue.class.isAssignableFrom(cl))
                 fnResult = (BiFunction<Object, JsonValue, JsonValue>) writersToJson.get(JsonValue.class);
             else
@@ -237,29 +237,40 @@ public class Json {
         return fn.apply(jsonValue);
     }
 
-    public static <T> T fromJsonValue(JsonValue jsonValue, Class<T> expectedClass){
-        return fromJsonValueOptional(jsonValue, expectedClass).orElseThrow(ClassCastException::new);
+    private static<T> Class<?> standardizeClass(Class<T> initialClass){
+        if(Iterable.class.isAssignableFrom(initialClass) )
+            return Iterable.class;
+        else if( Map.class.isAssignableFrom(initialClass) )
+            return Map.class;
+         else if(JsonValue.class.isAssignableFrom(initialClass))
+            return JsonValue.class;
+        else
+            return initialClass;
     }
 
-    public static <T> Optional<T> fromJsonValueOptional(JsonValue JsonValue, Class<T> expectedClass){
-
+    public static <T> T fromJsonValue(JsonValue jsonValue, Class<T> expectedClass){
         Function<JsonValue, Object> fn;
-        Optional<T> result;
-        try {
-            // First Check for User Defined conversion rules
-            if(usersDefinedReadersFromJson.containsKey(expectedClass))
-                fn = (Function<JsonValue, Object>) usersDefinedReadersFromJson.get(expectedClass);
+        // First Check for User Defined conversion rules
+        if(usersDefinedReadersFromJson.containsKey(expectedClass))
+            fn = (Function<JsonValue, Object>) usersDefinedReadersFromJson.get(standardizeClass(expectedClass));
 
             // Then Check for Default conversion rules
-            else if(readersFromJson.containsKey(expectedClass))
-                fn = (Function<JsonValue, Object>) readersFromJson.get(expectedClass);
-            else
-                throw new UnsupportedOperationException(
-                        String.format("Unable to convert from JsonValue because converter " +
-                                "for class %s is not registered", expectedClass)
-                );
+        else if(readersFromJson.containsKey(expectedClass))
+            fn = (Function<JsonValue, Object>) readersFromJson.get(standardizeClass(expectedClass));
+        else
+            throw new UnsupportedOperationException(
+                    String.format("Unable to convert from JsonValue because converter " +
+                            "for %s is not registered", standardizeClass(expectedClass))
+            );
 
-            result = Optional.of((T) fn.apply(JsonValue));
+        return (T) fn.apply(jsonValue);
+    }
+
+    public static <T> Optional<T> fromJsonValueOptional(JsonValue jsonValue, Class<T> expectedClass){
+
+        Optional<T> result;
+        try {
+            result = Optional.of(fromJsonValue(jsonValue, expectedClass));
         } catch(UnsupportedOperationException | ClassCastException e ) {
             result = Optional.empty();
         }
@@ -269,7 +280,13 @@ public class Json {
 
 
     public static <T> T fromJsonValueOrDefault(JsonValue jsonValue, Class<T> expectedClass, T defaultValue){
-        return fromJsonValueOptional(jsonValue, expectedClass).orElse(defaultValue);
+        T result;
+        try {
+            result = fromJsonValue(jsonValue, expectedClass);
+        } catch(UnsupportedOperationException | ClassCastException e ) {
+            result = defaultValue;
+        }
+        return result;
     }
 
 

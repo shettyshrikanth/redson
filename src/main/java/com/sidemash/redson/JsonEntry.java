@@ -4,10 +4,10 @@ package com.sidemash.redson;
 import java.util.Objects;
 
 public class JsonEntry<T> {
-    private final T key;
-    private final JsonValue value;
+    public final T key;
+    public final JsonValue value;
 
-    public JsonEntry(T key, JsonValue value) {
+    protected JsonEntry(T key, JsonValue value) {
         Objects.requireNonNull(key, "key must not be null");
         this.key = key;
         this.value = value;
@@ -31,6 +31,17 @@ public class JsonEntry<T> {
 
     public JsonValue getValue() {
         return value;
+    }
+
+
+    public static <T>  JsonEntry<T> of(T key, JsonValue jsonValue){
+        return (jsonValue == null)
+                ? new JsonEntry<>(key, JsonNull.INSTANCE)
+                : new JsonEntry<>(key, jsonValue) ;
+    }
+
+    public static <T>  JsonEntry<T> of(T key, Object o){
+        return new JsonEntry<>(key, Json.toJsonValue(o));
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.sidemash.redson.util;
 
 
+import com.sidemash.redson.JsonEntry;
 import com.sidemash.redson.JsonValue;
 
 import java.util.Comparator;
@@ -38,26 +39,21 @@ public interface ImmutableVector<T>  {
 
     Iterator<T> valuesIterator();
 
-    Stream<T> streamValues();
-
     ImmutableVector<T> updateValue(int index, T elem);
 
     ImmutableVector<T> updateValue(int index, UnaryOperator<T> elem);
-/*
+
+      /*
     ImmutableVector<T> updateWhile(Predicate<? super T> predicate, T elem);
-    ImmutableVector<T> updateWhile(Predicate<? super T> predicate, UnaryOperator<T> elem);
+
+    ImmutableVector<T> updateWhile(Predicate<? super T> predicate, UnaryOperator<T> operator);
 
     ImmutableVector<T> updateFirst(Predicate<? super T> predicate, T elem);
-    ImmutableVector<T> updateFirst(Predicate<? super T> predicate, UnaryOperator<T> elem);
 
-    ImmutableVector<T> updateWhere(Predicate<? super T> predicate, T elem);
-    ImmutableVector<T> updateWhere(Predicate<? super T> predicate, UnaryOperator<T> elem);
+    ImmutableVector<T> updateFirst(Predicate<? super T> predicate, UnaryOperator<T> operator);
 
-    int firstIndexWhere(Predicate<? super T> predicate);
-    int firstIndexWhere(Predicate<? super T> predicate, int from);
 
-    List<Integer> indexWhere(Predicate<? super T> predicate);
-    List<Integer> indexWhere(Predicate<? super T> predicate, int from);
+
 
     int firstIndexOf(T elem);
     int firstIndexOf(T elem, int from);

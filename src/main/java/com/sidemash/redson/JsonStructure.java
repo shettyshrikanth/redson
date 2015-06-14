@@ -3,8 +3,9 @@ package com.sidemash.redson;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 public interface JsonStructure extends JsonValue {
 
@@ -218,4 +219,31 @@ public interface JsonStructure extends JsonValue {
     }
 
     int size();
+
+    default int length() { return size(); }
+
+    Iterator<JsonValue> valuesIterator();
+
+    Iterator<JsonValue> reversedValuesIterator();
+
+    default Stream<JsonValue> reversedValuesStream(){
+        return StreamSupport.stream(
+                Spliterators.spliterator(
+                        reversedValuesIterator(),
+                        size(),
+                        Spliterator.NONNULL | Spliterator.ORDERED | Spliterator.IMMUTABLE
+                ),
+                false
+        );
+    }
+    default Stream<JsonValue> valuesStream(){
+        return StreamSupport.stream(
+                Spliterators.spliterator(
+                        valuesIterator(),
+                        size(),
+                        Spliterator.NONNULL | Spliterator.ORDERED | Spliterator.IMMUTABLE
+                ),
+                false
+        );
+    }
 }
