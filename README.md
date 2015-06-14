@@ -177,7 +177,7 @@ array.get(0).get("user").get("name").asIntOptional()        // -> Optional.empty
 array.get(0).get("user").get("name").asIntOrDefault(-1)     // -> -1
 array.get(0).get("user").get("name").asString()             // -> "John Doe"
 array.get(0).get("user").get("name").asStringOptional()     // -> Optional.of("John Doe")
-array.get(0).get("user").get("name").asStringOrDefault("")  // -> Optional.of("John Doe")
+array.get(0).get("user").get("name").asStringOrDefault("")  // -> "John Doe"
 
 array.get(0).get("user").get("unknownKey")                  // -> NoSuchElementException 
 array.get(0).get("user").getOptional("unknownKey")          // -> Optional.empty()
