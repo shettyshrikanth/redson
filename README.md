@@ -3,7 +3,7 @@ A lightweight library to handle json for Java 8 with simplicity and functional s
 
 ## What is Redson ? 
 Redson is a new Java 8 Json library that aims to handle Json in the way that : 
-- Help removing `null` from the earth [How to avoid null in your Java code](http://www.oracle.com/technetwork/articles/java/java8-optional-2175753.html)
+- Help removing `null` from the earth ( see [Avoiding null in your Java code](http://www.oracle.com/technetwork/articles/java/java8-optional-2175753.html) )
 - Simplify and reduce boilerplate when converting to/from Json even with complex rules that describe these conversions
 - Handle and manipulate Json as it was a first class data type
 - Introduce a new JsonOptional to handle missing fields : Very useful for example to modelize the difference between a submitted null value and a missing one.
@@ -103,26 +103,53 @@ JsonObject.of(
 )
 ```
 ```java
-JsonObject.of("user", 
-     JsonEntry.of("name", JsonString.of("John Doe")),
-     JsonEntry.of("age", JsonNumber.of(99))
+JsonObject.of( 
+    JsonEntry.of("user", JsonObject.of(
+        JsonEntry.of("name", JsonString.of("John Doe")),
+        JsonEntry.of("age", JsonNumber.of(99))
+    )    
 )
  
 
 
-// You can also construct an JsonObject from any Map<K,V>. If the key is not a string(E.g. you pass 
-// an instance of Map<Integer, YourCustomClass> to the JsonObject.of() function ), will automatically 
-// call the toString() on the key and transform the map into a Map<String, YourCustomClass>
+// You can also construct an JsonObject from any Map<String, V>
+Map<String, Integer> lettersToDigits = new HashMap<>();
+lettersToDigits.put("one", 1);
+lettersToDigits.put("two", 2);
+JsonObject.of(lettersToDigits);             // -> { "one" : 1, "two" : 2 }
+
+
+Map<String, YourCustomClass> yourMap =   // Initialize this map the way you want to
+JsonObject.of(yourMap);             
+
+// If the key is not a string(E.g. you pass an instance of Map<Integer, YourCustomClass> or even 
+// an instance of Map<YourCustomClass1, YourCustomClass2> to the JsonObject.of() ), you will have to provide a way
+// to convert the YourCustomClass1 to a String
+
+// Assume that we want to convert this Map to a JsonObject.
+Map<Integer, Char> ascii = new HashMap<>();
+ascii.put(65, 'A');
+ascii.put(66, 'B');
+ascii.put(67, 'C');
+
+// Here we can't call JsonObject.of(ascii) because the ascii is not an Map indexed by String.
+// We need to provide a way to convert the keys to String. So pass a lambda to convert Integer to String
+JsonObject.of(ascii, num -> String.valueOf(num))     // -> { "65":"A", "66":"B", "67":"C" }
+
+// If the key were an instance of YourCustomClass, all you have to do is to give a function that takes 
+// an instance of YourCustomClass and return a String you want to see as key of your JsonObject.
+
 ```
 
 
-#### Creating JsonNumber, JsonString and JsonOptionnal
-You can create JsonNumber from : Short, Byte, Integer, Long, Float, Double, BigDecimal, BigInteger and String(if and only if this String contains a number)
+#### Creating JsonNumber, JsonString and JsonOptional
+You can create `JsonNumber` from : Short, Byte, Integer, Long, Float, Double, BigDecimal, BigInteger and String ( if and only if this String contains a valid number )
 
-You can create JsonString from : String, Char and CharSequence
+You can create `JsonString` from : String, Char and CharSequence
 
-JsonOptionnal
-Whenever you are dealing with JsonOptionnal, remember that JsonOptionnal contains optionnally an instance of JsonValue. Hence, when you create an instance of JsonOptionnal from an Optionnal, the value if any will be converted ( E.g; : a String will become JsonString etc . ) and stored in the JsonOptionnal.
+`JsonOptionnal`
+Whenever you are dealing with JsonOptionnal, remember that JsonOptionnal contains optionnally an instance of JsonValue. Hence, when you create an instance of JsonOptionnal from an Optional, the value if any will be converted ( E.g; : a String will become JsonString etc . ) and stored in the JsonOptionnal.
+The JsonOptional has severals methods of the Java Optional, so it is possible to manipulate as if it was an `Optional<JsonValue>`.
 
 
 ### Traversing JsonValue
@@ -140,13 +167,27 @@ Let's assume we have this JSON
 If we were to manipulate it in java with redson, we will do the following : 
 ```java
 JsonArray array  // Assume this variable contains the previous Json
-array.get(0).get("user").get("age").asInt()     // -> 99
-array.getHead().get("user").get("age").asInt()  // -> 99
-array.get(0).get("user").get("name").asString() // -> "John Doe"
 
-array.get(0).get("user").get("name").asInt()    // -> ClassCastException
-array.get(0).get("user").get("unknownKey")      // -> NoSuchElementException 
+array.get(0).get("user").get("age").asInt()                 // -> 99
+array.getHead().get("user").get("age").asInt()              // -> 99
+array.get(0).get("user").get("name").asString()             // -> "John Doe"
+
+array.get(0).get("user").get("name").asInt()                // -> ClassCastException
+array.get(0).get("user").get("name").asIntOptional()        // -> Optional.empty()
+array.get(0).get("user").get("name").asIntOrDefault(-1)     // -> -1
+array.get(0).get("user").get("name").asString()             // -> "John Doe"
+array.get(0).get("user").get("name").asStringOptional()     // -> Optional.of("John Doe")
+array.get(0).get("user").get("name").asStringOrDefault("")  // -> Optional.of("John Doe")
+
+array.get(0).get("user").get("unknownKey")                  // -> NoSuchElementException 
+array.get(0).get("user").getOptional("unknownKey")          // -> Optional.empty()
+array.get(0).getOrDefault("unknownKey", "defaultValue")     // -> "defaultValue"
 ```
+
+
+
+(Still In Progress)
+
 ### Converting Java to JsonValue
 
 ### Converting JsonValue to Java
@@ -166,7 +207,6 @@ array.get(0).get("user").get("unknownKey")      // -> NoSuchElementException
 #### Streams & Iterators methods
 
 
-(Still In Progress)
 
 
 ## Authors
