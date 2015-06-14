@@ -3,7 +3,7 @@ A lightweight library to handle json for Java 8 with simplicity and functional s
 
 ## What is Redson ? 
 Redson is a new Java 8 Json library that aims to handle Json in the way that : 
-- Help removing `null` from the earth
+- Help removing `null` from the earth [How to avoid null in your Java code](http://www.oracle.com/technetwork/articles/java/java8-optional-2175753.html)
 - Simplify and reduce boilerplate when converting to/from Json even with complex rules that describe these conversions
 - Handle and manipulate Json as it was a first class data type
 - Introduce a new JsonOptional to handle missing fields : Very useful for example to modelize the difference between a submitted null value and a missing one.
@@ -30,8 +30,9 @@ Clearly, these 2 signatures clashe on return type and we have to choose one! So 
 ## Quickstart
 
 ### The Json*  family
-There are 7 Main Json* classes and there are : 
-JsonValue, JsonArray, JsonObject, JsonNumber, JsonString, JsonOptional, JsonEntry<K>, JsonNull(only here for compatiblity reasons, we strongly encourage to [avoid null in your code](http://www.oracle.com/technetwork/articles/java/java8-optional-2175753.html)).
+According to [RFC 7159](https://tools.ietf.org/html/rfc7159#section-3), values in Json must be : array, object, number, string, false, true or  null.
+Hence, we have defined 6 classes to represent Json values in Java. These are :  `JsonArray`, `JsonObject`, `JsonNumber`, `JsonString`, `JsonNull` and `JsonBoolean`.
+Additionnally, we have defined `JsonOptional` to model a possible missing JsonValue, we have defined `JsonValue` interface wich is the supertype of all previous Json* classes and finally we have defined the class `JsonEntry` which is either a pair `(String, JsonValue)` that indexes JsonObject values by key or the pair `(Integer, JsonValue)` that indexes JsonArray values by index. (In fact, JsonEntry is a parametrized class defined as JsonEntry<T>  with T being a String or an Integer)
 
 ### Creating Json in Java
 If you don't know the type of the variable (E.g. when using generics), or if you want rapid prototyping and test, you can use the `JsonValue.of()` factory method.
@@ -48,7 +49,7 @@ JsonValue.of(new Person("John DOE")) // -> JsonObject
 ```
 
 #### Creating JsonArray
-We said that this library will be a simple one : Look at this (these result on the right are the result of calling the method `stringify()` that convert the JsonValue on the left to its string representation, method removed for clarity).
+We have said that this library will be a simple one : Look at this (these result on the right are the result of calling the method `stringify()` that convert the JsonValue on the left to its string representation, method removed for clarity).
 This is how you create an array
 ```java
 JsonArray.of(1)                         // -> [1]
