@@ -12,37 +12,23 @@ import java.util.stream.Stream;
 public interface ImmutableMap<K,V>  {
 
 
+    <U> U foldLeft(U seed, BiFunction<U, JsonEntry<String>, U> op);
+
     V get(String key);
 
     JsonEntry<String> getHead();
 
     JsonEntry<String> getLast();
 
-    <U> U foldLeft(U seed, BiFunction<U, JsonEntry<String>, U> op);
-
     ImmutableMap<K,V> getTail();
 
     boolean isDefinedAt(String key);
-
-    Iterator<V> valuesIterator();
 
     Iterator<JsonEntry<String>> iterator();
 
     Iterator<K> keysIterator();
 
     Stream<K> keysStream();
-
-    ImmutableMap<K,V> updateValue(String key, V elem);
-
-    ImmutableMap<K,V> updateValue(String key, UnaryOperator<JsonEntry<String>> operator);
-
-    ImmutableMap<K,V> updateKey(String oldKey, String newKey);
-
-    ImmutableMap<K,V> updateKey(String oldKey, UnaryOperator<String> operator);
-
-    ImmutableMap<K,V> updateEntry(String oldEntryKey, JsonEntry<String> newEntry);
-
-    ImmutableMap<K,V> updateEntry(String oldEntryKey, UnaryOperator<JsonEntry<String>> operator);
 
     /*
 
@@ -77,7 +63,7 @@ public interface ImmutableMap<K,V>  {
     ImmutableMap<K,V> filterNot(Predicate<? super JsonEntry<K>> predicate);
 
     ImmutableMap<K,V> filter(Predicate<? super JsonEntry<K>> predicate);
-    
+
     ImmutableMap<K,V> skip(int nb);
 
     ImmutableMap<K,V> skipRight(int nb);
@@ -88,8 +74,22 @@ public interface ImmutableMap<K,V>  {
 
     ImmutableMap<K,V> skipWhile(Predicate<? super JsonEntry<K>> predicate);
 
-    ImmutableMap<K,V> takeWhile(Predicate<? super JsonEntry<K>> predicate);
+    ImmutableMap<K,V> limitWhile(Predicate<? super JsonEntry<K>> predicate);
 */
     ImmutableMap<K,V> sorted(Comparator<? super JsonEntry<K>> comparator);
+
+    ImmutableMap<K, V> updateEntry(String oldEntryKey, JsonEntry<String> newEntry);
+
+    ImmutableMap<K, V> updateEntry(String oldEntryKey, UnaryOperator<JsonEntry<String>> operator);
+
+    ImmutableMap<K, V> updateKey(String oldKey, String newKey);
+
+    ImmutableMap<K, V> updateKey(String oldKey, UnaryOperator<String> operator);
+
+    ImmutableMap<K, V> updateValue(String key, V elem);
+
+    ImmutableMap<K, V> updateValue(String key, UnaryOperator<JsonEntry<String>> operator);
+
+    Iterator<V> valuesIterator();
 
 }

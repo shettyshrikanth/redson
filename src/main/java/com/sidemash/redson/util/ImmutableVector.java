@@ -2,12 +2,16 @@ package com.sidemash.redson.util;
 
 
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
-import java.util.function.UnaryOperator;
 
 public interface ImmutableVector<T>  {
+
+    ImmutableVector<T> distinct();
+
+    ImmutableVector<T> filter(Predicate<? super T> predicate);
+
+    ImmutableVector<T> filterNot(Predicate<? super T> predicate);
 
     <U> U foldLeft(U seed, BiFunction<U, T, U> op);
 
@@ -29,13 +33,15 @@ public interface ImmutableVector<T>  {
 
     boolean isDefinedAt(int index);
 
+    ImmutableVector<T> limit(int nb);
+
+    ImmutableVector<T> limitRight(int nb);
+
     ImmutableVector<T> reverse();
 
-    Iterator<T> valuesIterator();
+    ImmutableVector<T> skip(int nb);
 
-    ImmutableVector<T> updateValue(int index, T elem);
-
-    ImmutableVector<T> updateValue(int index, UnaryOperator<T> elem);
+    ImmutableVector<T> skipRight(int nb);
 
       /*
     ImmutableVector<T> updateWhile(Predicate<? super T> predicate, T elem);
@@ -55,47 +61,12 @@ public interface ImmutableVector<T>  {
     List<Integer> indexOf(T elem);
     List<Integer> indexOf(T elem, int from);
 
-    ImmutableVector<T> slice(int from, int until);
     */
-
-
-    ImmutableVector<T> filterNot(Predicate<? super T> predicate);
-
-    ImmutableVector<T> filter(Predicate<? super T> predicate);
-
-    ImmutableVector<T> distinct();
-
-    ImmutableVector<T> skip(int nb);
-
-    ImmutableVector<T> skipRight(int nb);
-
-    ImmutableVector<T> limit(int nb);
-
-    ImmutableVector<T> limitRight(int nb);
-
-    default ImmutableVector<T> take(int nb) {
-        return limit(nb);
-    }
-
-    ImmutableVector<T> takeRight(int nb);
-
-    ImmutableVector<T> skipWhile(Predicate<? super T> predicate);
-
-    ImmutableVector<T> takeWhile(Predicate<? super T> predicate);
+      ImmutableVector<T> slice(int from, int until);
 
     ImmutableVector<T> sorted(Comparator<? super T> comparator);
 
+    ImmutableVector<T> updateValue(int index, T elem);
 
-/*
-    boolean exists(Predicate<? super T> predicate);
-
-    ImmutableVector<T> count(Predicate<? super T> predicate);
-
-
-    Optional<T> max(Comparator<? super T> comparator);
-
-    Optional<T> min(Comparator<? super T> comparator);
-
-*/
 
 }

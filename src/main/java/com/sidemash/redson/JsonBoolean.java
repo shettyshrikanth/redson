@@ -3,19 +3,29 @@ package com.sidemash.redson;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 public enum JsonBoolean implements JsonLiteral {
 
     TRUE(true){
+
         @Override
         public String prettyStringifyRecursive(int indent, int incrementAcc, boolean keepingNull, boolean emptyValuesToNull) {
             return  "true";
         }
-
         @Override
         public String stringify(boolean keepingNull, boolean emptyValuesToNull) {
             return  "true";
+        }
+        public JsonBoolean negate(){
+            return FALSE;
+        }
+        public boolean isTrue(){
+            return true;
+        }
+        public boolean isFalse(){
+            return false;
         }
     },
 
@@ -25,10 +35,18 @@ public enum JsonBoolean implements JsonLiteral {
         public String prettyStringifyRecursive(int indent, int incrementAcc, boolean keepingNull, boolean emptyValuesToNull) {
             return  "false";
         }
-
         @Override
         public String stringify(boolean keepingNull, boolean emptyValuesToNull) {
             return  "false";
+        }
+        public JsonBoolean negate(){
+            return TRUE;
+        }
+        public boolean isTrue(){
+            return false;
+        }
+        public boolean isFalse(){
+            return true;
         }
     };
 
@@ -44,7 +62,12 @@ public enum JsonBoolean implements JsonLiteral {
 
     @Override
     public BigDecimal asBigDecimal() {
-        throw new ClassCastException();
+        throw new ClassCastException(
+                String.format(
+                        "instance of %s could not be get as BigDecimal",
+                        this.getClass().getSimpleName()
+                )
+        );
     }
 
     @Override
@@ -53,23 +76,18 @@ public enum JsonBoolean implements JsonLiteral {
     }
 
     @Override
-    public BigDecimal asBigDecimalOrDefault(BigDecimal defaultValue) {
-        return defaultValue;
-    }
-
-    @Override
     public BigInteger asBigInteger() {
-        throw new ClassCastException();
+        throw new ClassCastException(
+                String.format(
+                        "instance of %s could not be get as BigInteger",
+                        this.getClass().getSimpleName()
+                )
+        );
     }
 
     @Override
     public Optional<BigInteger> asBigIntegerOptional() {
         return Optional.empty();
-    }
-
-    @Override
-    public BigInteger asBigIntegerOrDefault(BigInteger defaultValue) {
-        return defaultValue;
     }
 
     @Override
@@ -83,13 +101,13 @@ public enum JsonBoolean implements JsonLiteral {
     }
 
     @Override
-    public boolean asBooleanOrDefault(boolean defaultValue) {
-        return value;
-    }
-
-    @Override
     public byte asByte() {
-        throw new ClassCastException();
+        throw new ClassCastException(
+                String.format(
+                        "instance of %s could not be get as Byte",
+                        this.getClass().getSimpleName()
+                )
+        );
     }
 
     @Override
@@ -98,13 +116,13 @@ public enum JsonBoolean implements JsonLiteral {
     }
 
     @Override
-    public byte asByteOrDefault(byte defaultValue) {
-        return defaultValue;
-    }
-
-    @Override
     public char asChar() {
-        throw new ClassCastException();
+        throw new ClassCastException(
+                String.format(
+                        "instance of %s could not be get as Character",
+                        this.getClass().getSimpleName()
+                )
+        );
     }
 
     @Override
@@ -113,13 +131,13 @@ public enum JsonBoolean implements JsonLiteral {
     }
 
     @Override
-    public char asCharOrDefault(char defaultValue) {
-        return defaultValue;
-    }
-
-    @Override
     public double asDouble() {
-        throw new ClassCastException();
+        throw new ClassCastException(
+                String.format(
+                        "instance of %s could not be get as Double",
+                        this.getClass().getSimpleName()
+                )
+        );
     }
 
     @Override
@@ -128,13 +146,13 @@ public enum JsonBoolean implements JsonLiteral {
     }
 
     @Override
-    public double asDoubleOrDefault(double defaultValue) {
-        return defaultValue;
-    }
-
-    @Override
     public float asFloat() {
-        throw new ClassCastException();
+        throw new ClassCastException(
+                String.format(
+                        "instance of %s could not be get as Float",
+                        this.getClass().getSimpleName()
+                )
+        );
     }
 
     @Override
@@ -143,13 +161,13 @@ public enum JsonBoolean implements JsonLiteral {
     }
 
     @Override
-    public float asFloatOrDefault(float defaultValue) {
-        return defaultValue;
-    }
-
-    @Override
     public int asInt() {
-        throw new ClassCastException();
+        throw new ClassCastException(
+                String.format(
+                        "instance of %s could not be get as Integer",
+                        this.getClass().getSimpleName()
+                )
+        );
     }
 
     @Override
@@ -158,23 +176,18 @@ public enum JsonBoolean implements JsonLiteral {
     }
 
     @Override
-    public int asIntOrDefault(int defaultValue) {
-        return defaultValue;
-    }
-
-    @Override
     public long asLong() {
-        throw new ClassCastException();
+        throw new ClassCastException(
+                String.format(
+                        "instance of %s could not be get as Long",
+                        this.getClass().getSimpleName()
+                )
+        );
     }
 
     @Override
     public Optional<Long> asLongOptional() {
         return Optional.empty();
-    }
-
-    @Override
-    public long asLongOrDefault(long defaultValue) {
-        return defaultValue;
     }
 
     @Override
@@ -184,7 +197,12 @@ public enum JsonBoolean implements JsonLiteral {
 
     @Override
     public short asShort() {
-        throw new ClassCastException();
+        throw new ClassCastException(
+                String.format(
+                        "instance of %s could not be get as Short",
+                        this.getClass().getSimpleName()
+                )
+        );
     }
 
     @Override
@@ -193,13 +211,13 @@ public enum JsonBoolean implements JsonLiteral {
     }
 
     @Override
-    public short asShortOrDefault(short defaultValue) {
-        return defaultValue;
-    }
-
-    @Override
     public String asString() {
-        throw new ClassCastException();
+        throw new ClassCastException(
+                String.format(
+                        "instance of %s could not be get as String",
+                        this.getClass().getSimpleName()
+                )
+        );
     }
 
     @Override
@@ -208,14 +226,16 @@ public enum JsonBoolean implements JsonLiteral {
     }
 
     @Override
-    public String asStringOrDefault(String defaultValue) {
-        return defaultValue;
+    public JsonValue get() {
+        throw new NoSuchElementException(
+                "This method is only available for instances of " +
+                        " JsonOptional not JsonBoolean"
+        );
     }
 
-
     @Override
-    public Boolean getValue() {
-        return value;
+    public Optional<JsonValue> getOptional() {
+        return Optional.empty();
     }
 
     @Override
@@ -254,4 +274,5 @@ public enum JsonBoolean implements JsonLiteral {
                 "value=" + value +
                 '}';
     }
+
 }

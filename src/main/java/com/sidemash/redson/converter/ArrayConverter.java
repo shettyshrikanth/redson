@@ -1,7 +1,6 @@
 package com.sidemash.redson.converter;
 
 import com.sidemash.redson.JsonArray;
-import com.sidemash.redson.JsonEntry;
 import com.sidemash.redson.JsonValue;
 
 import java.lang.reflect.ParameterizedType;
@@ -16,8 +15,8 @@ public class ArrayConverter<T> implements JsonContainerConverter<T[]> {
         List<T> list = new ArrayList<>();
         JsonArray array = (JsonArray) jsonValue;
         ParameterizedType p = (ParameterizedType) type;
-        for(JsonEntry<Integer> entry : array)
-            list.add(entry.getValue().as(p.getActualTypeArguments()[0]));
+        for(JsonValue value : array)
+            list.add(value.as(p.getActualTypeArguments()[0]));
 
         @SuppressWarnings("unchecked")
         T[] result = (T[]) list.toArray();

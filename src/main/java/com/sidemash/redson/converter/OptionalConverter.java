@@ -1,12 +1,11 @@
 package com.sidemash.redson.converter;
 
-import com.sidemash.redson.*;
+import com.sidemash.redson.JsonOptional;
+import com.sidemash.redson.JsonValue;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.LinkedList;
 import java.util.Optional;
-import java.util.Queue;
 
 public class OptionalConverter<T> implements JsonContainerConverter<Optional<T>> {
 

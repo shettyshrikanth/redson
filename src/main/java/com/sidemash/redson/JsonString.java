@@ -3,6 +3,7 @@ package com.sidemash.redson;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 public class JsonString implements JsonLiteral {
@@ -231,7 +232,6 @@ public class JsonString implements JsonLiteral {
         return value;
     }
 
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -243,8 +243,16 @@ public class JsonString implements JsonLiteral {
     }
 
     @Override
-    public String getValue() {
-        return value;
+    public JsonValue get() {
+        throw new NoSuchElementException(
+                "This method is only available for instances of " +
+                        " JsonOptional not JsonBoolean"
+        );
+    }
+
+    @Override
+    public Optional<JsonValue> getOptional() {
+        return Optional.empty();
     }
 
     @Override

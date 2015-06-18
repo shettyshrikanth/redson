@@ -261,6 +261,7 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>>, I
         return jsonValue;
     }
 
+
     public Set<JsonEntry<String>> getStringIndexedEntrySet() {
         Set<JsonEntry<String>> result = new LinkedHashSet<>();
         scala.collection.Iterator<Tuple2<String, JsonValue>> iterator = bindings.iterator();
@@ -280,16 +281,6 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>>, I
         return this.remove(bindings.head()._1());
     }
 
-    @Override
-    public java.util.Map<String, JsonValue> getValue() {
-        scala.collection.Iterator<Tuple2<String, JsonValue>> iterator = bindings.iterator();
-        final java.util.Map<String, JsonValue> value = new LinkedHashMap<>();
-        while (iterator.hasNext()) {
-            Tuple2<String, JsonValue> element = iterator.next();
-            value.put(element._1(), element._2());
-        }
-        return value;
-    }
 
     @Override
     public int hashCode() {
@@ -462,7 +453,7 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>>, I
 
         StringJoiner sj = new StringJoiner(",", "{", "}");
         scala.collection.Iterator<Tuple2<String, JsonValue>> iterator =
-                (scala.collection.Iterator<Tuple2<String, JsonValue>>) bindings.iterator();
+                bindings.iterator();
         Tuple2<String, JsonValue> next;
         JsonValue value;
         while (iterator.hasNext()) {

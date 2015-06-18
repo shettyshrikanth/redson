@@ -16,47 +16,69 @@ public interface JsonValue {
         return Json.toJsonValue(o);
     }
 
+    default <T> T as(Type type) {
+        return Json.fromJsonValue(this, type);
+    }
+
+    default <T> T as(TypeReference<T> typeReference) {
+        return Json.fromJsonValue(this, typeReference);
+    }
+
     BigDecimal asBigDecimal();
 
     Optional<BigDecimal> asBigDecimalOptional();
 
-    BigDecimal asBigDecimalOrDefault(BigDecimal defaultValue);
+    default BigDecimal asBigDecimalOrDefault(BigDecimal defaultValue) {
+        return asBigDecimalOptional().orElse(defaultValue);
+    }
 
     BigInteger asBigInteger();
 
     Optional<BigInteger> asBigIntegerOptional();
 
-    BigInteger asBigIntegerOrDefault(BigInteger defaultValue);
+    default BigInteger asBigIntegerOrDefault(BigInteger defaultValue) {
+        return asBigIntegerOptional().orElse(defaultValue);
+    }
 
     boolean asBoolean();
 
     Optional<Boolean> asBooleanOptional();
 
-    boolean asBooleanOrDefault(boolean defaultValue);
+    default boolean asBooleanOrDefault(boolean defaultValue) {
+        return asBooleanOptional().orElse(defaultValue);
+    }
 
     byte asByte();
 
     Optional<Byte> asByteOptional();
 
-    byte asByteOrDefault(byte defaultValue);
+    default byte asByteOrDefault(byte defaultValue) {
+        return asByteOptional().orElse(defaultValue);
+    }
 
     char asChar();
 
     Optional<Character> asCharOptional();
 
-    char asCharOrDefault(char defaultValue);
+    default char asCharOrDefault(char defaultValue) {
+        return asCharOptional().orElse(defaultValue);
+    }
 
     double asDouble();
 
     Optional<Double> asDoubleOptional();
 
-    double asDoubleOrDefault(double defaultValue);
+    default double asDoubleOrDefault(double defaultValue) {
+        return asDoubleOptional().orElse(defaultValue);
+    }
 
     float asFloat();
 
     Optional<Float> asFloatOptional();
 
-    float asFloatOrDefault(float defaultValue);
+    default float asFloatOrDefault(float defaultValue) {
+        return asFloatOptional().orElse(defaultValue);
+    }
 
     int asInt();
 
@@ -68,11 +90,13 @@ public interface JsonValue {
 
     Optional<Integer> asIntOptional();
 
-    int asIntOrDefault(int defaultValue);
+    // <C,T> Object asContainerOf(Class<C> containerClass, Class<T> objectClass);
+
+    default int asIntOrDefault(int defaultValue) {
+        return asIntOptional().orElse(defaultValue);
+    }
 
     <T> List<T> asListOf(Class<T> cl, List<T> list);
-
-    // <C,T> Object asContainerOf(Class<C> containerClass, Class<T> objectClass);
 
     default <T> List<T> asListOf(Class<T> cl) {
         return asListOf(cl, new ArrayList<>());
@@ -82,7 +106,9 @@ public interface JsonValue {
 
     Optional<Long> asLongOptional();
 
-    long asLongOrDefault(long defaultValue);
+    default long asLongOrDefault(long defaultValue) {
+        return asLongOptional().orElse(defaultValue);
+    }
 
     default Optional<? extends JsonValue> asOptional() {
         return Optional.of(this);
@@ -90,15 +116,6 @@ public interface JsonValue {
 
     default <T> Optional<T> asOptionalOf(Class<T> cl){
         return Json.fromJsonValueOptional(this, cl);
-    }
-
-    default <T> T as(Type type ) {
-        return Json.fromJsonValue(this, type);
-    }
-
-
-    default <T> T as(TypeReference<T> typeReference) {
-        return Json.fromJsonValue(this, typeReference);
     }
 
     default <T> T asPojo(Class<T> cl) {
@@ -123,7 +140,9 @@ public interface JsonValue {
 
     Optional<Short> asShortOptional();
 
-    short asShortOrDefault(short defaultValue);
+    default short asShortOrDefault(short defaultValue) {
+        return asShortOptional().orElse(defaultValue);
+    }
 
     String  asString();
 
@@ -135,22 +154,33 @@ public interface JsonValue {
 
     Optional<String> asStringOptional();
 
-    String  asStringOrDefault(String defaultValue);
-
+    default String asStringOrDefault(String defaultValue) {
+        return asStringOptional().orElse(defaultValue);
+    }
 
     JsonValue get(int index);
 
     JsonValue get(String key);
 
+    JsonValue get();
+
     Optional<JsonValue> getOptional(int index);
 
     Optional<JsonValue> getOptional(String key);
 
-    JsonValue getOrDefault(int index, JsonValue jsonValue);
+    Optional<JsonValue> getOptional();
 
-    JsonValue getOrDefault(String key, JsonValue jsonValue);
+    default JsonValue getOrDefault(int index, JsonValue defaultValue) {
+        return getOptional(index).orElse(defaultValue);
+    }
 
-    Object getValue();
+    default JsonValue getOrDefault(String key, JsonValue defaultValue) {
+        return getOptional(key).orElse(defaultValue);
+    }
+
+    default JsonValue getOrDefault(JsonValue defaultValue) {
+        return getOptional().orElse(defaultValue);
+    }
 /*
     <T> T ifJsonArray(Function<? super JsonValue, ? extends T> thenFn,Function<? super JsonValue, ? extends T> elseFn);
 

@@ -3,15 +3,22 @@ package com.sidemash.redson;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.*;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
+import java.util.NoSuchElementException;
+import java.util.Optional;
+import java.util.Set;
+
 
 public interface JsonStructure extends JsonValue {
 
+
     @Override
     default BigDecimal asBigDecimal() {
-        throw new ClassCastException(String.format("instance of %s could not be get as BigDecimal", this.getClass()));
+        throw new ClassCastException(
+                String.format(
+                        "instance of %s could not be get as BigDecimal",
+                        this.getClass().getSimpleName()
+                )
+        );
     }
 
     @Override
@@ -20,13 +27,13 @@ public interface JsonStructure extends JsonValue {
     }
 
     @Override
-    default BigDecimal asBigDecimalOrDefault(BigDecimal defaultValue) {
-        return defaultValue;
-    }
-
-    @Override
     default BigInteger asBigInteger() {
-        throw new ClassCastException(String.format("instance of %s could not be get as BigIntegerConverter", this.getClass()));
+        throw new ClassCastException(
+                String.format(
+                        "instance of %s could not be get as BigInteger",
+                        this.getClass().getSimpleName()
+                )
+        );
     }
 
     @Override
@@ -35,13 +42,13 @@ public interface JsonStructure extends JsonValue {
     }
 
     @Override
-    default BigInteger asBigIntegerOrDefault(BigInteger defaultValue) {
-        return defaultValue;
-    }
-
-    @Override
     default boolean asBoolean() {
-        throw new ClassCastException(String.format("instance of %s could not be get as Boolean", this.getClass()));
+        throw new ClassCastException(
+                String.format(
+                        "instance of %s could not be get as Boolean",
+                        this.getClass().getSimpleName()
+                )
+        );
     }
 
     @Override
@@ -50,13 +57,13 @@ public interface JsonStructure extends JsonValue {
     }
 
     @Override
-    default boolean asBooleanOrDefault(boolean defaultValue) {
-        return defaultValue;
-    }
-
-    @Override
     default byte asByte() {
-        throw new ClassCastException(String.format("instance of %s could not be get as Byte", this.getClass()));
+        throw new ClassCastException(
+                String.format(
+                        "instance of %s could not be get as Byte",
+                        this.getClass().getSimpleName()
+                )
+        );
     }
 
     @Override
@@ -65,13 +72,13 @@ public interface JsonStructure extends JsonValue {
     }
 
     @Override
-    default byte asByteOrDefault(byte defaultValue) {
-        return defaultValue;
-    }
-
-    @Override
     default char asChar() {
-        throw new ClassCastException(String.format("instance of %s could not be get as Character", this.getClass()));
+        throw new ClassCastException(
+                String.format(
+                        "instance of %s could not be get as Character",
+                        this.getClass().getSimpleName()
+                )
+        );
     }
 
     @Override
@@ -80,13 +87,13 @@ public interface JsonStructure extends JsonValue {
     }
 
     @Override
-    default char asCharOrDefault(char defaultValue) {
-        return defaultValue;
-    }
-
-    @Override
     default double asDouble() {
-        throw new ClassCastException(String.format("instance of %s could not be get as Double", this.getClass()));
+        throw new ClassCastException(
+                String.format(
+                        "instance of %s could not be get as Double",
+                        this.getClass().getSimpleName()
+                )
+        );
     }
 
     @Override
@@ -95,13 +102,13 @@ public interface JsonStructure extends JsonValue {
     }
 
     @Override
-    default double asDoubleOrDefault(double defaultValue) {
-        return defaultValue;
-    }
-
-    @Override
     default float asFloat() {
-        throw new ClassCastException(String.format("instance of %s could not be get as Float", this.getClass()));
+        throw new ClassCastException(
+                String.format(
+                        "instance of %s could not be get as Float",
+                        this.getClass().getSimpleName()
+                )
+        );
     }
 
     @Override
@@ -110,13 +117,13 @@ public interface JsonStructure extends JsonValue {
     }
 
     @Override
-    default float asFloatOrDefault(float defaultValue) {
-        return defaultValue;
-    }
-
-    @Override
     default int asInt() {
-        throw new ClassCastException(String.format("instance of %s could not be get as Integer", this.getClass()));
+        throw new ClassCastException(
+                String.format(
+                        "instance of %s could not be get as Integer",
+                        this.getClass().getSimpleName()
+                )
+        );
     }
 
     @Override
@@ -125,23 +132,18 @@ public interface JsonStructure extends JsonValue {
     }
 
     @Override
-    default int asIntOrDefault(int defaultValue) {
-        return defaultValue;
-    }
-
-    @Override
     default long asLong() {
-        throw new ClassCastException(String.format("instance of %s could not be get as Long", this.getClass()));
+        throw new ClassCastException(
+                String.format(
+                        "instance of %s could not be get as Long",
+                        this.getClass().getSimpleName()
+                )
+        );
     }
 
     @Override
     default Optional<Long> asLongOptional() {
         return Optional.empty();
-    }
-
-    @Override
-    default long asLongOrDefault(long defaultValue) {
-        return defaultValue;
     }
 
     @Override
@@ -151,7 +153,12 @@ public interface JsonStructure extends JsonValue {
 
     @Override
     default short asShort() {
-        throw new ClassCastException(String.format("instance of %s could not be get as Short", this.getClass()));
+        throw new ClassCastException(
+                String.format(
+                        "instance of %s could not be get as Short",
+                        this.getClass().getSimpleName()
+                )
+        );
     }
 
     @Override
@@ -160,13 +167,13 @@ public interface JsonStructure extends JsonValue {
     }
 
     @Override
-    default short asShortOrDefault(short defaultValue) {
-        return defaultValue;
-    }
-
-    @Override
     default String asString() {
-        throw new ClassCastException(String.format("instance of %s could not be get as String", this.getClass()));
+        throw new ClassCastException(
+                String.format(
+                        "instance of %s could not be get as String",
+                        this.getClass().getSimpleName()
+                )
+        );
     }
 
     @Override
@@ -174,12 +181,22 @@ public interface JsonStructure extends JsonValue {
         return Optional.empty();
     }
 
+    boolean containsValue(Object value);
+
     @Override
-    default String asStringOrDefault(String defaultValue) {
-        return defaultValue;
+    default JsonValue get() {
+        throw new NoSuchElementException(
+                String.format(
+                        "This method is only available for instances of  JsonOptional not %s",
+                        this.getClass().getSimpleName()
+                )
+        );
     }
 
-    boolean containsValue(Object value);
+    @Override
+    default Optional<JsonValue> getOptional() {
+        return Optional.empty();
+    }
 
     Set<JsonEntry<String>> getStringIndexedEntrySet();
 
@@ -218,20 +235,7 @@ public interface JsonStructure extends JsonValue {
         return true;
     }
 
-    int size();
-
     default int length() { return size(); }
 
-    Iterator<JsonValue> valuesIterator();
-
-    default Stream<JsonValue> valuesStream(){
-        return StreamSupport.stream(
-                Spliterators.spliterator(
-                        valuesIterator(),
-                        size(),
-                        Spliterator.NONNULL | Spliterator.ORDERED | Spliterator.IMMUTABLE
-                ),
-                false
-        );
-    }
+    int size();
 }

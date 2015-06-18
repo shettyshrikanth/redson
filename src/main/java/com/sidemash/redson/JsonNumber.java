@@ -3,6 +3,7 @@ package com.sidemash.redson;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 public class JsonNumber implements JsonLiteral {
@@ -25,25 +26,27 @@ public class JsonNumber implements JsonLiteral {
         return JsonNumber.of(BigDecimal.valueOf(value));
     }
 
-    public static JsonNumber of(long value){
+    public static JsonNumber of(long value) {
         return JsonNumber.of(BigDecimal.valueOf(value));
     }
 
-    public static JsonNumber of(float value){
+    public static JsonNumber of(float value) {
         return JsonNumber.of(BigDecimal.valueOf(value));
     }
 
-    public static JsonNumber of(double value){return JsonNumber.of(BigDecimal.valueOf(value)); }
-
-    public static JsonNumber of(byte value){
+    public static JsonNumber of(double value) {
         return JsonNumber.of(BigDecimal.valueOf(value));
     }
 
-    public static JsonNumber of(short value){
+    public static JsonNumber of(byte value) {
         return JsonNumber.of(BigDecimal.valueOf(value));
     }
 
-    public static JsonNumber of(String value){
+    public static JsonNumber of(short value) {
+        return JsonNumber.of(BigDecimal.valueOf(value));
+    }
+
+    public static JsonNumber of(String value) {
         return JsonNumber.of(new BigDecimal(value));
     }
 
@@ -72,8 +75,7 @@ public class JsonNumber implements JsonLiteral {
         Optional<BigInteger> result;
         try {
             result = Optional.of(value.toBigIntegerExact());
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             result = Optional.empty();
         }
         return result;
@@ -109,8 +111,7 @@ public class JsonNumber implements JsonLiteral {
         Optional<Byte> result;
         try {
             result = Optional.of(value.byteValueExact());
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             result = Optional.empty();
         }
         return result;
@@ -146,8 +147,7 @@ public class JsonNumber implements JsonLiteral {
         Optional<Double> result;
         try {
             result = Optional.of(value.doubleValue());
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             result = Optional.empty();
         }
         return result;
@@ -168,8 +168,7 @@ public class JsonNumber implements JsonLiteral {
         Optional<Float> result;
         try {
             result = Optional.of(value.floatValue());
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             result = Optional.empty();
         }
         return result;
@@ -190,8 +189,7 @@ public class JsonNumber implements JsonLiteral {
         Optional<Integer> result;
         try {
             result = Optional.of(value.intValueExact());
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             result = Optional.empty();
         }
         return result;
@@ -212,8 +210,7 @@ public class JsonNumber implements JsonLiteral {
         Optional<Long> result;
         try {
             result = Optional.of(value.longValueExact());
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             result = Optional.empty();
         }
         return result;
@@ -239,8 +236,7 @@ public class JsonNumber implements JsonLiteral {
         Optional<Short> result;
         try {
             result = Optional.of(value.shortValueExact());
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             result = Optional.empty();
         }
         return result;
@@ -261,8 +257,7 @@ public class JsonNumber implements JsonLiteral {
         Optional<String> result;
         try {
             result = Optional.of(value.toString());
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             result = Optional.empty();
         }
         return result;
@@ -272,7 +267,6 @@ public class JsonNumber implements JsonLiteral {
     public String asStringOrDefault(String defaultValue) {
         return asStringOptional().orElse(defaultValue);
     }
-
 
     @Override
     public boolean equals(Object o) {
@@ -285,8 +279,18 @@ public class JsonNumber implements JsonLiteral {
     }
 
     @Override
-    public BigDecimal getValue() {
-        return value;
+    public JsonValue get() {
+        throw new NoSuchElementException(
+                String.format(
+                        "This method is only available for instances of JsonOptional not %s",
+                        this.getClass().getSimpleName()
+                )
+        );
+    }
+
+    @Override
+    public Optional<JsonValue> getOptional() {
+        return Optional.empty();
     }
 
     @Override

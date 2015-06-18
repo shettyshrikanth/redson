@@ -26,7 +26,7 @@ public class JsonOptional implements JsonValue {
                     .map(v -> new JsonOptional(Optional.of(Json.toJsonValue(v))))
                     .orElse(JsonOptional.EMPTY);
         }
-        return new JsonOptional(Optional.of(Json.toJsonValue(value)));
+        return new JsonOptional(Optional.of(JsonValue.of(value)));
     }
 
     @Override
@@ -40,11 +40,6 @@ public class JsonOptional implements JsonValue {
     }
 
     @Override
-    public BigDecimal asBigDecimalOrDefault(BigDecimal defaultValue) {
-        return defaultValue;
-    }
-
-    @Override
     public BigInteger asBigInteger() {
         throw new ClassCastException();
     }
@@ -52,11 +47,6 @@ public class JsonOptional implements JsonValue {
     @Override
     public Optional<BigInteger> asBigIntegerOptional() {
         return Optional.empty();
-    }
-
-    @Override
-    public BigInteger asBigIntegerOrDefault(BigInteger defaultValue) {
-        return defaultValue;
     }
 
     @Override
@@ -70,11 +60,6 @@ public class JsonOptional implements JsonValue {
     }
 
     @Override
-    public boolean asBooleanOrDefault(boolean defaultValue) {
-        return defaultValue;
-    }
-
-    @Override
     public byte asByte() {
         throw new ClassCastException();
     }
@@ -82,11 +67,6 @@ public class JsonOptional implements JsonValue {
     @Override
     public Optional<Byte> asByteOptional() {
         return Optional.empty();
-    }
-
-    @Override
-    public byte asByteOrDefault(byte defaultValue) {
-        return defaultValue;
     }
 
     @Override
@@ -100,11 +80,6 @@ public class JsonOptional implements JsonValue {
     }
 
     @Override
-    public char asCharOrDefault(char defaultValue) {
-        return defaultValue;
-    }
-
-    @Override
     public double asDouble() {
         throw new ClassCastException();
     }
@@ -115,11 +90,6 @@ public class JsonOptional implements JsonValue {
     }
 
     @Override
-    public double asDoubleOrDefault(double defaultValue) {
-        return defaultValue;
-    }
-
-    @Override
     public float asFloat() {
         throw new ClassCastException();
     }
@@ -127,11 +97,6 @@ public class JsonOptional implements JsonValue {
     @Override
     public Optional<Float> asFloatOptional() {
         return Optional.empty();
-    }
-
-    @Override
-    public float asFloatOrDefault(float defaultValue) {
-        return defaultValue;
     }
 
     @Override
@@ -155,11 +120,6 @@ public class JsonOptional implements JsonValue {
     }
 
     @Override
-    public int asIntOrDefault(int defaultValue) {
-        return defaultValue;
-    }
-
-    @Override
     public <T> List<T> asListOf(Class<T> cl, List<T> list) {
         if(value.isPresent())
             list.add(Json.fromJsonValue(value.get(), cl));
@@ -180,11 +140,6 @@ public class JsonOptional implements JsonValue {
     @Override
     public Optional<Long> asLongOptional() {
         return Optional.empty();
-    }
-
-    @Override
-    public long asLongOrDefault(long defaultValue) {
-        return defaultValue;
     }
 
     @Override
@@ -212,14 +167,6 @@ public class JsonOptional implements JsonValue {
     }
 
     @Override
-    public <T> T asPojoOrDefault(Class<T> cl, T defaultValue) {
-        if(!value.isPresent())
-            return defaultValue;
-
-        return Json.fromJsonValueOptional(value.get(), cl).orElse(defaultValue);
-    }
-
-    @Override
     public <T> Set<T> asSetOf(Class<T> cl, Set<T> set) {
         value.ifPresent((jsonValue) -> set.add(Json.fromJsonValue(jsonValue, cl)));
         return set;
@@ -241,11 +188,6 @@ public class JsonOptional implements JsonValue {
     }
 
     @Override
-    public short asShortOrDefault(short defaultValue) {
-        return defaultValue;
-    }
-
-    @Override
     public String asString() {
         throw new ClassCastException();
     }
@@ -264,11 +206,6 @@ public class JsonOptional implements JsonValue {
     @Override
     public Optional<String> asStringOptional() {
         return Optional.empty();
-    }
-
-    @Override
-    public String asStringOrDefault(String defaultValue) {
-        return defaultValue;
     }
 
     public boolean containsValue(Object value) {
@@ -300,6 +237,11 @@ public class JsonOptional implements JsonValue {
     }
 
     @Override
+    public Optional<JsonValue> getOptional() {
+        return value;
+    }
+
+    @Override
     public Optional<JsonValue> getOptional(int index) {
         return Optional.empty();
     }
@@ -307,23 +249,6 @@ public class JsonOptional implements JsonValue {
     @Override
     public Optional<JsonValue> getOptional(String key) {
         return Optional.empty();
-    }
-
-    @Override
-    public JsonValue getOrDefault(int index, JsonValue jsonValue) {
-        return jsonValue;
-    }
-
-    @Override
-    public JsonValue getOrDefault(String key, JsonValue jsonValue) {
-        return jsonValue;
-    }
-
-
-    @Override
-    public Object getValue() {
-        if(value.isPresent()) return Optional.of(value.get().getValue());
-        else return Optional.empty();
     }
 
     @Override

@@ -201,8 +201,16 @@ public enum JsonNull implements JsonLiteral {
     }
 
     @Override
-    public Object getValue() {
-        throw new NoSuchElementException();
+    public JsonValue get() {
+        throw new NoSuchElementException(
+                "This method is only available for instances of " +
+                        " JsonOptional not JsonBoolean"
+        );
+    }
+
+    @Override
+    public Optional<JsonValue> getOptional() {
+        return Optional.empty();
     }
 
     @Override
