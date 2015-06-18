@@ -7,7 +7,6 @@ Redson is a new Java 8 Json library that aims to handle Json in the way that :
 - Simplify and reduce boilerplate when converting to/from Json even with complex rules that describe these conversions
 - Handle and manipulate Json as it was a first class data type
 - Introduce a new JsonOptional to handle missing fields : Very useful for example to modelize the difference between a submitted null value and a missing one.
-- Reuse internally the carefully tested Scala immutable collection API. 
 
 ## What is not Redson ? 
 - Redson is Not an implementation of [JSR  353](https://jcp.org/en/jsr/detail?id=353)
@@ -24,7 +23,7 @@ E remove(int index)
 // as parameter.
 List<E> remove(int index)
 ```
-Clearly, these 2 signatures clashe on return type and we have to choose one! So we choosen not to implement the List interface and picked the second signature. This choice of making our JsonArray not implementing the List interface among others, de facto made redson not to follow this JSR. However, we took inspiration from it and many of redson methods names were directly inspired by this JSR. 
+Clearly, these 2 signatures clash on return type and we have to choose one! So we chose not to implement the List interface and picked the second signature. This choice of making our JsonArray not implementing the List interface among others, de facto made redson not to follow this JSR. However, we took inspiration from it and many of redson methods names were directly inspired by this JSR. 
 
 
 ## Quickstart
