@@ -224,18 +224,6 @@ public interface JsonStructure extends JsonValue {
 
     Iterator<JsonValue> valuesIterator();
 
-    Iterator<JsonValue> reversedValuesIterator();
-
-    default Stream<JsonValue> reversedValuesStream(){
-        return StreamSupport.stream(
-                Spliterators.spliterator(
-                        reversedValuesIterator(),
-                        size(),
-                        Spliterator.NONNULL | Spliterator.ORDERED | Spliterator.IMMUTABLE
-                ),
-                false
-        );
-    }
     default Stream<JsonValue> valuesStream(){
         return StreamSupport.stream(
                 Spliterators.spliterator(

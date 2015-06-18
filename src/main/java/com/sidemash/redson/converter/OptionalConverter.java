@@ -1,33 +1,41 @@
 package com.sidemash.redson.converter;
 
-import com.sidemash.redson.Json;
-import com.sidemash.redson.JsonOptional;
-import com.sidemash.redson.JsonValue;
+import com.sidemash.redson.*;
 
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.LinkedList;
 import java.util.Optional;
+import java.util.Queue;
 
-public enum OptionalConverter implements JsonConverter<Optional<?>> {
+public class OptionalConverter<T> implements JsonContainerConverter<Optional<T>> {
 
-    INSTANCE
-    ;
     @Override
-    public Optional<?> fromJsonValue(JsonValue jsonValue) {
-        Optional<?> result;
+    public Optional<T> fromJsonValue(JsonValue jsonValue,Type type) {
+        Optional<T> result;
         if (jsonValue.isJsonNull() || (jsonValue.isJsonOptional() && jsonValue.isEmpty()) ) {
             result = Optional.empty();
         }
-        else {
-            result = Optional.of(Json.fromJsonValue(jsonValue.asOptional().get()));
+        else if(jsonValue.isJsonOptional()){
+            JsonOptional jsOpt = (JsonOptional) jsonValue;
+            ParameterizedType p = (ParameterizedType) type;
+            result = Optional.of(
+                    jsOpt.get().as(p.getActualTypeArguments()[0])
+            );
+        } else {
+            ParameterizedType p = (ParameterizedType) type;
+            result = Optional.of(
+                    jsonValue.as(p.getActualTypeArguments()[0])
+            );
         }
         return result;
     }
 
+
     @Override
-    public JsonValue toJsonValue(Optional<?> obj, JsonValue jsonValue) {
-         JsonValue result = JsonOptional.EMPTY;
-        if (obj.isPresent()) {
-            result =  JsonOptional.of(Json.toJsonValue(obj.get()));
-        }
-        return result;
+    public JsonValue toJsonValue(Optional<T> optional, JsonValue jsonValue) {
+        return optional
+                .map(elem -> JsonOptional.of(JsonValue.of(elem)))
+                .orElse(JsonOptional.EMPTY);
     }
 }

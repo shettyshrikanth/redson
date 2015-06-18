@@ -6,7 +6,6 @@ import com.sidemash.redson.JsonEntry;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.function.BiFunction;
-import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 

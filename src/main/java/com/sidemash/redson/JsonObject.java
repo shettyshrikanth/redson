@@ -3,7 +3,6 @@ package com.sidemash.redson;
 
 import com.sidemash.redson.util.ImmutableMap;
 import scala.Tuple2;
-import scala.collection.Traversable;
 import scala.collection.immutable.Map;
 import scala.collection.immutable.Map$;
 import scala.collection.mutable.Builder;
@@ -59,6 +58,12 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>>, I
     public static JsonObject of(Object o) {
         JsonObject result = (JsonObject) Json.toJsonValue(o);
         return result;
+    }
+
+    public static JsonObject of(JsonEntry<String> jsonEntry1) {
+        Builder<Tuple2<String, JsonValue>, Map> mapBuilder = Map$.MODULE$.newBuilder();
+        mapBuilder.$plus$eq(new Tuple2<>(jsonEntry1.getKey().toString(), jsonEntry1.getValue()));
+        return new JsonObject(mapBuilder.result());
     }
 
     @SafeVarargs
@@ -404,6 +409,8 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>>, I
 
             }
             result = sj.toString();
+            if(result.equals(String.format("{\n\n%s}", endIncrementation)))
+                result = "{}";
         }
         return result;
     }
@@ -589,4 +596,5 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>>, I
             }
         };
     }
+
 }

@@ -34,13 +34,17 @@ public class JsonEntry<T> {
     }
 
 
-    public static <T>  JsonEntry<T> of(T key, JsonValue jsonValue){
+    public static JsonEntry<String> of(String key, JsonValue jsonValue){
         return (jsonValue == null)
                 ? new JsonEntry<>(key, JsonNull.INSTANCE)
                 : new JsonEntry<>(key, jsonValue) ;
     }
 
-    public static <T>  JsonEntry<T> of(T key, Object o){
+    public static JsonEntry<String> of(String key, Object o){
+        return new JsonEntry<>(key, Json.toJsonValue(o));
+    }
+
+    public static JsonEntry<Integer> of(int key, Object o){
         return new JsonEntry<>(key, Json.toJsonValue(o));
     }
 

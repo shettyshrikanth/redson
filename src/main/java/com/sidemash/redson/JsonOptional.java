@@ -15,14 +15,16 @@ public class JsonOptional implements JsonValue {
         this.value = value;
     }
 
-    public static<T> JsonOptional of(List<T> items) {
-        return new JsonOptional(Optional.of(JsonArray.of(items)));
-    }
+
     public static<T> JsonOptional of(T value) {
+        if(value == null)
+            return JsonOptional.EMPTY;
+
         if(value instanceof Optional){
-            Optional<?> v = (Optional<?>) value;
-            if(v.isPresent()) return new JsonOptional(v.map(Json::toJsonValue));
-            else return JsonOptional.EMPTY;
+            Optional<?> optValue = (Optional<?>) value;
+            return optValue
+                    .map(v -> new JsonOptional(Optional.of(Json.toJsonValue(v))))
+                    .orElse(JsonOptional.EMPTY);
         }
         return new JsonOptional(Optional.of(Json.toJsonValue(value)));
     }
@@ -286,6 +288,10 @@ public class JsonOptional implements JsonValue {
     @Override
     public JsonValue get(int index) {
         throw new UnsupportedOperationException("Get item by index on JsonOptional");
+    }
+
+    public JsonValue get() {
+        return value.get();
     }
 
     @Override

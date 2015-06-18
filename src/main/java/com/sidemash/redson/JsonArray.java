@@ -23,10 +23,8 @@ public class JsonArray implements
     private final Vector<JsonValue> items;
 
     private static JsonArray createJsonArray(Vector<JsonValue> items){
-        if(items.isEmpty())
-            return EMPTY;
-        else
-            return new JsonArray(items);
+        if(items.isEmpty()) return EMPTY;
+        else return new JsonArray(items);
     }
 
     private JsonArray(Vector<JsonValue> items) {
@@ -36,6 +34,10 @@ public class JsonArray implements
 
     public static JsonArray of(Object... values){
         return JsonArray.of(Arrays.asList(values));
+    }
+
+    public static JsonArray of(JsonArray array){
+        return JsonArray.of(array.valuesIterator());
     }
 
 
@@ -66,10 +68,8 @@ public class JsonArray implements
 
     @Override
     public <T> Map<Integer, T> asIntIndexedMapOf(Class<T> c, Map<Integer, T> map) {
-        if (items.isEmpty())
-            return map;
         for (int i = 0; i < items.length(); i++) {
-            map.put(i, Json.fromJsonValue(items.apply(i), c));
+            map.put(i, items.apply(i).as(c));
         }
         return map;
     }
@@ -77,7 +77,7 @@ public class JsonArray implements
     @Override
     public <T> List<T> asListOf(Class<T> cl, List<T> list) {
         for (int i = 0; i < items.length(); i++) {
-            list.add(Json.fromJsonValue(items.apply(i), cl));
+            list.add(items.apply(i).as(cl));
         }
         return list;
     }
@@ -86,14 +86,14 @@ public class JsonArray implements
     public <T> Set<T> asSetOf(Class<T> cl, Set<T> set) {
         final scala.collection.Iterator <JsonValue> iterator = items.iterator();
         while (iterator.hasNext())
-            set.add(Json.fromJsonValue(iterator.next(), cl));
+            set.add(iterator.next().as(cl));
         return set;
     }
 
     @Override
     public <T> Map<String, T> asStringIndexedMapOf(Class<T> c, Map<String, T> map) {
         for (int i = 0; i < items.length(); i++)
-            map.put(String.valueOf(i), Json.fromJsonValue(items.apply(i), c));
+            map.put(String.valueOf(i), items.apply(i).as(c));
         return map;
     }
 
@@ -422,6 +422,8 @@ public class JsonArray implements
                 }
             }
             result = sj.toString();
+            if(result.equals(String.format("[\n\n%s]", endIncrementation)))
+                result = "[]";
         }
 
         return result;
@@ -466,6 +468,18 @@ public class JsonArray implements
                 return iterator.next();
             }
         };
+    }
+
+
+    public Stream<JsonValue> reversedValuesStream(){
+        return StreamSupport.stream(
+                Spliterators.spliterator(
+                        reversedValuesIterator(),
+                        size(),
+                        Spliterator.NONNULL | Spliterator.ORDERED | Spliterator.IMMUTABLE
+                ),
+                false
+        );
     }
 
 
@@ -554,11 +568,12 @@ public class JsonArray implements
             if (emptyValuesToNull && value.isJsonOptional() && value.isEmpty())
                 value = JsonNull.INSTANCE;
             if(Json.isEligibleForStringify(value, keepingNull)){
-                sj = sj.add(value.stringify());
+                sj = sj.add(value.stringify(keepingNull));
             }
         }
         return sj.toString();
     }
+
     @Override
     public <U> U foldLeft(U seed, BiFunction<U, JsonValue, U> op) {
         U result = seed;
@@ -568,8 +583,6 @@ public class JsonArray implements
         }
         return result;
     }
-
-
 
     @Override
     public String toString() {
@@ -598,7 +611,7 @@ public class JsonArray implements
 
     public JsonArray intersect(JsonArray jsonArray) {
         if(isEmpty() || jsonArray.isEmpty())
-            return EMPTY;
+           return EMPTY;
         else {
             JsonArray temp, other;
             if(jsonArray.size() < this.size()) { temp = jsonArray; other = this; }
@@ -654,12 +667,6 @@ public class JsonArray implements
     }
 
     public JsonArray updateFirst(Predicate<? super JsonEntry<Integer>> predicate, UnaryOperator<JsonValue> operator) {
-        /*
-        if (predicate.test(items.apply(0)))
-            return new JsonArray(items.updateAt(0, operator.apply(items.apply(0))));
-        else
-            return this;
-        */
         return  this.stream()
                     .filter(predicate)
                     .findFirst()

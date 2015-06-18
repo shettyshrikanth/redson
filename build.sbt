@@ -4,6 +4,8 @@ version := "0.1.0"
 
 scalaVersion := "2.10.5"
 
+libraryDependencies += "com.fasterxml.jackson.core" % "jackson-databind" % "2.5.4" withSources() withJavadoc()
+
 libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.4" % "test" withSources() withJavadoc()
 
 libraryDependencies += "org.scalacheck" %% "scalacheck" % "1.12.3" % "test"  withSources() withJavadoc()

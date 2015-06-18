@@ -1,6 +1,9 @@
 package com.sidemash.redson;
 
 
+import com.fasterxml.jackson.core.type.TypeReference;
+
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
@@ -69,6 +72,8 @@ public interface JsonValue {
 
     <T> List<T> asListOf(Class<T> cl, List<T> list);
 
+    // <C,T> Object asContainerOf(Class<C> containerClass, Class<T> objectClass);
+
     default <T> List<T> asListOf(Class<T> cl) {
         return asListOf(cl, new ArrayList<>());
     }
@@ -85,6 +90,15 @@ public interface JsonValue {
 
     default <T> Optional<T> asOptionalOf(Class<T> cl){
         return Json.fromJsonValueOptional(this, cl);
+    }
+
+    default <T> T as(Type type ) {
+        return Json.fromJsonValue(this, type);
+    }
+
+
+    default <T> T as(TypeReference<T> typeReference) {
+        return Json.fromJsonValue(this, typeReference);
     }
 
     default <T> T asPojo(Class<T> cl) {

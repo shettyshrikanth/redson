@@ -61,8 +61,8 @@ class JsonArraySpec extends UnitSpec {
       Integer.valueOf(5),
       Integer.valueOf(6)
     )
-    val predicate = new Predicate[JsonValue] {
-      override def test(t: JsonValue): Boolean = t.asInt() < 3
+    val predicate = new Predicate[JsonEntry[Integer]] {
+      override def test(t: JsonEntry[Integer]): Boolean = t.getValue.asInt() < 3
     }
     array.updateWhile(predicate, JsonNumber.of(64)) should be(
       JsonArray.of(
@@ -78,8 +78,8 @@ class JsonArraySpec extends UnitSpec {
   }
   it should "updateFirst should replace first value in array" in {
     val array = JsonArray.of(Integer.valueOf(1), Integer.valueOf(2))
-    val predicate =  new Predicate[JsonValue] {
-      override def test(t: JsonValue): Boolean = t.asInt() < 3
+    val predicate =  new Predicate[JsonEntry[Integer]] {
+      override def test(t: JsonEntry[Integer]): Boolean = t.getValue.asInt() < 3
     }
     array.updateFirst(predicate, JsonNumber.of(64)) should be (
       JsonArray.of(
