@@ -6,6 +6,7 @@ Redson is a new Java 8 Json library that aims to handle Json in the way that :
 - Help removing `null` from the earth ( see [Avoiding null in your Java code](http://www.oracle.com/technetwork/articles/java/java8-optional-2175753.html) )
 - Simplify and reduce boilerplate when converting to/from Json even with complex rules that describe these conversions
 - Handle and manipulate Json as it was a first class data type
+- Provide an immutable data structure to manipulate Json Documents
 - Introduce a new JsonOptional to handle missing fields : Very useful for example to modelize the difference between a submitted null value and a missing one.
 
 ## What is not Redson ? 
@@ -32,7 +33,7 @@ Clearly, these 2 signatures clash on return type and we have to choose one! So w
 According to [RFC 7159](https://tools.ietf.org/html/rfc7159#section-3), values in Json must be : array, object, number, string, false, true or  null.
 Hence, we have defined 6 classes to represent Json values in Java. These are :  `JsonArray`, `JsonObject`, `JsonNumber`, `JsonString`, `JsonNull` and `JsonBoolean`.
 Additionnally, we have defined `JsonOptional` to model a possible missing JsonValue, we have defined `JsonValue` interface wich is the supertype of all previous Json* classes and finally we have defined the class `JsonEntry` which is either a pair `(String, JsonValue)` that indexes JsonObject values by key or the pair `(Integer, JsonValue)` that indexes JsonArray values by index. (In fact, JsonEntry is a parametrized class defined as JsonEntry<T>  with T being a String or an Integer)
-
+![Json* Class Diagram](https://github.com/sidemash/redson/blob/develop/RedsonClassDiagram.png)
 ### Creating Json in Java
 If you don't know the type of the variable (E.g. when using generics), or if you want rapid prototyping and test, you can use the `JsonValue.of()` factory method.
 Because every Json* inherits from JsonValue, you can create all of these via JsonValue. Some examples : 
