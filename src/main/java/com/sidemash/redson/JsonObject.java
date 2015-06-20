@@ -453,7 +453,7 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>>, I
         }
         return result;
     }
-    
+
     public JsonObject remove(String key) {
         if (!this.isDefinedAt(key))
             return this;
