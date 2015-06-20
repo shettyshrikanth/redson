@@ -126,17 +126,6 @@ public class JsonArray implements
     }
 
     @Override
-    public <T> Map<Integer, T> asIntIndexedMapOf(Class<T> cl, Map<Integer, T> map) {
-        int index = 0;
-        for (JsonValue item : items) {
-            map.put(index, item.as(cl));
-            ++index;
-        }
-
-        return map;
-    }
-
-    @Override
     public <T> List<T> asListOf(Class<T> cl, List<T> list) {
         for (JsonValue item : items)
             list.add(item.as(cl));
@@ -145,22 +134,22 @@ public class JsonArray implements
     }
 
     @Override
+    public <T> Map<String, T> asMapOf(Class<T> cl, Map<String, T> map) {
+        throw new ClassCastException(
+                String.format(
+                        "This %s could be interpreted as an instance of Map<String, %s>",
+                        this.getClass().getSimpleName(),
+                        cl.getSimpleName()
+                )
+        );
+    }
+
+    @Override
     public <T> Set<T> asSetOf(Class<T> cl, Set<T> set) {
         for (JsonValue item : items)
             set.add(item.as(cl));
 
         return set;
-    }
-
-    @Override
-    public <T> Map<String, T> asStringIndexedMapOf(Class<T> cl, Map<String, T> map) {
-        int index = 0;
-        for (JsonValue item : items) {
-            map.put(String.valueOf(index), item.as(cl));
-            ++index;
-        }
-
-        return map;
     }
 
     /**
@@ -219,7 +208,7 @@ public class JsonArray implements
     }
 
     public Stream<JsonEntry<Integer>> entryStream() {
-        return IntStream.of(0, items.size())
+        return IntStream.range(0, items.size())
                 .mapToObj(index -> JsonEntry.of(index, items.get(index)));
     }
 
@@ -306,7 +295,12 @@ public class JsonArray implements
 
     @Override
     public JsonValue get() {
-        throw new NoSuchElementException("This method is only available for instances of JsonOptional not JsonArray");
+        throw new NoSuchElementException(
+                String.format(
+                        "This method is only available for instances of JsonOptional not %s",
+                        this.getClass().getSimpleName()
+                )
+        );
     }
 
     @Override
@@ -343,7 +337,7 @@ public class JsonArray implements
     public Set<JsonEntry<Integer>> getIntIndexedEntrySet(Set<JsonEntry<Integer>> initialSet) {
         int index = 0;
         for (JsonValue item : items) {
-            initialSet.add(new JsonEntry<>(index, item));
+            initialSet.add(JsonEntry.of(index, item));
             ++index;
         }
 
@@ -396,7 +390,7 @@ public class JsonArray implements
 
     public Set<JsonEntry<String>> getStringIndexedEntrySet(Set<JsonEntry<String>> initialSet) {
         for (int i = 0; i < items.size(); i++)
-            initialSet.add(new JsonEntry<>(String.valueOf(i), items.get(i)));
+            initialSet.add( JsonEntry.of(String.valueOf(i), items.get(i)));
         return initialSet;
     }
 
@@ -527,7 +521,7 @@ public class JsonArray implements
         return JsonArray.of(this.stream().map(mapper.andThen(JsonValue::of)));
     }
 
-    public <R> JsonArray mapEntries(Function<? super JsonEntry<Integer>, R> mapper) {
+    public <R> JsonArray mapEntry(Function<? super JsonEntry<Integer>, R> mapper) {
         return JsonArray.of(this.entryStream().map(mapper.andThen(JsonValue::of)));
     }
 
@@ -616,7 +610,7 @@ public class JsonArray implements
             @Override
             public JsonEntry<Integer> next() {
                 index--;
-                return new JsonEntry<>(index, items.get(index));
+                return JsonEntry.of(index, items.get(index));
             }
         };
     }
@@ -780,10 +774,32 @@ public class JsonArray implements
     }
 
     @Override
+    public <T> Map<Integer, T> toIntIndexedMapOf(Class<T> cl, Map<Integer, T> map) {
+        int index = 0;
+        for (JsonValue item : items) {
+            map.put(index, item.as(cl));
+            ++index;
+        }
+
+        return map;
+    }
+
+    @Override
     public String toString() {
         return "JsonArray{" +
                 "items=" + items +
                 '}';
+    }
+
+    @Override
+    public <T> Map<String, T> toStringIndexedMapOf(Class<T> cl, Map<String, T> map) {
+        int index = 0;
+        for (JsonValue item : items) {
+            map.put(String.valueOf(index), item.as(cl));
+            ++index;
+        }
+
+        return map;
     }
 
     public JsonArray union(JsonArray jsonArray) {
@@ -819,7 +835,7 @@ public class JsonArray implements
                                  Function<JsonEntry<Integer>, JsonValue> function) {
         return this.entryStream()
                 .filter(predicate)
-                    .findFirst()
+                .findFirst()
                 .map(entry -> this.updateValue(entry.getKey(), function))
                 .orElse(this);
     }
@@ -853,12 +869,22 @@ public class JsonArray implements
 
     public JsonArray updateWhere(Predicate<? super JsonEntry<Integer>> predicate,
                                  Function<JsonEntry<Integer>, JsonValue> function) {
-        return this.mapEntries(
-                entry -> {
-                    if (predicate.test(entry)) return function.apply(entry);
-                    else return entry;
-                }
-        );
+        List<JsonValue> newItems = new ArrayList<>();
+        int i = 0;
+        boolean updated = false;
+        JsonEntry<Integer> entry;
+        for(JsonValue jsonValue : items){
+            entry = JsonEntry.of(i, jsonValue);
+            if (predicate.test(entry)){
+                newItems.add(function.apply(entry));
+                updated = true;
+            } else {
+                newItems.add(entry.getValue());
+            }
+            i++;
+        }
+        if(updated == false) return this;
+        return createJsonArray(newItems);
     }
 
     public JsonArray updateWhile(Predicate<? super JsonEntry<Integer>> predicate, JsonValue elem) {

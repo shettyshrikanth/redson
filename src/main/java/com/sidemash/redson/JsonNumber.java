@@ -61,13 +61,8 @@ public class JsonNumber implements JsonLiteral {
     }
 
     @Override
-    public BigDecimal asBigDecimalOrDefault(BigDecimal defaultValue) {
-        return value;
-    }
-
-    @Override
     public BigInteger asBigInteger() {
-        return asBigIntegerOptional().orElseThrow(ClassCastException::new);
+        return value.toBigIntegerExact();
     }
 
     @Override
@@ -82,13 +77,13 @@ public class JsonNumber implements JsonLiteral {
     }
 
     @Override
-    public BigInteger asBigIntegerOrDefault(BigInteger defaultValue) {
-        return asBigIntegerOptional().orElse(defaultValue);
-    }
-
-    @Override
     public boolean asBoolean() {
-        throw new ClassCastException();
+        throw new ClassCastException(
+                String.format(
+                        "instance of %s could not be get as Boolean",
+                        this.getClass().getSimpleName()
+                )
+        );
     }
 
     @Override
@@ -97,13 +92,8 @@ public class JsonNumber implements JsonLiteral {
     }
 
     @Override
-    public boolean asBooleanOrDefault(boolean defaultValue) {
-        return defaultValue;
-    }
-
-    @Override
     public byte asByte() {
-        return asByteOptional().orElseThrow(ClassCastException::new);
+        return value.byteValueExact();
     }
 
     @Override
@@ -118,13 +108,13 @@ public class JsonNumber implements JsonLiteral {
     }
 
     @Override
-    public byte asByteOrDefault(byte defaultValue) {
-        return asByteOptional().orElse(defaultValue);
-    }
-
-    @Override
     public char asChar() {
-        throw new ClassCastException();
+        throw new ClassCastException(
+                String.format(
+                        "instance of %s could not be get as Character",
+                        this.getClass().getSimpleName()
+                )
+        );
     }
 
     @Override
@@ -133,13 +123,8 @@ public class JsonNumber implements JsonLiteral {
     }
 
     @Override
-    public char asCharOrDefault(char defaultValue) {
-        return defaultValue;
-    }
-
-    @Override
     public double asDouble() {
-        return asDoubleOptional().orElseThrow(ClassCastException::new);
+        return value.doubleValue();
     }
 
     @Override
@@ -154,13 +139,8 @@ public class JsonNumber implements JsonLiteral {
     }
 
     @Override
-    public double asDoubleOrDefault(double defaultValue) {
-        return asDoubleOptional().orElse(defaultValue);
-    }
-
-    @Override
     public float asFloat() {
-        return asFloatOptional().orElseThrow(ClassCastException::new);
+        return value.floatValue();
     }
 
     @Override
@@ -174,14 +154,10 @@ public class JsonNumber implements JsonLiteral {
         return result;
     }
 
-    @Override
-    public float asFloatOrDefault(float defaultValue) {
-        return asFloatOptional().orElse(defaultValue);
-    }
 
     @Override
     public int asInt() {
-        return asIntOptional().orElseThrow(ClassCastException::new);
+        return value.intValueExact();
     }
 
     @Override
@@ -196,13 +172,8 @@ public class JsonNumber implements JsonLiteral {
     }
 
     @Override
-    public int asIntOrDefault(int defaultValue) {
-        return asIntOptional().orElse(defaultValue);
-    }
-
-    @Override
     public long asLong() {
-        return asLongOptional().orElseThrow(ClassCastException::new);
+        return value.longValueExact();
     }
 
     @Override
@@ -216,19 +187,10 @@ public class JsonNumber implements JsonLiteral {
         return result;
     }
 
-    @Override
-    public long asLongOrDefault(long defaultValue) {
-        return asLongOptional().orElse(defaultValue);
-    }
-
-    @Override
-    public <T> Optional<T> asOptionalOf(Class<T> c) {
-        return null;
-    }
 
     @Override
     public short asShort() {
-        return asShortOptional().orElseThrow(ClassCastException::new);
+        return value.shortValueExact();
     }
 
     @Override
@@ -242,31 +204,22 @@ public class JsonNumber implements JsonLiteral {
         return result;
     }
 
-    @Override
-    public short asShortOrDefault(short defaultValue) {
-        return asShortOptional().orElse(defaultValue);
-    }
 
     @Override
     public String asString() {
-        return asStringOptional().orElseThrow(ClassCastException::new);
+        throw new ClassCastException(
+                String.format(
+                        "instance of %s could not be get as String",
+                        this.getClass().getSimpleName()
+                )
+        );
     }
 
     @Override
     public Optional<String> asStringOptional() {
-        Optional<String> result;
-        try {
-            result = Optional.of(value.toString());
-        } catch (Exception e) {
-            result = Optional.empty();
-        }
-        return result;
+        return Optional.empty();
     }
 
-    @Override
-    public String asStringOrDefault(String defaultValue) {
-        return asStringOptional().orElse(defaultValue);
-    }
 
     @Override
     public boolean equals(Object o) {

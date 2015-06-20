@@ -11,10 +11,10 @@ public class Tree<T> {
     private static final Tree<?> EMPTY = new Tree<>();
 
     static {
-        Json.registerWriter(Tree.class, ((tree, jsonValue) -> JsonObject.of(
+        Json.registerWriter(Tree.class, (tree, jsonValue) -> JsonObject.of(
                 JsonEntry.of("node", tree.getNode()),
                 JsonEntry.of("children", tree.getChildren())
-        )));
+        ));
 
         Json.registerReader(Tree.class, (JsonValue jsVal, Type type) -> {
             if (jsVal.isJsonObject() && jsVal.isEmpty())
@@ -54,12 +54,31 @@ public class Tree<T> {
         return result;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Tree<?> tree = (Tree<?>) o;
+
+        if (node != null ? !node.equals(tree.node) : tree.node != null) return false;
+        return !(children != null ? !children.equals(tree.children) : tree.children != null);
+
+    }
+
     public List<Tree<T>> getChildren() {
         return children;
     }
 
     public T getNode() {
         return node;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = node != null ? node.hashCode() : 0;
+        result = 31 * result + (children != null ? children.hashCode() : 0);
+        return result;
     }
 
     public boolean isEmpty(){

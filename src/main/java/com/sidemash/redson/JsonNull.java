@@ -3,6 +3,7 @@ package com.sidemash.redson;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -12,7 +13,12 @@ public enum JsonNull implements JsonLiteral {
 
     @Override
     public BigDecimal asBigDecimal() {
-        return null;
+        throw new ClassCastException(
+                String.format(
+                        "instance of %s could not be get as BigDecimal",
+                        this.getClass().getSimpleName()
+                )
+        );
     }
 
     @Override
@@ -21,13 +27,13 @@ public enum JsonNull implements JsonLiteral {
     }
 
     @Override
-    public BigDecimal asBigDecimalOrDefault(BigDecimal defaultValue) {
-        return defaultValue;
-    }
-
-    @Override
     public BigInteger asBigInteger() {
-        return null;
+        throw new ClassCastException(
+                String.format(
+                        "instance of %s could not be get as BigInteger",
+                        this.getClass().getSimpleName()
+                )
+        );
     }
 
     @Override
@@ -36,13 +42,13 @@ public enum JsonNull implements JsonLiteral {
     }
 
     @Override
-    public BigInteger asBigIntegerOrDefault(BigInteger defaultValue) {
-        return defaultValue;
-    }
-
-    @Override
     public boolean asBoolean() {
-        return  false;
+        throw new ClassCastException(
+                String.format(
+                        "instance of %s could not be get as Boolean",
+                        this.getClass().getSimpleName()
+                )
+        );
     }
 
     @Override
@@ -50,14 +56,15 @@ public enum JsonNull implements JsonLiteral {
         return Optional.empty();
     }
 
-    @Override
-    public boolean asBooleanOrDefault(boolean defaultValue) {
-        return defaultValue;
-    }
 
     @Override
     public byte asByte() {
-        return (byte)0;
+        throw new ClassCastException(
+                String.format(
+                        "instance of %s could not be get as Byte",
+                        this.getClass().getSimpleName()
+                )
+        );
     }
 
     @Override
@@ -66,13 +73,13 @@ public enum JsonNull implements JsonLiteral {
     }
 
     @Override
-    public byte asByteOrDefault(byte defaultValue) {
-        return defaultValue;
-    }
-
-    @Override
     public char asChar() {
-        return '\u0000';
+        throw new ClassCastException(
+                String.format(
+                        "instance of %s could not be get as Character",
+                        this.getClass().getSimpleName()
+                )
+        );
     }
 
     @Override
@@ -81,13 +88,13 @@ public enum JsonNull implements JsonLiteral {
     }
 
     @Override
-    public char asCharOrDefault(char defaultValue) {
-        return defaultValue;
-    }
-
-    @Override
     public double asDouble() {
-        return  0.0d;
+        throw new ClassCastException(
+                String.format(
+                        "instance of %s could not be get as Double",
+                        this.getClass().getSimpleName()
+                )
+        );
     }
 
     @Override
@@ -96,13 +103,13 @@ public enum JsonNull implements JsonLiteral {
     }
 
     @Override
-    public double asDoubleOrDefault(double defaultValue) {
-        return defaultValue;
-    }
-
-    @Override
     public float asFloat() {
-        return  0.0f;
+        throw new ClassCastException(
+                String.format(
+                        "instance of %s could not be get as Float",
+                        this.getClass().getSimpleName()
+                )
+        );
     }
 
     @Override
@@ -111,13 +118,13 @@ public enum JsonNull implements JsonLiteral {
     }
 
     @Override
-    public float asFloatOrDefault(float defaultValue) {
-        return defaultValue;
-    }
-
-    @Override
     public int asInt() {
-        return  0;
+        throw new ClassCastException(
+                String.format(
+                        "instance of %s could not be get as Integer",
+                        this.getClass().getSimpleName()
+                )
+        );
     }
 
     @Override
@@ -126,13 +133,13 @@ public enum JsonNull implements JsonLiteral {
     }
 
     @Override
-    public int asIntOrDefault(int defaultValue) {
-        return defaultValue;
-    }
-
-    @Override
     public long asLong() {
-        return  0L;
+        throw new ClassCastException(
+                String.format(
+                        "instance of %s could not be get as Long",
+                        this.getClass().getSimpleName()
+                )
+        );
     }
 
     @Override
@@ -141,38 +148,24 @@ public enum JsonNull implements JsonLiteral {
     }
 
     @Override
-    public long asLongOrDefault(long defaultValue) {
-        return defaultValue;
-    }
-
-    @Override
-    public Optional<? extends JsonValue> asOptional() {
-        return Optional.empty();
-    }
-
-    @Override
-    public <T> Optional<T> asOptionalOf(Class<T> c) {
-        return Optional.empty();
-    }
-
-    @Override
-    public <T> T asPojo(Class<T> cl) {
-        return null;
-    }
-
-    @Override
-    public <T> Optional<T> asPojoOptional(Class<T> cl) {
-        return Optional.empty();
-    }
-
-    @Override
-    public <T> T asPojoOrDefault(Class<T> cl, T defaultValue) {
-        return defaultValue;
+    public <T> Map<String, T> asMapOf(Class<T> cl, Map<String, T> map) {
+        throw new ClassCastException(
+                String.format(
+                        "This %s could be interpreted as an instance of Map<String, %s>",
+                        this.getClass().getSimpleName(),
+                        cl.getSimpleName()
+                )
+        );
     }
 
     @Override
     public short asShort() {
-        return (short)0;
+        throw new ClassCastException(
+                String.format(
+                        "instance of %s could not be get as Short",
+                        this.getClass().getSimpleName()
+                )
+        );
     }
 
     @Override
@@ -181,13 +174,13 @@ public enum JsonNull implements JsonLiteral {
     }
 
     @Override
-    public short asShortOrDefault(short defaultValue) {
-        return defaultValue;
-    }
-
-    @Override
     public String asString() {
-        return  null;
+        throw new ClassCastException(
+                String.format(
+                        "instance of %s could not be get as String",
+                        this.getClass().getSimpleName()
+                )
+        );
     }
 
     @Override
@@ -196,15 +189,12 @@ public enum JsonNull implements JsonLiteral {
     }
 
     @Override
-    public String asStringOrDefault(String defaultValue) {
-        return defaultValue;
-    }
-
-    @Override
     public JsonValue get() {
         throw new NoSuchElementException(
-                "This method is only available for instances of " +
-                        " JsonOptional not JsonBoolean"
+                String.format(
+                        "This method is only available for instances of JsonOptional not %s",
+                        this.getClass().getSimpleName()
+                )
         );
     }
 

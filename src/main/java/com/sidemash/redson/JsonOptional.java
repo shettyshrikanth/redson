@@ -4,6 +4,10 @@ package com.sidemash.redson;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 
 public class JsonOptional implements JsonValue {
@@ -17,21 +21,35 @@ public class JsonOptional implements JsonValue {
 
 
     public static<T> JsonOptional of(T value) {
-        if(value == null)
-            return JsonOptional.EMPTY;
+        if(value instanceof Optional)
+            return of((Optional<?>) value);
 
-        if(value instanceof Optional){
-            Optional<?> optValue = (Optional<?>) value;
-            return optValue
-                    .map(v -> new JsonOptional(Optional.of(Json.toJsonValue(v))))
-                    .orElse(JsonOptional.EMPTY);
-        }
         return new JsonOptional(Optional.of(JsonValue.of(value)));
     }
 
+
+    public static<T> JsonOptional ofNullable(Optional<T> value) {
+        if(value == null)
+            return JsonOptional.EMPTY;
+
+        return value
+                .map(v -> new JsonOptional(Optional.of(Json.toJsonValue(v))))
+                .orElse(JsonOptional.EMPTY);
+    }
+
+    public static<T> JsonOptional of(Optional<T> value) {
+        return value
+                .map(v -> new JsonOptional(Optional.of(Json.toJsonValue(v))))
+                .orElse(JsonOptional.EMPTY);
+    }
     @Override
     public BigDecimal asBigDecimal() {
-        throw new ClassCastException();
+        throw new ClassCastException(
+                String.format(
+                        "instance of %s could not be get as BigDecimal",
+                        this.getClass().getSimpleName()
+                )
+        );
     }
 
     @Override
@@ -41,7 +59,12 @@ public class JsonOptional implements JsonValue {
 
     @Override
     public BigInteger asBigInteger() {
-        throw new ClassCastException();
+        throw new ClassCastException(
+                String.format(
+                        "instance of %s could not be get as BigInteger",
+                        this.getClass().getSimpleName()
+                )
+        );
     }
 
     @Override
@@ -51,7 +74,12 @@ public class JsonOptional implements JsonValue {
 
     @Override
     public boolean asBoolean() {
-        throw new ClassCastException();
+        throw new ClassCastException(
+                String.format(
+                        "instance of %s could not be get as Boolean",
+                        this.getClass().getSimpleName()
+                )
+        );
     }
 
     @Override
@@ -59,9 +87,15 @@ public class JsonOptional implements JsonValue {
         return Optional.empty();
     }
 
+
     @Override
     public byte asByte() {
-        throw new ClassCastException();
+        throw new ClassCastException(
+                String.format(
+                        "instance of %s could not be get as Byte",
+                        this.getClass().getSimpleName()
+                )
+        );
     }
 
     @Override
@@ -71,7 +105,12 @@ public class JsonOptional implements JsonValue {
 
     @Override
     public char asChar() {
-        throw new ClassCastException();
+        throw new ClassCastException(
+                String.format(
+                        "instance of %s could not be get as Character",
+                        this.getClass().getSimpleName()
+                )
+        );
     }
 
     @Override
@@ -81,7 +120,12 @@ public class JsonOptional implements JsonValue {
 
     @Override
     public double asDouble() {
-        throw new ClassCastException();
+        throw new ClassCastException(
+                String.format(
+                        "instance of %s could not be get as Double",
+                        this.getClass().getSimpleName()
+                )
+        );
     }
 
     @Override
@@ -91,7 +135,12 @@ public class JsonOptional implements JsonValue {
 
     @Override
     public float asFloat() {
-        throw new ClassCastException();
+        throw new ClassCastException(
+                String.format(
+                        "instance of %s could not be get as Float",
+                        this.getClass().getSimpleName()
+                )
+        );
     }
 
     @Override
@@ -101,17 +150,12 @@ public class JsonOptional implements JsonValue {
 
     @Override
     public int asInt() {
-        throw new ClassCastException();
-    }
-
-    @Override
-    public <T> Map<Integer, T> asIntIndexedMapOf(Class<T> c, Map<Integer, T> map) {
-        if(!value.isPresent())
-           return  map;
-
-        T instance = Json.fromJsonValue(value.get(), c);
-        map.put(0, instance);
-        return map;
+        throw new ClassCastException(
+                String.format(
+                        "instance of %s could not be get as Integer",
+                        this.getClass().getSimpleName()
+                )
+        );
     }
 
     @Override
@@ -134,12 +178,28 @@ public class JsonOptional implements JsonValue {
 
     @Override
     public long asLong() {
-        throw new ClassCastException();
+        throw new ClassCastException(
+                String.format(
+                        "instance of %s could not be get as Long",
+                        this.getClass().getSimpleName()
+                )
+        );
     }
 
     @Override
     public Optional<Long> asLongOptional() {
         return Optional.empty();
+    }
+
+    @Override
+    public <T> Map<String, T> asMapOf(Class<T> cl, Map<String, T> map) {
+        throw new ClassCastException(
+                String.format(
+                        "This %s could be interpreted as an instance of Map<String, %s>",
+                        this.getClass().getSimpleName(),
+                        cl.getSimpleName()
+                )
+        );
     }
 
     @Override
@@ -179,7 +239,12 @@ public class JsonOptional implements JsonValue {
 
     @Override
     public short asShort() {
-        throw new ClassCastException();
+        throw new ClassCastException(
+                String.format(
+                        "instance of %s could not be get as Short",
+                        this.getClass().getSimpleName()
+                )
+        );
     }
 
     @Override
@@ -189,18 +254,12 @@ public class JsonOptional implements JsonValue {
 
     @Override
     public String asString() {
-        throw new ClassCastException();
-    }
-
-    @Override
-    public <T> Map<String, T> asStringIndexedMapOf(Class<T> c) {
-        return asStringIndexedMapOf(c, new LinkedHashMap<>());
-    }
-
-    @Override
-    public <T> Map<String, T> asStringIndexedMapOf(Class<T> c, Map<String, T> map) {
-        value.ifPresent(jsonValue -> map.put("0", Json.fromJsonValue(jsonValue, c)));
-        return map;
+        throw new ClassCastException(
+                String.format(
+                        "instance of %s could not be get as String",
+                        this.getClass().getSimpleName()
+                )
+        );
     }
 
     @Override
@@ -220,6 +279,14 @@ public class JsonOptional implements JsonValue {
         JsonOptional that = (JsonOptional) o;
 
         return value.equals(that.value);
+    }
+
+    public JsonOptional filter(Predicate<? super JsonValue> predicate) {
+        return new JsonOptional(value.filter(predicate));
+    }
+
+    public <U> JsonOptional flatMap(Function<? super JsonValue, Optional<U>> mapper) {
+        return JsonOptional.of(value.flatMap(mapper));
     }
 
     @Override
@@ -254,6 +321,10 @@ public class JsonOptional implements JsonValue {
     @Override
     public int hashCode() {
         return value.hashCode();
+    }
+
+    public void ifPresent(Consumer<? super JsonValue> consumer) {
+        value.ifPresent(consumer);
     }
 
     @Override
@@ -306,6 +377,26 @@ public class JsonOptional implements JsonValue {
         return false;
     }
 
+    public boolean isPresent() {
+        return value.isPresent();
+    }
+
+    public <U> JsonOptional map(Function<? super JsonValue, ? extends U> mapper) {
+        return new JsonOptional(value.map(mapper.andThen(JsonValue::of)));
+    }
+
+    public JsonValue orElse(JsonValue other) {
+        return value.orElse(other);
+    }
+
+    public JsonValue orElseGet(Supplier<? extends JsonValue> other) {
+        return value.orElseGet(other);
+    }
+
+    public <X extends Throwable> JsonValue orElseThrow(Supplier<? extends X> exceptionSupplier) throws X {
+        return value.orElseThrow(exceptionSupplier);
+    }
+
     @Override
     public String prettyStringifyRecursive(int indent, int incrementAcc, boolean keepingNull, boolean emptyValuesToNull) {
         return stringify(keepingNull, emptyValuesToNull);
@@ -326,10 +417,27 @@ public class JsonOptional implements JsonValue {
     }
 
     @Override
+    public <T> Map<Integer, T> toIntIndexedMapOf(Class<T> cl, Map<Integer, T> map) {
+        value.ifPresent(elem -> map.put(0, elem.as(cl)));
+        return map;
+    }
+
+    @Override
     public String toString() {
         return "JsonOptional{" +
                 "value=" + value +
                 '}';
+    }
+
+    @Override
+    public <T> Map<String, T> toStringIndexedMapOf(Class<T> c) {
+        return toStringIndexedMapOf(c, new LinkedHashMap<>());
+    }
+
+    @Override
+    public <T> Map<String, T> toStringIndexedMapOf(Class<T> c, Map<String, T> map) {
+        value.ifPresent(jsonValue -> map.put("0", Json.fromJsonValue(jsonValue, c)));
+        return map;
     }
 
 }
