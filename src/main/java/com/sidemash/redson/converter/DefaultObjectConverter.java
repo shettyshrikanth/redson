@@ -31,12 +31,11 @@ public enum DefaultObjectConverter implements  JsonConverter<Object> {
 
     @Override
     public Map<String, Object> fromJsonValue(JsonValue jsonValue) {
-        return jsonValue.asStringIndexedMapOf(Object.class);
+        return jsonValue.toStringIndexedMapOf(Object.class);
     }
 
     @Override
     public JsonValue toJsonValue(Object obj, JsonValue jsonValue) {
-        System.out.println("We are here");
 
         Class<?> tmpClass = obj.getClass();
         if(tmpClass.equals(Object.class))

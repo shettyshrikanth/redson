@@ -6,12 +6,6 @@ import java.util.*;
 public interface JsonLiteral extends JsonValue {
 
     @Override
-    default <T> Map<Integer, T> asIntIndexedMapOf(Class<T> cl, Map<Integer, T> map) {
-        map.put(0, Json.fromJsonValue(this, cl));
-        return map;
-    }
-
-    @Override
     default <T> List<T> asListOf(Class<T> cl, List<T> list) {
         list.add(Json.fromJsonValue(this, cl));
         return list;
@@ -23,6 +17,17 @@ public interface JsonLiteral extends JsonValue {
     }
 
     @Override
+    default <T> Map<String, T> asMapOf(Class<T> cl,  Map<String, T> map){
+        throw new ClassCastException(
+                String.format(
+                        "This %s could be interpreted as an instance of Map<String, %s>",
+                        this.getClass().getSimpleName(),
+                        cl.getSimpleName()
+                )
+        );
+    }
+
+    @Override
     default <T> Set<T> asSetOf(Class<T> cl, Set<T> set) {
         set.add(Json.fromJsonValue(this, cl));
         return set;
@@ -31,17 +36,6 @@ public interface JsonLiteral extends JsonValue {
     @Override
     default <T> Set<T> asSetOf(Class<T> cl) {
         return asSetOf(cl, new LinkedHashSet<>());
-    }
-
-    @Override
-    default <T> Map<String, T> asStringIndexedMapOf(Class<T> c) {
-        return asStringIndexedMapOf(c, new LinkedHashMap<>());
-    }
-
-    @Override
-    default <T> Map<String, T> asStringIndexedMapOf(Class<T> c, Map<String, T> map) {
-        map.put("0", Json.fromJsonValue(this, c));
-        return map;
     }
 
     @Override
@@ -63,7 +57,7 @@ public interface JsonLiteral extends JsonValue {
 
     @Override
     default Optional<JsonValue> getOptional(String key) {
-        return null;
+        return Optional.empty();
     }
 
     @Override
@@ -114,6 +108,23 @@ public interface JsonLiteral extends JsonValue {
     @Override
     default String prettyStringify(int ident) {
         return toString();
+    }
+
+    @Override
+    default <T> Map<Integer, T> toIntIndexedMapOf(Class<T> cl, Map<Integer, T> map) {
+        map.put(0, Json.fromJsonValue(this, cl));
+        return map;
+    }
+
+    @Override
+    default <T> Map<String, T> toStringIndexedMapOf(Class<T> c) {
+        return toStringIndexedMapOf(c, new LinkedHashMap<>());
+    }
+
+    @Override
+    default <T> Map<String, T> toStringIndexedMapOf(Class<T> c, Map<String, T> map) {
+        map.put("0", Json.fromJsonValue(this, c));
+        return map;
     }
 
 }

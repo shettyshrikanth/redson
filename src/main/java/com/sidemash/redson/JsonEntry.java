@@ -1,13 +1,14 @@
 package com.sidemash.redson;
 
 
+import java.util.Map;
 import java.util.Objects;
 
-public class JsonEntry<T> {
+public abstract class JsonEntry<T> {
     private final T key;
     private final JsonValue value;
 
-    protected JsonEntry(T key, JsonValue value) {
+    private JsonEntry(T key, JsonValue value) {
         Objects.requireNonNull(key, "key must not be null");
         this.key = key;
         this.value = value;
@@ -15,16 +16,20 @@ public class JsonEntry<T> {
 
     public static JsonEntry<String> of(String key, JsonValue jsonValue){
         return (jsonValue == null)
-                ? new JsonEntry<>(key, JsonNull.INSTANCE)
-                : new JsonEntry<>(key, jsonValue) ;
+                ? new StringIndexedJsonEntry(key, JsonNull.INSTANCE)
+                : new StringIndexedJsonEntry(key, jsonValue) ;
     }
 
     public static JsonEntry<String> of(String key, Object o){
-        return new JsonEntry<>(key, JsonValue.of(o));
+        return new StringIndexedJsonEntry(key, JsonValue.of(o));
     }
 
     public static JsonEntry<Integer> of(int key, Object o){
-        return new JsonEntry<>(key, Json.toJsonValue(o));
+        return new IntIndexedJsonEntry(key, Json.toJsonValue(o));
+    }
+
+    public static JsonEntry<String> of(Map.Entry<String, JsonValue> entry){
+        return new StringIndexedJsonEntry(entry.getKey(), entry.getValue());
     }
 
     @Override
@@ -54,11 +59,81 @@ public class JsonEntry<T> {
         return result;
     }
 
+    public abstract Map.Entry<T, JsonValue> toMapEntry();
+
     @Override
     public String toString() {
         return "JsonEntry{" +
                 "key=" + key +
                 ", value=" + value +
                 '}';
+    }
+
+    private static class IntIndexedJsonEntry extends  JsonEntry<Integer> {
+
+        private IntIndexedJsonEntry(Integer key, JsonValue value) {
+            super(key, value);
+        }
+
+        @Override
+        public Map.Entry<Integer, JsonValue> toMapEntry() {
+            IntIndexedJsonEntry outer = this;
+            return new Map.Entry<Integer, JsonValue>() {
+
+                final Integer innerKey = outer.getKey() ;
+                JsonValue innerValue = outer.getValue();
+
+                @Override
+                public Integer getKey() {
+                    return innerKey;
+                }
+
+                @Override
+                public JsonValue getValue() {
+                    return innerValue;
+                }
+
+                @Override
+                public JsonValue setValue(JsonValue newInnerValue) {
+                    JsonValue oldInnerValue = innerValue;
+                    this.innerValue = newInnerValue;
+                    return oldInnerValue;
+                }
+            };
+        }
+    }
+
+    private static class StringIndexedJsonEntry extends  JsonEntry<String> {
+
+        private StringIndexedJsonEntry(String key, JsonValue value) {
+            super(key, value);
+        }
+
+        @Override
+        public Map.Entry<String, JsonValue> toMapEntry() {
+            StringIndexedJsonEntry outer = this;
+            return new Map.Entry<String, JsonValue>() {
+
+                final String innerKey = outer.getKey() ;
+                JsonValue innerValue = outer.getValue();
+
+                @Override
+                public String getKey() {
+                    return innerKey;
+                }
+
+                @Override
+                public JsonValue getValue() {
+                    return innerValue;
+                }
+
+                @Override
+                public JsonValue setValue(JsonValue newInnerValue) {
+                    JsonValue oldInnerValue = innerValue;
+                    this.innerValue = newInnerValue;
+                    return oldInnerValue;
+                }
+            };
+        }
     }
 }

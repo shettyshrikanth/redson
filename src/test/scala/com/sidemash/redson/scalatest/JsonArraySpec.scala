@@ -19,16 +19,19 @@ class JsonArraySpec extends UnitSpec {
       JsonArray.EMPTY.getHead
     }
   }
+
   it should "throw UnsupportedOperationException if the tail of an empty JsonArray is accessed" in {
     a[UnsupportedOperationException] should be thrownBy {
       JsonArray.EMPTY.getTail
     }
   }
+
   it should "throw NoSuchElementException if the last item of an empty JsonArray is accessed" in {
     a[NoSuchElementException] should be thrownBy {
       JsonArray.EMPTY.getLast
     }
   }
+
   it should "updateWhere should replace all even number in array" in {
     val array = JsonArray.of(
                   Integer.valueOf(1),
@@ -51,6 +54,7 @@ class JsonArraySpec extends UnitSpec {
       )
     )
   }
+
   it should "updateWhile should update all number less than 3" in {
     val array = JsonArray.of(
       Integer.valueOf(0),
@@ -76,6 +80,7 @@ class JsonArraySpec extends UnitSpec {
       )
     )
   }
+
   it should "updateFirst should replace first value in array" in {
     val array = JsonArray.of(Integer.valueOf(1), Integer.valueOf(2))
     val predicate =  new Predicate[JsonEntry[Integer]] {

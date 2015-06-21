@@ -88,8 +88,6 @@ public interface ImmutableMap<K,V>  {
 
     ImmutableMap<K, V> updateValue(String key, V elem);
 
-    ImmutableMap<K, V> updateValue(String key, UnaryOperator<JsonEntry<String>> operator);
-
     Iterator<V> valuesIterator();
 
 }

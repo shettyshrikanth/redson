@@ -1,12 +1,21 @@
 # Redson
-A lightweight library to handle json for Java 8 with simplicity and functional style.
+A lightweight library to handle json for Java 8 built with functional style and Simplicity in mind.
 
 ## What is Redson ? 
 Redson is a new Java 8 Json library that aims to handle Json in the way that : 
 - Help removing `null` from the earth ( see [Avoiding null in your Java code](http://www.oracle.com/technetwork/articles/java/java8-optional-2175753.html) )
 - Simplify and reduce boilerplate when converting to/from Json even with complex rules that describe these conversions
 - Handle and manipulate Json as it was a first class data type
-- Introduce a new JsonOptional to handle missing fields : Very useful for example to modelize the difference between a submitted null value and a missing one.
+<<<<<<< HEAD
+- Provide an immutables data structures to manipulate Json Documents
+- Introduce a new JsonOptional data type
+- Is again a Dead Simple Library.
+- Is Written on top of [Jackson](https://github.com/FasterXML/jackson) (a excellent library that provided parsing capabilities via its streaming API)
+- Is interoperable with Jackson via [JsonNode](http://fasterxml.github.io/jackson-databind/javadoc/2.0.0/com/fasterxml/jackson/databind/JsonNode.html). (Hence, your can use redson in your library where JsonNode is required. For example, when doing rest service with [play framework](https://www.playframework.com/documentation/2.3.x/JavaResponse), there is a method `ok(response)` that takes a JsonNode as parameter in order to return a Json Response  to the client with appropriate response headers ( Content-type : application/json, ... ) you can then use Redson data type and call the method `jsonValue.toJsonNode()` to convert any redson JsonValue to its JsonNode representation and  `JsonValue.of(jsonNode)` to get a redson JsonValue from any JsonNode.
+=======
+- Introduce a new JsonOptional to handle missing fields : Very useful for example to modelize the difference between a submitted null innerValue and a missing one.
+- Reuse internally the carefully tested Scala immutable collection API. 
+>>>>>>> ReImplemented JsonObject without scala immutable collection
 
 ## What is not Redson ? 
 - Redson is Not an implementation of [JSR  353](https://jcp.org/en/jsr/detail?id=353)
@@ -31,7 +40,15 @@ Clearly, these 2 signatures clash on return type and we have to choose one! So w
 ### The Json*  family
 According to [RFC 7159](https://tools.ietf.org/html/rfc7159#section-3), values in Json must be : array, object, number, string, false, true or  null.
 Hence, we have defined 6 classes to represent Json values in Java. These are :  `JsonArray`, `JsonObject`, `JsonNumber`, `JsonString`, `JsonNull` and `JsonBoolean`.
-Additionnally, we have defined `JsonOptional` to model a possible missing JsonValue, we have defined `JsonValue` interface wich is the supertype of all previous Json* classes and finally we have defined the class `JsonEntry` which is either a pair `(String, JsonValue)` that indexes JsonObject values by key or the pair `(Integer, JsonValue)` that indexes JsonArray values by index. (In fact, JsonEntry is a parametrized class defined as JsonEntry<T>  with T being a String or an Integer)
+<<<<<<< HEAD
+Additionnally, we have defined `JsonOptional` to model a possible missing JsonValue, we have defined `JsonValue` interface wich is the supertype of all previous Json* classes and finally we have defined the class `JsonEntry` which is either a pair `(String, JsonValue)` that indexes JsonObject values by key or the pair `(Integer, JsonValue)` that indexes JsonArray values by index. (In fact, JsonEntry is a parametrized class defined as JsonEntry<T>  with T only being a String or an Integer).
+
+Here is the class Diagram of the Json* family : 
+![Json* Class Diagram](https://github.com/sidemash/redson/blob/develop/RedsonClassDiagram.png)
+
+=======
+Additionnally, we have defined `JsonOptional` to model a possible missing JsonValue, we have defined `JsonValue` interface wich is the supertype of all previous Json* classes and finally we have defined the class `JsonEntry` which is either a pair `(String, JsonValue)` that indexes JsonObject values by innerKey or the pair `(Integer, JsonValue)` that indexes JsonArray values by index. (In fact, JsonEntry is a parametrized class defined as JsonEntry<T>  with T being a String or an Integer)
+>>>>>>> ReImplemented JsonObject without scala immutable collection
 
 ### Creating Json in Java
 If you don't know the type of the variable (E.g. when using generics), or if you want rapid prototyping and test, you can use the `JsonValue.of()` factory method.
@@ -121,7 +138,7 @@ JsonObject.of(lettersToDigits);             // -> { "one" : 1, "two" : 2 }
 Map<String, YourCustomClass> yourMap =   // Initialize this map the way you want to
 JsonObject.of(yourMap);             
 
-// If the key is not a string(E.g. you pass an instance of Map<Integer, YourCustomClass> or even 
+// If the innerKey is not a string(E.g. you pass an instance of Map<Integer, YourCustomClass> or even 
 // an instance of Map<YourCustomClass1, YourCustomClass2> to the JsonObject.of() ), you will have to provide a way
 // to convert the YourCustomClass1 to a String
 
@@ -135,8 +152,8 @@ ascii.put(67, 'C');
 // We need to provide a way to convert the keys to String. So pass a lambda to convert Integer to String
 JsonObject.of(ascii, num -> String.valueOf(num))     // -> { "65":"A", "66":"B", "67":"C" }
 
-// If the key were an instance of YourCustomClass, all you have to do is to give a function that takes 
-// an instance of YourCustomClass and return a String you want to see as key of your JsonObject.
+// If the innerKey were an instance of YourCustomClass, all you have to do is to give a function that takes 
+// an instance of YourCustomClass and return a String you want to see as innerKey of your JsonObject.
 
 ```
 
@@ -147,7 +164,7 @@ You can create `JsonNumber` from : Short, Byte, Integer, Long, Float, Double, Bi
 You can create `JsonString` from : String, Char and CharSequence
 
 `JsonOptionnal`
-Whenever you are dealing with JsonOptionnal, remember that JsonOptionnal contains optionnally an instance of JsonValue. Hence, when you create an instance of JsonOptionnal from an Optional, the value if any will be converted ( E.g; : a String will become JsonString etc . ) and stored in the JsonOptionnal.
+Whenever you are dealing with JsonOptionnal, remember that JsonOptionnal contains optionnally an instance of JsonValue. Hence, when you create an instance of JsonOptionnal from an Optional, the innerValue if any will be converted ( E.g; : a String will become JsonString etc . ) and stored in the JsonOptionnal.
 The JsonOptional has severals methods of the Java Optional, so it is possible to manipulate as if it was an `Optional<JsonValue>`.
 
 

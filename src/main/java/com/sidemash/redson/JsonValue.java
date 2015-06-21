@@ -82,15 +82,7 @@ public interface JsonValue {
 
     int asInt();
 
-    <T> Map<Integer, T> asIntIndexedMapOf(Class<T> c, Map<Integer, T> map);
-
-    default <T> Map<Integer, T> asIntIndexedMapOf(Class<T> c) {
-        return asIntIndexedMapOf(c, new LinkedHashMap<>());
-    }
-
     Optional<Integer> asIntOptional();
-
-    // <C,T> Object asContainerOf(Class<C> containerClass, Class<T> objectClass);
 
     default int asIntOrDefault(int defaultValue) {
         return asIntOptional().orElse(defaultValue);
@@ -108,6 +100,12 @@ public interface JsonValue {
 
     default long asLongOrDefault(long defaultValue) {
         return asLongOptional().orElse(defaultValue);
+    }
+
+    <T> Map<String, T> asMapOf(Class<T> cl,  Map<String, T> map);
+
+    default <T> Map<String, T> asMapOf(Class<T> cl){
+        return asMapOf(cl, new HashMap<>());
     }
 
     default Optional<? extends JsonValue> asOptional() {
@@ -146,12 +144,6 @@ public interface JsonValue {
 
     String  asString();
 
-    default <T> Map<String, T> asStringIndexedMapOf(Class<T> cl){
-        return asStringIndexedMapOf(cl, new LinkedHashMap<>());
-    }
-
-    <T> Map<String, T> asStringIndexedMapOf(Class<T> c,  Map<String, T> map);
-
     Optional<String> asStringOptional();
 
     default String asStringOrDefault(String defaultValue) {
@@ -181,35 +173,6 @@ public interface JsonValue {
     default JsonValue getOrDefault(JsonValue defaultValue) {
         return getOptional().orElse(defaultValue);
     }
-/*
-    <T> T ifJsonArray(Function<? super JsonValue, ? extends T> thenFn,Function<? super JsonValue, ? extends T> elseFn);
-
-    JsonValue ifJsonArrayElseThis(Function<? super JsonValue, ? extends JsonValue> thenFn);
-
-    <T> T ifJsonBoolean(Function<? super JsonValue, ? extends T> thenFn,Function<? super JsonValue, ? extends T> elseFn);
-
-    JsonValue ifJsonBooleanElseThis(Function<? super JsonValue, ? extends JsonValue> thenFn);
-
-    <T> T ifJsonLiteral(Function<? super JsonValue, ? extends T> thenFn,Function<? super JsonValue, ? extends T> elseFn);
-
-    JsonValue ifJsonLiteralElseThis(Function<? super JsonValue, ? extends JsonValue> thenFn);
-
-    <T> T ifJsonNull(Function<? super JsonValue, ? extends T> thenFn,Function<? super JsonValue, ? extends T> elseFn);
-
-    JsonValue ifJsonNullElseThis(Function<? super JsonValue, ? extends JsonValue> thenFn);
-
-    <T> T ifJsonNumber(Function<? super JsonValue, ? extends T> thenFn,Function<? super JsonValue, ? extends T> elseFn);
-
-    JsonValue ifJsonNumberElseThis(Function<? super JsonValue, ? extends JsonValue> thenFn);
-
-    <T> T ifJsonObject(Function<? super JsonValue, ? extends T> thenFn, Function<? super JsonValue, ? extends T> elseFn);
-
-    JsonValue ifJsonObjectElseThis(Function<? super JsonValue, ? extends JsonValue> thenFn);
-
-    <T> T ifJsonString(Function<? super JsonValue, ? extends T> thenFn, Function<? super JsonValue, ? extends T> elseFn);
-
-    JsonValue ifJsonStringElseThis(Function<? super JsonValue, ? extends JsonValue> thenFn);
-*/
 
     /**
      * Executes thenFn callback if conditionFn function is true, and elseFn if false.
@@ -266,6 +229,36 @@ public interface JsonValue {
     default JsonValue ifJsonStructureElseThis(Function<? super JsonValue, ? extends JsonValue> thenFn) {
         return ifConditionElseThis(this::isJsonStructure, thenFn);
     }
+/*
+    <T> T ifJsonArray(Function<? super JsonValue, ? extends T> thenFn,Function<? super JsonValue, ? extends T> elseFn);
+
+    JsonValue ifJsonArrayElseThis(Function<? super JsonValue, ? extends JsonValue> thenFn);
+
+    <T> T ifJsonBoolean(Function<? super JsonValue, ? extends T> thenFn,Function<? super JsonValue, ? extends T> elseFn);
+
+    JsonValue ifJsonBooleanElseThis(Function<? super JsonValue, ? extends JsonValue> thenFn);
+
+    <T> T ifJsonLiteral(Function<? super JsonValue, ? extends T> thenFn,Function<? super JsonValue, ? extends T> elseFn);
+
+    JsonValue ifJsonLiteralElseThis(Function<? super JsonValue, ? extends JsonValue> thenFn);
+
+    <T> T ifJsonNull(Function<? super JsonValue, ? extends T> thenFn,Function<? super JsonValue, ? extends T> elseFn);
+
+    JsonValue ifJsonNullElseThis(Function<? super JsonValue, ? extends JsonValue> thenFn);
+
+    <T> T ifJsonNumber(Function<? super JsonValue, ? extends T> thenFn,Function<? super JsonValue, ? extends T> elseFn);
+
+    JsonValue ifJsonNumberElseThis(Function<? super JsonValue, ? extends JsonValue> thenFn);
+
+    <T> T ifJsonObject(Function<? super JsonValue, ? extends T> thenFn, Function<? super JsonValue, ? extends T> elseFn);
+
+    JsonValue ifJsonObjectElseThis(Function<? super JsonValue, ? extends JsonValue> thenFn);
+
+    <T> T ifJsonString(Function<? super JsonValue, ? extends T> thenFn, Function<? super JsonValue, ? extends T> elseFn);
+
+    JsonValue ifJsonStringElseThis(Function<? super JsonValue, ? extends JsonValue> thenFn);
+*/
+
     boolean isEmpty();
 
     boolean isJsonArray();
@@ -330,6 +323,18 @@ public interface JsonValue {
         final boolean emptyValuesToNull = false;
         return stringify(keepingNull, emptyValuesToNull);
     }
+
+    <T> Map<Integer, T> toIntIndexedMapOf(Class<T> c, Map<Integer, T> map);
+
+    default <T> Map<Integer, T> toIntIndexedMapOf(Class<T> c) {
+        return toIntIndexedMapOf(c, new LinkedHashMap<>());
+    }
+
+    default <T> Map<String, T> toStringIndexedMapOf(Class<T> cl){
+        return toStringIndexedMapOf(cl, new LinkedHashMap<>());
+    }
+
+    <T> Map<String, T> toStringIndexedMapOf(Class<T> c, Map<String, T> map);
 
 
 }
