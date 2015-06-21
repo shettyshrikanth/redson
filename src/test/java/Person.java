@@ -1,14 +1,11 @@
-package com.sidemash.redson;
+import com.sidemash.redson.Json;
+import com.sidemash.redson.JsonEntry;
+import com.sidemash.redson.JsonObject;
 
 /**
  * Created by Serge Martial on 09/06/2015.
  */
 public class Person {
-
-    public String name;
-    public Integer age;
-    public String password = null; // "TopSecret";
-    public Float height;
 
     static {
         Json.registerWriter(Person.class, (person, jsonValue) -> JsonObject.of(
@@ -24,20 +21,15 @@ public class Person {
                         )
         );
     }
+
+    public String name;
+    public Integer age;
+    public String password = null; // "TopSecret";
+    public Float height;
     public Person(String name, Integer age, Float height) {
         this.name = name;
         this.age = age;
         this.height = height;
-    }
-
-    @Override
-    public String toString() {
-        return "Person{" +
-                "name='" + name + '\'' +
-                ", age=" + age +
-                ", password='" + password + '\'' +
-                ", height=" + height +
-                '}';
     }
 
     @Override
@@ -62,5 +54,15 @@ public class Person {
         result = 31 * result + (password != null ? password.hashCode() : 0);
         result = 31 * result + (height != null ? height.hashCode() : 0);
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "Person{" +
+                "name='" + name + '\'' +
+                ", age=" + age +
+                ", password='" + password + '\'' +
+                ", height=" + height +
+                '}';
     }
 }

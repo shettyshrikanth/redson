@@ -1,6 +1,9 @@
 package com.sidemash.redson;
 
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.DecimalNode;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.NoSuchElementException;
@@ -24,6 +27,19 @@ public class JsonNumber implements JsonLiteral {
 
     public static JsonNumber of(int value){
         return JsonNumber.of(BigDecimal.valueOf(value));
+    }
+
+    public static JsonNumber of(Number value){
+
+        // Protection if number is a Double or Float that is Infinity or NaN
+        // Calling the toString() method would throw a NumberFormatException
+        // @see http://docs.oracle.com/javase/1.5.0/docs/api/java/lang/Double.html#toString%28double%29
+        if (value instanceof Double)
+            return JsonNumber.of(BigDecimal.valueOf((Double) value));
+        else if (value instanceof Float)
+            return JsonNumber.of(BigDecimal.valueOf((Float) value));
+
+        return JsonNumber.of(new BigDecimal(value.toString()));
     }
 
     public static JsonNumber of(long value) {
@@ -85,6 +101,7 @@ public class JsonNumber implements JsonLiteral {
                 )
         );
     }
+
 
     @Override
     public Optional<Boolean> asBooleanOptional() {
@@ -188,6 +205,7 @@ public class JsonNumber implements JsonLiteral {
     }
 
 
+
     @Override
     public short asShort() {
         return value.shortValueExact();
@@ -279,6 +297,11 @@ public class JsonNumber implements JsonLiteral {
     @Override
     public String stringify(boolean keepingNull, boolean emptyValuesToNull) {
         return value.toString();
+    }
+
+    @Override
+    public JsonNode toJsonNode() {
+        return DecimalNode.valueOf(value);
     }
 
     @Override

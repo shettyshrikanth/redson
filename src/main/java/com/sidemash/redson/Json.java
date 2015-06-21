@@ -1,6 +1,7 @@
 package com.sidemash.redson;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.sidemash.redson.converter.*;
 
 import java.lang.reflect.Array;
@@ -46,6 +47,7 @@ public class Json {
         registerDefaultConverter(Object.class,     DefaultObjectConverter.INSTANCE);
         registerDefaultConverter(JsonValue.class,  JsonValueConverter.INSTANCE);
         registerDefaultConverter(Enum.class,       EnumConverter.INSTANCE);
+        registerDefaultConverter(JsonNode.class,   JsonNodeConverter.INSTANCE);
 
         registerDefaultConverter(List.class,       new ListConverter<>());
         registerDefaultConverter(Stream.class,     new StreamConverter<>());
@@ -57,6 +59,8 @@ public class Json {
         registerDefaultConverter(IteratorConverter.class, new IteratorConverter<>());
     }
 
+
+    private Json(){}
 
     public static JsonValue toJsonValue(Object o){
 
@@ -70,7 +74,6 @@ public class Json {
         fnResult = (BiFunction<Object, JsonValue, JsonValue>) getJsonWriterFunctionFor(standardizeClass(o.getClass()));
         return fnResult.apply(o, JsonObject.EMPTY);
     }
-
 
     public static BiFunction<?, JsonValue, JsonValue> getJsonWriterFunctionFor(Class<?> cl){
         return getFunctionFrom(cl,writersToJson, usersDefinedWritersToJson );
@@ -112,10 +115,6 @@ public class Json {
 
         return fnResult;
     }
-
-
-
-    private Json(){}
 
     public static String prettyStringify(Object o) {
         JsonValue jsonValue = (o instanceof  JsonValue) ? ((JsonValue) o) : toJsonValue(o);
@@ -236,6 +235,8 @@ public class Json {
             return Set.class;
         else if( initialClass.isArray() )
             return Array.class;
+        else if( JsonNode.class.isAssignableFrom(initialClass) )
+            return JsonNode.class;
         else if( Queue.class.isAssignableFrom(initialClass) )
             return Queue.class;
         else if( Iterator.class.isAssignableFrom(initialClass) )
@@ -291,10 +292,8 @@ public class Json {
        //      2 - The value is NOT an Empty instance of JsonOptional
        if(!keepingNull && jsonValue.isJsonNull())
            return false;
-       if(jsonValue.isJsonOptional() && jsonValue.isEmpty())
-           return false;
+       return !(jsonValue.isJsonOptional() && jsonValue.isEmpty());
 
-       return true;
    }
 
     public static boolean isWriterRegisteredFor(Class<?> cl) {

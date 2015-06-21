@@ -1,6 +1,9 @@
 package com.sidemash.redson;
 
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.sidemash.redson.util.ImmutableVector;
 
 import java.util.*;
@@ -782,6 +785,15 @@ public class JsonArray implements
         }
 
         return map;
+    }
+
+    @Override
+    public JsonNode toJsonNode() {
+        ArrayNode result = JsonNodeFactory.instance.arrayNode();
+        items.stream().forEachOrdered(value  -> {
+            result.add(value.toJsonNode());
+        });
+        return result;
     }
 
     @Override
