@@ -62,6 +62,7 @@ This is how you create an array
 ```java
 JsonArray.of(1)                         // -> [1]
 JsonArray.of(1,2,3)                     // -> [1, 2, 3]
+JsonArray.of("Hello", "World")          // -> ["Hello", "World"]
 ```
 Simple Right ?  
 Let's complicate thing. Since in JSON, it allowed to have mixed element in array, you can create a such array
@@ -95,6 +96,15 @@ A more complicated example, look at the following Json object
     "age"  : 99
 }
 ```
+We will construct this previous Json with redson in a simply way
+```java
+JsonObject.of( 
+     JsonEntry.of("name", "John Doe"),
+     JsonEntry.of("age", 99)
+)
+```
+
+Let see another example : 
 ```javascript
 {
    "user" : {
@@ -103,18 +113,12 @@ A more complicated example, look at the following Json object
    }
 }
 ```
-We will construct these following Json with redson in a simply way
-```java
-JsonObject.of( 
-     JsonEntry.of("name", JsonString.of("John Doe")),
-     JsonEntry.of("age", JsonNumber.of(99))
-)
-```
+We will construct this previous Json with redson in a same simply way : 
 ```java
 JsonObject.of( 
     JsonEntry.of("user", JsonObject.of(
-        JsonEntry.of("name", JsonString.of("John Doe")),
-        JsonEntry.of("age", JsonNumber.of(99))
+        JsonEntry.of("name", "John Doe"),
+        JsonEntry.of("age", 99)
     )    
 )
  
@@ -141,8 +145,8 @@ ascii.put(66, 'B');
 ascii.put(67, 'C');
 
 // Here we can't call JsonObject.of(ascii) because the ascii is not an Map indexed by String.
-// We need to provide a way to convert the keys to String. So pass a lambda to convert Integer to String
-JsonObject.of(ascii, num -> String.valueOf(num))     // -> { "65":"A", "66":"B", "67":"C" }
+// We need to provide a way to convert the keys to String. So we pass a lambda to convert Integer to String
+JsonObject.of(ascii, (Integer num) -> String.valueOf(num))     // -> { "65":"A", "66":"B", "67":"C" }
 
 // If the innerKey were an instance of YourCustomClass, all you have to do is to give a function that takes 
 // an instance of YourCustomClass and return a String you want to see as innerKey of your JsonObject.
@@ -153,10 +157,10 @@ JsonObject.of(ascii, num -> String.valueOf(num))     // -> { "65":"A", "66":"B",
 #### Creating JsonNumber, JsonString and JsonOptional
 You can create `JsonNumber` from : Short, Byte, Integer, Long, Float, Double, BigDecimal, BigInteger and String ( if and only if this String contains a valid number )
 
-You can create `JsonString` from : String, Char and CharSequence
+You can create `JsonString` from : String, byte[], Char, and CharSequence
 
-`JsonOptionnal`
-Whenever you are dealing with JsonOptionnal, remember that JsonOptionnal contains optionnally an instance of JsonValue. Hence, when you create an instance of JsonOptionnal from an Optional, the innerValue if any will be converted ( E.g; : a String will become JsonString etc . ) and stored in the JsonOptionnal.
+`JsonOptional`
+Whenever you are dealing with JsonOptional, remember that JsonOptional contains optionally an instance of JsonValue. Hence, when you create an instance of JsonOptional from an Optional, the innerValue if any, will be converted ( E.g; : a String will become JsonString etc . ) and stored in the JsonOptional.
 The JsonOptional has severals methods of the Java Optional, so it is possible to manipulate as if it was an `Optional<JsonValue>`.
 
 
@@ -192,7 +196,50 @@ array.get(0).get("user").getOptional("unknownKey")          // -> Optional.empty
 array.get(0).getOrDefault("unknownKey", "defaultValue")     // -> "defaultValue"
 ```
 
+Let's take again our previous Json
+```javascript
+[
+    {
+       "user" : {
+          "name" : "John Doe",
+          "age"  : 99
+       }
+    }
+]
+```
+Assume that this Json is an array having the Friends List of a given user : Let's call him toto. Given the previous Json, we can say that "toto has only one friend named John". It seems that toto is not very popular but here, array could have been empty. So how do we traverse this JsonArray to get the name of the first friend ( here "John Doe") in a safe way ?
 
+The (old) imperative way
+```java 
+JsonArray friendList = // Get this Json in your favorite way.
+
+// As this variable will store eventually the name of the first friend, We start by defining a 
+// default value in the case where the user have no friends.
+String firstFriendName = "We are so sorry for you, #ForeverAlone :-( ";
+
+// We then check for the JsonArray
+if(friendList.isNotEmpty()) {
+    JsonValue firstFriend = array.getHead();
+    if(firstFriend.isNotEmpty() && firstFriend.isDefinedAt("user")) {
+        firstFriendName = firstFriend.get("user").get("name");
+        // here we can safety mutate the variable with the result ( assuming that the initial friendList
+        // were well formed, we do not need to check for availability of "name" attribute by calling :
+        // firstFriend.get("user").isDefinedAt("name")
+    }
+}
+```
+
+The functional Java 8 way
+```java 
+JsonArray friendList = // Get this Json in your favorite way.
+
+// This variable will store eventually the name of the first friend.
+String firstFriendName =  friendList.getHeadOptional()
+                                    .flatMap(firstFriend -> firstFriend.getOptional("user"))
+                                    .flatMap(user -> user.getOptional("name"))
+                                    .map(JsonValue::asString)
+                                    .orElse("We are so sorry for you, #ForeverAlone :-( ");
+```
 
 (Still In Progress)
 
