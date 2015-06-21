@@ -2,6 +2,7 @@ package com.sidemash.redson;
 
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
@@ -229,6 +230,8 @@ public interface JsonValue {
     default JsonValue ifJsonStructureElseThis(Function<? super JsonValue, ? extends JsonValue> thenFn) {
         return ifConditionElseThis(this::isJsonStructure, thenFn);
     }
+
+    boolean isEmpty();
 /*
     <T> T ifJsonArray(Function<? super JsonValue, ? extends T> thenFn,Function<? super JsonValue, ? extends T> elseFn);
 
@@ -258,8 +261,6 @@ public interface JsonValue {
 
     JsonValue ifJsonStringElseThis(Function<? super JsonValue, ? extends JsonValue> thenFn);
 */
-
-    boolean isEmpty();
 
     boolean isJsonArray();
 
@@ -329,6 +330,8 @@ public interface JsonValue {
     default <T> Map<Integer, T> toIntIndexedMapOf(Class<T> c) {
         return toIntIndexedMapOf(c, new LinkedHashMap<>());
     }
+
+    JsonNode toJsonNode();
 
     default <T> Map<String, T> toStringIndexedMapOf(Class<T> cl){
         return toStringIndexedMapOf(cl, new LinkedHashMap<>());

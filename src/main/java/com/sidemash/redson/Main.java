@@ -1,22 +1,23 @@
 package com.sidemash.redson;
 
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+
 public class Main {
 
     public static void main(String[] args) {
-        System.out.println(JsonObject.of(
-                JsonEntry.of("Serge", "MArtial"),
-                JsonEntry.of("Serge", "Strike"),
-                JsonEntry.of("martial", "Venan"),
-                JsonEntry.of("Serge", "Strike"),
-                JsonEntry.of("martial", "Strike"),
-                JsonEntry.of("Serge", "VRadioenan")
-           ).stringify());
+        JsonNode rootNode = JsonNodeFactory.instance.numberNode(12);
+
+        System.out.println(JsonValue.of(rootNode));
     }
 
 }
         /*
         // Tester limit(), limitWhile(), limitRight()
+        // Does JsonEntry have to implements Map.Entry ?
+        // Change the internal repr of Object to Map
+        // JsonObect construct from Iterator<Map.Entry<String, ? >>
 
         // Revoir les regles de conversion par defaut d'un objet
         // Revoir les regles de conversion en general

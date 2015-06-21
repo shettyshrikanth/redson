@@ -1,6 +1,9 @@
 package com.sidemash.redson;
 
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.NullNode;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Map;
@@ -55,7 +58,6 @@ public enum JsonNull implements JsonLiteral {
     public Optional<Boolean> asBooleanOptional() {
         return Optional.empty();
     }
-
 
     @Override
     public byte asByte() {
@@ -240,8 +242,14 @@ public enum JsonNull implements JsonLiteral {
     }
 
     @Override
+    public JsonNode toJsonNode() {
+        return NullNode.getInstance();
+    }
+
+    @Override
     public String toString() {
         return "JsonNull{}";
     }
+
 
 }

@@ -1,6 +1,9 @@
 package com.sidemash.redson;
 
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.BooleanNode;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.NoSuchElementException;
@@ -266,6 +269,11 @@ public enum JsonBoolean implements JsonLiteral {
     @Override
     public String stringify(boolean keepingNull, boolean emptyValuesToNull) {
         return String.valueOf(value);
+    }
+
+    @Override
+    public JsonNode toJsonNode() {
+        return BooleanNode.valueOf(value);
     }
 
     @Override

@@ -1,6 +1,9 @@
 package com.sidemash.redson;
 
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.TextNode;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.NoSuchElementException;
@@ -288,6 +291,11 @@ public class JsonString implements JsonLiteral {
     @Override
     public String stringify(boolean keepingNull, boolean emptyValuesToNull) {
         return  String.format("\"%s\"", value);
+    }
+
+    @Override
+    public JsonNode toJsonNode() {
+        return TextNode.valueOf(value);
     }
 
     @Override

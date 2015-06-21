@@ -1,6 +1,9 @@
 package com.sidemash.redson;
 
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.MissingNode;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
@@ -209,8 +212,7 @@ public class JsonOptional implements JsonValue {
 
     @Override
     public <T> Optional<T> asOptionalOf(Class<T> c) {
-       if(value.isPresent()) return Optional.of(Json.fromJsonValue(value.get(), c));
-       else return Optional.empty();
+        return value.map(v -> Json.fromJsonValue(v, c));
     }
 
     @Override
@@ -420,6 +422,13 @@ public class JsonOptional implements JsonValue {
     public <T> Map<Integer, T> toIntIndexedMapOf(Class<T> cl, Map<Integer, T> map) {
         value.ifPresent(elem -> map.put(0, elem.as(cl)));
         return map;
+    }
+
+    @Override
+    public JsonNode toJsonNode() {
+        return value
+                .map(JsonValue::toJsonNode)
+                .orElse(MissingNode.getInstance());
     }
 
     @Override

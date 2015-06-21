@@ -1,5 +1,4 @@
-package com.sidemash.redson;
-
+import com.sidemash.redson.*;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;

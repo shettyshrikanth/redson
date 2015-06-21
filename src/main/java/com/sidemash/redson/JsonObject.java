@@ -1,6 +1,9 @@
 package com.sidemash.redson;
 
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.sidemash.redson.util.ImmutableMap;
 
 import java.util.*;
@@ -527,6 +530,15 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>>, I
                         cl.getSimpleName()
                 )
         );
+    }
+
+    @Override
+    public JsonNode toJsonNode() {
+        ObjectNode result = JsonNodeFactory.instance.objectNode();
+        bindingsIntJsonValues.stream().forEachOrdered(entry -> {
+            result.set(entry.getKey(), entry.getValue().toJsonNode());
+        });
+        return result;
     }
 
     public List<JsonEntry<String>> toList(){
