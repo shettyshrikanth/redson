@@ -1,49 +1,73 @@
 package com.sidemash.redson;
 
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public interface JsonLiteral extends JsonValue {
 
     @Override
-    default JsonValue append(JsonValue jsValue) {
-        throw new UnsupportedOperationException("This operation is not supported for JsonLiteral.");
+    default <T> List<T> asListOf(Class<T> cl, List<T> list) {
+        list.add(Json.fromJsonValue(this, cl));
+        return list;
     }
 
     @Override
-    default JsonValue append(String key, JsonValue jsValue) {
-        throw new UnsupportedOperationException("This operation is not supported for JsonLiteral.");
+    default <T> List<T> asListOf(Class<T> cl) {
+        return asListOf(cl, new ArrayList<>());
     }
 
     @Override
-    default JsonValue appendIfAbsent(String key, JsonValue jsValue) {
-        throw new UnsupportedOperationException("This operation is not supported for JsonLiteral.");
+    default <T> Map<String, T> asMapOf(Class<T> cl,  Map<String, T> map){
+        throw new ClassCastException(
+                String.format(
+                        "This %s could be interpreted as an instance of Map<String, %s>",
+                        this.getClass().getSimpleName(),
+                        cl.getSimpleName()
+                )
+        );
     }
 
     @Override
-    default boolean containsAll(JsonValue... jsValues) {
-        return containsAll(Arrays.asList(jsValues));
+    default <T> Set<T> asSetOf(Class<T> cl, Set<T> set) {
+        set.add(Json.fromJsonValue(this, cl));
+        return set;
     }
 
     @Override
-    default boolean containsAll(List<? extends JsonValue> jsValues) {
-        if(jsValues.size() > 1)
-            return false;
-        else if (jsValues.size() == 1)
-            return containsValue(jsValues.get(0));
-        else
-            return false;
+    default <T> Set<T> asSetOf(Class<T> cl) {
+        return asSetOf(cl, new LinkedHashSet<>());
     }
 
     @Override
-    default boolean isDefinedAt(int index) {
-        return (index == 0);
+    default JsonValue get(int index) {
+        throw new UnsupportedOperationException(String.format("Get item by index " +
+                "on JsonLiteral of type %s", this.getClass().getSimpleName()));
     }
 
     @Override
-    default boolean isDefinedAt(String key) {
-        return false;
+    default JsonValue get(String key) {
+        throw new UnsupportedOperationException(String.format("Get item by key " +
+                "on JsonLiteral of type %s", this.getClass().getSimpleName()));
+    }
+
+    @Override
+    default Optional<JsonValue> getOptional(int index) {
+        return Optional.empty();
+    }
+
+    @Override
+    default Optional<JsonValue> getOptional(String key) {
+        return Optional.empty();
+    }
+
+    @Override
+    default JsonValue getOrDefault(int index, JsonValue jsonValue) {
+        return jsonValue;
+    }
+
+    @Override
+    default JsonValue getOrDefault(String key, JsonValue jsonValue) {
+        return jsonValue;
     }
 
     @Override
@@ -87,16 +111,20 @@ public interface JsonLiteral extends JsonValue {
     }
 
     @Override
-    default JsonValue union(JsonValue jsonValue){
-        throw new UnsupportedOperationException(
-                String.format("this operation is not supported by instance of %s", this.getClass())
-        );
+    default <T> Map<Integer, T> toIntIndexedMapOf(Class<T> cl, Map<Integer, T> map) {
+        map.put(0, Json.fromJsonValue(this, cl));
+        return map;
     }
 
     @Override
-    default JsonValue unionAll(List<? extends JsonValue> jsonValues){
-        throw new UnsupportedOperationException(
-                String.format("this operation is not supported by instance of %s", this.getClass())
-        );
+    default <T> Map<String, T> toStringIndexedMapOf(Class<T> c) {
+        return toStringIndexedMapOf(c, new LinkedHashMap<>());
     }
+
+    @Override
+    default <T> Map<String, T> toStringIndexedMapOf(Class<T> c, Map<String, T> map) {
+        map.put("0", Json.fromJsonValue(this, c));
+        return map;
+    }
+
 }

@@ -1,42 +1,46 @@
 package com.sidemash.redson;
 
-import java.util.function.Supplier;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 
 public class Main {
 
     public static void main(String[] args) {
+        JsonNode rootNode = JsonNodeFactory.instance.numberNode(12);
 
-        JsonValue jsValue =
-                JsonObject.of("user",
-                        JsonObject.of("age",  JsonNumber.of(10))
-                );
-
-        JsonValue jsValue1 =
-                JsonArray.of(JsonNumber.of(10), JsonObject.EMPTY,  JsonNumber.of(10))
-                ;
-        JsonObject jsValue2 = JsonObject.EMPTY;
-
-        JsonObject jsValue3 = JsonObject.of(
-                                     JsonObject.of("name", JsonNumber.of(10)),
-                                     JsonObject.of("age",  JsonNumber.of(10)),
-                                    JsonObject.of("naming", JsonNumber.of(10)),
-                                    JsonObject.of("text", JsonOptional.EMPTY)
-                                );
-        timedOperation(() -> { jsValue3.toString(); return null; });
-
-
-        // JsonOptional.empty  -> Missing Field
-        // JsonOptional.of(T)  -> field of type T
-        // JsonNull   -> Field with a null value
-
-        System.out.println(jsValue3);
+        System.out.println(JsonValue.of(rootNode));
     }
 
-    public static void timedOperation(Supplier<Void> fn){
-        long startTime = System.nanoTime();
-        fn.get();
-        long endTime = System.nanoTime();
-        long duration = (endTime - startTime);
-        System.out.println("Total time : " + (duration/1000000 ) + "ms");
-    }
 }
+        /*
+        // Tester limit(), limitWhile(), limitRight()
+        // Does JsonEntry have to implements Map.Entry ?
+        // Change the internal repr of Object to Map
+        // JsonObect construct from Iterator<Map.Entry<String, ? >>
+
+        // Revoir les regles de conversion par defaut d'un objet
+        // Revoir les regles de conversion en general
+
+        JsonValue jsonValue = JsonArray.of(1, 2, 3, 4);
+        jsonValue.getOptional("user")
+                .flatMap(user -> user.getOptional("bestFriend"))
+                .flatMap(bestFriend -> bestFriend.getOptional("name"))
+                .map(JsonValue::asString)
+                .orElse("Unknown User");
+
+        System.out.println(JsonArray.of(1, 2, 3, 4).asListOf(Integer.class));
+
+        // System.out.println(JsonObject.of(tree).prettyStringify());
+        // Cannot transform nested classes to Json by reflexion
+        // Implements monadic methods on JsonValue DONE with STREAM
+        // Give sense to all Exceptions OK
+        // Implements equals and hashcode OK
+        // Test
+        // Document
+        // Implement ordered converter list, Many Converetr for exemple for String OK
+        // Implement converter for date
+        // Handle conversion to List Map, Arrays OK
+        // Handle conversion of recursive Parent classes OK
+        // Handle conversion of recursive data structures ( List<List<String>>, List<List<Map<String, List<String>>>> ) OK
+  */
