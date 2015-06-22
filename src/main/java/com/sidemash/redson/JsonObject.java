@@ -4,6 +4,7 @@ package com.sidemash.redson;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.ser.std.MapSerializer;
 import com.sidemash.redson.util.ImmutableMap;
 
 import java.util.*;
@@ -16,18 +17,20 @@ import java.util.stream.StreamSupport;
 public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>>, ImmutableMap<String, JsonValue> {
 
 
-    public static final JsonObject EMPTY = new JsonObject(Collections.emptyList(), Collections.emptyMap());
+    public static final JsonObject EMPTY = new JsonObject(Collections.emptyMap());
     private final List<JsonEntry<String>> bindingsIntJsonValues;
     private final Map<String, Integer> bindingsKeysInt;
+    private final Map<String, JsonValue> items;
 
-    private JsonObject(List<JsonEntry<String>> bindingsIntJsonValues, Map<String, Integer> bindingsKeysInt) {
-        this.bindingsIntJsonValues = bindingsIntJsonValues;
-        this.bindingsKeysInt = bindingsKeysInt;
+    // Constructors
+    private JsonObject(final Map<String, JsonValue> items) {
+        this.items = items;
     }
 
+    // Factories
     private static List<JsonEntry<String>> newBindingJsonValues() { return new ArrayList<>(); }
     private static Map<String, Integer> newBindingKeys() { return new LinkedHashMap<>(); }
-    // Constructors
+    private static Map<String, JsonValue> newItems() { return new LinkedHashMap<>(); }
 
     /**
      * Creates a JsonObject from the Map passed as parameter
@@ -36,19 +39,14 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>>, I
      * @param <V>
      * @return
      */
-    public static <V> JsonObject of(Map<String, V> map) {
+    public static <V> JsonObject of(final Map<String, V> map) {
         if(map.isEmpty())
             return EMPTY;
 
-        List<JsonEntry<String>> newBindings = newBindingJsonValues();
-        Map<String, Integer> newBindingsKeys = newBindingKeys();
-        int i = 0;
-        for (Map.Entry<String, V> entry : map.entrySet()) {
-            newBindings.add(JsonEntry.of(entry.getKey(), entry.getValue()));
-            newBindingsKeys.put(entry.getKey(), i);
-            i++;
-        }
-        return new JsonObject(newBindings, newBindingsKeys);
+        Map<String, JsonValue> newItems = newItems();
+        map.forEach((key, value) -> newItems.put(key, JsonValue.of(value)));
+
+        return new JsonObject(newItems);
     }
 
     /**
@@ -60,23 +58,14 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>>, I
      * @param <V>
      * @return
      */
-    public static <K, V> JsonObject of(Map<K, V> map, Function<K, String> kToString) {
+    public static <K, V> JsonObject of(final Map<K, V> map, final Function<K, String> kToString) {
         if(map.isEmpty())
             return EMPTY;
 
-        List<JsonEntry<String>> newBindings = newBindingJsonValues();
-        Map<String, Integer> newBindingsKeys = newBindingKeys();
-        int i = 0;
-        String tmpKey ;
-        for (Map.Entry<K, V> entry : map.entrySet()) {
-                tmpKey = kToString.apply(entry.getKey());
-            if(!newBindingsKeys.containsKey(tmpKey)) {
-                newBindings.add(JsonEntry.of(tmpKey, entry.getValue()));
-                newBindingsKeys.put(tmpKey, i);
-                i++;
-            }
-        }
-        return new JsonObject(newBindings, newBindingsKeys);
+        Map<String, JsonValue> newItems = newItems();
+        map.forEach((key, value) -> newItems.put(kToString.apply(key), JsonValue.of(value)));
+
+        return new JsonObject(newItems);
     }
 
     /**
@@ -85,13 +74,12 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>>, I
      * @param value
      * @return A new JsonObject with only one entry { key : value }
      */
-    public static JsonObject of(String key, Object value) {
-        List<JsonEntry<String>> newBindings = newBindingJsonValues();
-        Map<String, Integer> newBindingsKeys = newBindingKeys();
+    public static JsonObject of(final String key, final Object value) {
+        Map<String, JsonValue> newItems = newItems();
 
-        newBindings.add(JsonEntry.of(key, value));
-        newBindingsKeys.put(key, 0);
-        return new JsonObject(newBindings, newBindingsKeys);
+        newItems.put(key, JsonValue.of(value));
+
+        return new JsonObject(newItems);
     }
 
     /**
@@ -100,43 +88,29 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>>, I
      * @throws ClassCastException if o can't be converted to a valid JsonObject
      * @return
      */
-    public static JsonObject of(Object o) {
+    public static JsonObject of(final Object o) {
         return  (JsonObject) JsonValue.of(o);
     }
 
-    public static JsonObject of(JsonEntry<String> jsonEntry) {
+    /**
+     * Create JsonObject from an jsonEntry passed as parameter
+     * @param jsonEntry
+     * @return
+     */
+    public static JsonObject of(final JsonEntry<String> jsonEntry) {
         Objects.requireNonNull(jsonEntry);
+        Map<String, JsonValue> newItems = newItems();
+        newItems.put(jsonEntry.getKey(), jsonEntry.getValue());
 
-        List<JsonEntry<String>> newBindings = newBindingJsonValues();
-        Map<String, Integer> newBindingsKeys = newBindingKeys();
-
-        newBindings.add(jsonEntry);
-        newBindingsKeys.put(jsonEntry.getKey(), 0);
-        return new JsonObject(newBindings, newBindingsKeys);
+        return new JsonObject(newItems);
     }
 
     @SafeVarargs
-    public static JsonObject of(JsonEntry<String> jsonEntry1, JsonEntry<String>... jsonEntries) {
-        List<JsonEntry<String>> newBindings = newBindingJsonValues();
-        Map<String, Integer> newBindingsKeys = newBindingKeys();
-
-        int i = 0;
-        int tmpIndex;
-        newBindings.add(Objects.requireNonNull(jsonEntry1));
-        newBindingsKeys.put(jsonEntry1.getKey(), i);
-        for (JsonEntry<String> entry : jsonEntries) {
-            if(newBindingsKeys.containsKey(entry.getKey())) {
-                tmpIndex = newBindingsKeys.get(entry.getKey());
-                newBindings.remove(tmpIndex);
-                newBindings.add(tmpIndex, Objects.requireNonNull(entry));
-            }
-            else {
-                i++;
-                newBindings.add(Objects.requireNonNull(entry));
-                newBindingsKeys.put(entry.getKey(), i);
-            }
-        }
-        return new JsonObject(newBindings, newBindingsKeys);
+    public static JsonObject of(final JsonEntry<String> jsonEntry1, final JsonEntry<String>... jsonEntries) {
+        Objects.requireNonNull(jsonEntry1);
+        List<JsonEntry<String>> itemsList = Arrays.asList(jsonEntries);
+        itemsList.add(0, jsonEntry1);
+        return of(itemsList.iterator());
     }
 
     public static JsonObject of(Iterable<JsonEntry<String>> iterable) {

@@ -13,7 +13,7 @@ import java.util.function.Supplier;
 
 public interface JsonValue {
 
-    static JsonValue of(Object o){
+    static JsonValue of(final Object o){
         return Json.toJsonValue(o);
     }
 
