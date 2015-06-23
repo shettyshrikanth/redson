@@ -4,22 +4,19 @@ package com.sidemash.redson;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.ser.std.MapSerializer;
 import com.sidemash.redson.util.ImmutableMap;
 
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>>, ImmutableMap<String, JsonValue> {
 
 
     public static final JsonObject EMPTY = new JsonObject(Collections.emptyMap());
-    private final List<JsonEntry<String>> bindingsIntJsonValues;
-    private final Map<String, Integer> bindingsKeysInt;
     private final Map<String, JsonValue> items;
 
     // Constructors
@@ -27,9 +24,6 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>>, I
         this.items = items;
     }
 
-    // Factories
-    private static List<JsonEntry<String>> newBindingJsonValues() { return new ArrayList<>(); }
-    private static Map<String, Integer> newBindingKeys() { return new LinkedHashMap<>(); }
     private static Map<String, JsonValue> newItems() { return new LinkedHashMap<>(); }
 
     /**
@@ -40,13 +34,7 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>>, I
      * @return
      */
     public static <V> JsonObject of(final Map<String, V> map) {
-        if(map.isEmpty())
-            return EMPTY;
-
-        Map<String, JsonValue> newItems = newItems();
-        map.forEach((key, value) -> newItems.put(key, JsonValue.of(value)));
-
-        return new JsonObject(newItems);
+        return JsonObject.of(map, Function.<String>identity());
     }
 
     /**
@@ -75,11 +63,11 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>>, I
      * @return A new JsonObject with only one entry { key : value }
      */
     public static JsonObject of(final String key, final Object value) {
-        Map<String, JsonValue> newItems = newItems();
-
-        newItems.put(key, JsonValue.of(value));
-
-        return new JsonObject(newItems);
+        Objects.requireNonNull(key);
+        return JsonObject.of(
+                Collections.singletonMap(key, value),
+                Function.<String>identity()
+        );
     }
 
     /**
@@ -98,18 +86,18 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>>, I
      * @return
      */
     public static JsonObject of(final JsonEntry<String> jsonEntry) {
-        Objects.requireNonNull(jsonEntry);
-        Map<String, JsonValue> newItems = newItems();
-        newItems.put(jsonEntry.getKey(), jsonEntry.getValue());
-
-        return new JsonObject(newItems);
+        return JsonObject.of(
+                Collections.singletonMap(jsonEntry.getKey(), jsonEntry.getValue()),
+                Function.<String>identity()
+        );
     }
 
     @SafeVarargs
     public static JsonObject of(final JsonEntry<String> jsonEntry1, final JsonEntry<String>... jsonEntries) {
         Objects.requireNonNull(jsonEntry1);
-        List<JsonEntry<String>> itemsList = Arrays.asList(jsonEntries);
-        itemsList.add(0, jsonEntry1);
+        List<JsonEntry<String>> itemsList = new ArrayList<>();
+        itemsList.add(jsonEntry1);
+        itemsList.addAll(Arrays.asList(jsonEntries));
         return of(itemsList.iterator());
     }
 
@@ -117,43 +105,26 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>>, I
         return JsonObject.of(iterable.iterator());
     }
 
-
     public static JsonObject of(Stream<JsonEntry<String>> stream) {
         return JsonObject.of(stream.iterator());
     }
-
 
     public static JsonObject of(Iterator<JsonEntry<String>> it) {
         if (!it.hasNext())
             return JsonObject.EMPTY;
 
-        List<JsonEntry<String>> newBindings = newBindingJsonValues();
-        Map<String, Integer> newBindingsKeys = newBindingKeys();
-        int i = 0;
-        JsonEntry<String> entry;
-        while (it.hasNext()) {
-            entry = it.next();
-            newBindings.add(Objects.requireNonNull(entry));
-            newBindingsKeys.put(entry.getKey(), i);
-            i++;
-        }
+        Map<String, JsonValue> newItems = newItems();
+        it.forEachRemaining(entry -> newItems.put(entry.getKey(), entry.getValue()));
 
-        return new JsonObject(newBindings, newBindingsKeys);
+        return new JsonObject(newItems);
     }
 
-
     public JsonObject append(String key, Object value) {
-        List<JsonEntry<String>> newBindings = newBindingJsonValues();
-        Map<String, Integer> newBindingsKeys = newBindingKeys();
-
-        newBindings.addAll(bindingsIntJsonValues);
-        newBindingsKeys.putAll(bindingsKeysInt);
-
-        JsonEntry<String> entry = JsonEntry.of(key, value);
-        newBindings.add(entry);
-        newBindingsKeys.put(entry.getKey(), bindingsKeysInt.size());
-
-        return new JsonObject(newBindings, newBindingsKeys);
+        Objects.requireNonNull(key);
+        Map<String, JsonValue> newItems = newItems();
+        newItems.putAll(this.items);
+        newItems.put(key, JsonValue.of(value));
+        return new JsonObject(newItems);
     }
 
     @Override
@@ -169,7 +140,8 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>>, I
 
     @Override
     public <T> Map<String, T> asMapOf(Class<T> cl, Map<String, T> map) {
-        this.stream().forEachOrdered(entry -> map.put(entry.getKey(), entry.getValue().as(cl)));
+        this.stream()
+            .forEachOrdered(entry -> map.put(entry.getKey(), entry.getValue().as(cl)));
         return map;
     }
 
@@ -184,22 +156,54 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>>, I
         );
     }
 
-    public boolean containsAllKeys(List<String> allKeys) {
-        return allKeys.stream().allMatch(bindingsKeysInt::containsKey);
+    @SafeVarargs
+    public final boolean containsAllEntries(final JsonEntry<String>... entry){
+        return this.containsAllEntries(Arrays.asList(entry));
     }
 
-    public <E> boolean containsAllValues(List<E> allValues) {
-        // FIXME find a better way
-        return allValues.stream().allMatch(this::containsValue);
+    public boolean containsAllEntries(final Iterable<JsonEntry<String>> jsonEntries){
+        for(JsonEntry<String> jsonEntry : jsonEntries){
+            if(!this.containsEntry(jsonEntry))
+                return false;
+        }
+        return true;
+    }
+
+    public boolean containsAllKeys(Iterable<String> allKeys) {
+        for(String key : allKeys){
+            if(!items.containsKey(key))
+                return false;
+        }
+        return true;
+    }
+
+    public boolean containsAllKeys(String... allKeys) {
+        return this.containsAllKeys(Arrays.asList(allKeys));
+    }
+
+    public <E> boolean containsAllValues(Iterable<E> allValues) {
+        for(E value : allValues){
+            if(!items.containsValue(value))
+                return false;
+        }
+        return true;
+    }
+
+    public <E> boolean containsAllValues(E... allValues) {
+        return this.containsAllValues(Arrays.asList(allValues));
+    }
+
+    public boolean containsEntry(JsonEntry<String> entry){
+        return items.containsKey(entry.getKey()) && get(entry.getKey()).equals(entry.getValue());
     }
 
     public boolean containsKey(String key) {
-        return bindingsKeysInt.containsKey(key);
+        return items.containsKey(key);
     }
 
     @Override
     public boolean containsValue(Object value) {
-        return bindingsIntJsonValues.stream().anyMatch(entry -> entry.getValue().equals(value));
+        return items.containsValue(value);
     }
 
     @Override
@@ -209,16 +213,14 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>>, I
 
         JsonObject that = (JsonObject) o;
 
-        if (!bindingsIntJsonValues.equals(that.bindingsIntJsonValues)) return false;
-        return bindingsKeysInt.equals(that.bindingsKeysInt);
-
+        return items.equals(that.items);
     }
 
     @Override
-    public <U> U foldLeft(U seed, BiFunction<U, JsonEntry<String>, U> op) {
+    public <U> U foldLeft(final U seed, final BiFunction<U, JsonEntry<String>, U> op) {
         U result = seed;
-        for (JsonEntry<String> binding : bindingsIntJsonValues) {
-            result = op.apply(result, binding);
+        for (Map.Entry<String, JsonValue> binding : items.entrySet()) {
+            result = op.apply(result, JsonEntry.of(binding));
         }
         return result;
     }
@@ -233,17 +235,17 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>>, I
         if(isEmpty())
             throw new NoSuchElementException(String.format("Impossible to find key '%s' in an empty JsonObject", key));
 
-        return bindingsIntJsonValues.get(bindingsKeysInt.get(key)).getValue();
+        return items.get(key);
     }
 
     /**
-     * Utility method to retrieve a JsonEntry by a key
+     * Get a JsonEntry by a key
      *
      * @param key the key of the entry
      * @return the entry which have key key
      */
     public JsonEntry<String> getEntry(String key) {
-        return this.bindingsIntJsonValues.get(this.bindingsKeysInt.get(key));
+        return JsonEntry.of(key, get(key));
     }
 
     @Override
@@ -251,7 +253,12 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>>, I
         if(isEmpty())
             throw new NoSuchElementException("Head of an empty JsonObject");
 
-        return bindingsIntJsonValues.get(0);
+        // FIXME find a better way
+        return items.entrySet()
+                .stream()
+                .findFirst()
+                .map(JsonEntry::of)
+                .get();
     }
 
     public Set<JsonEntry<Integer>> getIntIndexedEntrySet() {
@@ -268,7 +275,12 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>>, I
         if(isEmpty())
             throw new NoSuchElementException("Head of an empty JsonObject");
 
-        return bindingsIntJsonValues.get(bindingsIntJsonValues.size() - 1);
+        return items.entrySet()
+                .stream()
+                .skip(items.size() - 1)
+                .findFirst()
+                .map(JsonEntry::of)
+                .get();
     }
 
     @Override
@@ -278,7 +290,7 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>>, I
 
     @Override
     public Optional<JsonValue> getOptional(String key) {
-        return (bindingsKeysInt.containsKey(key))
+        return (items.containsKey(key))
                 ? Optional.of(this.get(key))
                 : Optional.empty();
     }
@@ -290,14 +302,12 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>>, I
 
     @Override
     public JsonValue getOrDefault(String key, JsonValue jsonValue) {
-        return (bindingsKeysInt.containsKey(key))
-                ? this.get(key)
-                : jsonValue;
+        return items.getOrDefault(key, jsonValue);
     }
 
     public Set<JsonEntry<String>> getStringIndexedEntrySet() {
         Set<JsonEntry<String>> result = new LinkedHashSet<>();
-        result.addAll(bindingsIntJsonValues);
+        items.forEach((key, value) -> result.add(JsonEntry.of(key, value)) );
         return result;
     }
 
@@ -306,31 +316,26 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>>, I
         if(this.isEmpty())
             throw new UnsupportedOperationException("Get tail of an EMPTY JsonObject");
 
-        List<JsonEntry<String>> newBindings = bindingsIntJsonValues.subList(1, bindingsIntJsonValues.size());
-        Map<String, Integer> newBindingsKeys = newBindingKeys();
-        int i = 0;
-        for(JsonEntry<String> entry : newBindings){
-            newBindingsKeys.put(entry.getKey(), i);
-            i++;
-        }
-
-        return new JsonObject(newBindings, newBindingsKeys);
+        return JsonObject.of(
+            items.entrySet()
+                 .stream()
+                 .skip(1)
+                 .map(JsonEntry::of)
+        );
     }
 
     @Override
     public int hashCode() {
-        int result = bindingsIntJsonValues.hashCode();
-        result = 31 * result + bindingsKeysInt.hashCode();
-        return result;
+        return items.hashCode();
     }
 
     public boolean isDefinedAt(String key) {
-        return bindingsKeysInt.containsKey(key);
+        return items.containsKey(key);
     }
 
     @Override
     public boolean isEmpty() {
-        return bindingsKeysInt.isEmpty();
+        return items.isEmpty();
     }
 
     @Override
@@ -345,45 +350,25 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>>, I
 
     @Override
     public Iterator<JsonEntry<String>> iterator() {
-        return bindingsIntJsonValues.iterator();
+        return items.entrySet()
+                    .stream()
+                    .map(JsonEntry::of)
+                    .iterator();
     }
 
     @Override
     public Iterator<String> keysIterator() {
-        return new Iterator<String>() {
-
-            final int length = bindingsIntJsonValues.size();
-            int currentIndex = 0;
-
-            @Override
-            public boolean hasNext() {
-                return (currentIndex < length);
-            }
-
-            @Override
-            public String next() {
-                String next = bindingsIntJsonValues.get(currentIndex).getKey();
-                currentIndex++;
-                return next;
-            }
-        };
+        return this.keysStream().iterator();
     }
 
     public Set<String> keysSet() {
         Set<String> keySet = new LinkedHashSet<>();
-        keySet.addAll(bindingsKeysInt.keySet());
+        keySet.addAll(items.keySet());
         return keySet;
     }
 
     public Stream<String> keysStream() {
-        return StreamSupport.stream(
-                Spliterators.spliterator(
-                        keysIterator(),
-                        bindingsKeysInt.size(),
-                        Spliterator.NONNULL | Spliterator.ORDERED | Spliterator.IMMUTABLE | Spliterator.DISTINCT
-                ),
-                false
-        );
+        return items.keySet().stream();
     }
 
     @Override
@@ -431,34 +416,36 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>>, I
         return result;
     }
 
+    /**
+     * Return a new JsonObject where the key specified as parameter has
+     * been removed.
+     * Note : If this JsonObject is empty, then nothing will occur and the
+     *          empty JsonObject will be returned as it since it does not
+     *          contain the key specified as parameter.
+     *
+     * @param key the key to remove
+     * @return a new JsonObject without the key passed in param
+     */
     public JsonObject remove(String key) {
         if (!this.isDefinedAt(key))
             return this;
 
-        Map<String, Integer> newBindingsKeys = newBindingKeys();
-        List<JsonEntry<String>> newBindings = newBindingJsonValues();
-        newBindings.addAll(bindingsIntJsonValues);
-        int indexToRemove = bindingsKeysInt.get(key);
-        newBindings.remove(indexToRemove);
-        int i = 0;
-        for(JsonEntry<String> entry : newBindings){
-            newBindingsKeys.put(entry.getKey(), i);
-            i++;
-        }
-
-        return new JsonObject(newBindings, newBindingsKeys);
+        Map<String, JsonValue> newItems = newItems();
+        newItems.putAll(items);
+        newItems.remove(key);
+        return new JsonObject(newItems);
     }
 
     public JsonObject remove(String key, JsonValue oldJsonValue) {
-        if (!this.containsKey(key) || this.get(key).equals(oldJsonValue))
-            return this;
+        if (this.containsKey(key) && this.get(key).equals(oldJsonValue))
+            return remove(key);
 
-        return remove(key);
+        return this;
     }
 
     @Override
     public int size() {
-        return bindingsKeysInt.size();
+        return items.size();
     }
 
     @Override
@@ -467,14 +454,9 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>>, I
     }
 
     public Stream<JsonEntry<String>> stream() {
-        return StreamSupport.stream(
-                Spliterators.spliterator(
-                        iterator(),
-                        bindingsKeysInt.size(),
-                        Spliterator.NONNULL | Spliterator.ORDERED | Spliterator.IMMUTABLE | Spliterator.DISTINCT
-                ),
-                false
-        );
+        return items.entrySet()
+                    .stream()
+                    .map(JsonEntry::of);
     }
 
     @Override
@@ -484,7 +466,7 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>>, I
 
         StringJoiner sj = new StringJoiner(",", "{", "}");
         JsonValue value;
-        for(JsonEntry<String> entry : bindingsIntJsonValues){
+        for(Map.Entry<String, JsonValue> entry : items.entrySet()){
             value = entry.getValue();
             if (emptyValuesToNull && value.isJsonOptional() && value.isEmpty())
                 value = JsonNull.INSTANCE;
@@ -509,31 +491,25 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>>, I
     @Override
     public JsonNode toJsonNode() {
         ObjectNode result = JsonNodeFactory.instance.objectNode();
-        bindingsIntJsonValues.stream().forEachOrdered(entry -> {
-            result.set(entry.getKey(), entry.getValue().toJsonNode());
+        items.forEach((key, value) -> {
+            result.set(key, value.toJsonNode());
         });
         return result;
     }
 
     public List<JsonEntry<String>> toList(){
-        return Collections.unmodifiableList(bindingsIntJsonValues);
+        return this.stream().collect(Collectors.toList());
     }
 
-    @Override
-    public String toString() {
-        return "JsonObject{" +
-                "bindings=" + bindingsIntJsonValues +
-                '}';
-    }
 
     @Override
     public <T> Map<String, T> toStringIndexedMapOf(Class<T> cl, java.util.Map<String, T> map) {
-        for (JsonEntry<String> entry : bindingsIntJsonValues) {
+        for (Map.Entry<String, JsonValue> entry : items.entrySet()) {
             map.put(entry.getKey(), entry.getValue().as(cl));
         }
-
         return map;
     }
+
 
     public JsonObject union(JsonObject other) {
 
@@ -544,43 +520,20 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>>, I
             return this;
 
         else{
-            JsonObject result;
+            Map<String, JsonValue> newItems = newItems();
+            newItems.putAll(this.items);
+            newItems.putAll(other.items);
 
-            Map<String, Integer> newBindingsKeys = newBindingKeys();
-            List<JsonEntry<String>> newBindings = newBindingJsonValues();
-
-            newBindings.addAll(this.bindingsIntJsonValues);
-            newBindingsKeys.putAll(this.bindingsKeysInt);
-
-            int i = newBindings.size();
-            int indexToRemove;
-            for(Map.Entry<String, Integer> entry : other.bindingsKeysInt.entrySet()){
-                if(newBindingsKeys.containsKey(entry.getKey())){
-                    indexToRemove = newBindingsKeys.get(entry.getKey());
-                    newBindings.remove(indexToRemove);
-                    newBindings.add(indexToRemove, JsonEntry.of(entry.getKey(), entry.getValue()));
-                }
-                else {
-                    newBindings.add(JsonEntry.of(entry.getKey(), other.bindingsIntJsonValues.get(entry.getValue())));
-                    newBindingsKeys.put(entry.getKey(), i);
-                    i++;
-                }
-            }
-
-            result = new JsonObject(newBindings, newBindingsKeys);
-
-            return result;
+            return new JsonObject(newItems);
         }
-
     }
 
     public JsonObject unionAll(List<JsonObject> jsonObjects) {
-
-        JsonObject result = this;
+        Map<String, JsonValue> newItems = newItems();
         for(JsonObject other : jsonObjects){
-            result = result.union(other);
+            newItems.putAll(other.items);
         }
-        return result;
+        return new JsonObject(newItems);
     }
 
     @Override
@@ -593,44 +546,24 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>>, I
         if (!this.isDefinedAt(oldEntryKey))
             return this;
 
-        Map<String, Integer> newBindingsKeys = newBindingKeys();
-        List<JsonEntry<String>> newBindingsValues = newBindingJsonValues();
-        for(Map.Entry<String, Integer> entryKey : bindingsKeysInt.entrySet()) {
-            int index = this.bindingsKeysInt.get(entryKey.getKey());
-            JsonEntry<String> entry = this.bindingsIntJsonValues.get(index);
-            if (entryKey.getKey().equals(oldEntryKey)) {
-                JsonEntry<String> newValue = operator.apply(entry);
-                newBindingsKeys.put(newValue.getKey(), index);
-                newBindingsValues.add(index, newValue);
-            }
-            else {
-                newBindingsKeys.put(entryKey.getKey(), index);
-                newBindingsValues.add(index, entry);
-            }
-        }
+        Map<String, JsonValue> newItems = newItems();
+        newItems.putAll(this.items);
+        JsonEntry<String> newEntry = operator.apply(getEntry(oldEntryKey));
+        newItems.put(newEntry.getKey(), newEntry.getValue());
+        return new JsonObject(newItems);
 
-        return new JsonObject(newBindingsValues, newBindingsKeys);
     }
 
     public JsonObject updateKey(String oldKey, String newKey) {
         if (!this.isDefinedAt(oldKey))
             return this;
 
-        Map<String, Integer> newBindingsKeys = newBindingKeys();
-        List<JsonEntry<String>> newBindingsValues = newBindingJsonValues();
-        for (Map.Entry<String, Integer> entryKey : this.bindingsKeysInt.entrySet()) {
-            int index = this.bindingsKeysInt.get(entryKey.getKey());
-            if (entryKey.getKey().equals(oldKey)) {
-                newBindingsKeys.put(newKey, index);
-                newBindingsValues.add(index, JsonEntry.of(newKey, this.get(oldKey)));
-            }
-            else{
-                newBindingsKeys.put(entryKey.getKey(), index);
-                newBindingsValues.add(index, this.bindingsIntJsonValues.get(index));
-            }
-        }
-
-        return new JsonObject(newBindingsValues, newBindingsKeys);
+        Map<String, JsonValue> newItems = newItems();
+        newItems.putAll(this.items);
+        JsonValue value = newItems.get(oldKey);
+        newItems.remove(oldKey);
+        newItems.put(newKey, value);
+        return new JsonObject(newItems);
     }
 
     @Override
@@ -639,26 +572,20 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>>, I
     }
 
     public JsonObject updateKey(String oldKey, JsonValue oldJsonValue, String newKey) {
-        if (!this.isDefinedAt(oldKey) || !oldJsonValue.equals(this.get(oldKey)))
-            return this;
-        else
+        if (this.isDefinedAt(oldKey) && oldJsonValue.equals(this.get(oldKey)))
             return updateKey(oldKey, newKey);
+
+        return this;
     }
 
     public JsonObject updateValue(String key, JsonValue newJsonValue) {
         if (!this.isDefinedAt(key))
             return this;
 
-        List<JsonEntry<String>> newBindingsValues = newBindingJsonValues();
-        for (Map.Entry<String, Integer> entryKey : this.bindingsKeysInt.entrySet()) {
-            int index = this.bindingsKeysInt.get(key);
-            if (entryKey.getKey().equals(key))
-                newBindingsValues.add(index, JsonEntry.of(key, newJsonValue));
-            else
-                newBindingsValues.add(index, this.bindingsIntJsonValues.get(index));
-        }
-
-        return new JsonObject(newBindingsValues, this.bindingsKeysInt);
+        Map<String, JsonValue> newItems = newItems();
+        newItems.putAll(this.items);
+        newItems.put(key, newJsonValue);
+        return new JsonObject(newItems);
     }
 
     public JsonObject updateValue(String key, Function<JsonEntry<String>, JsonValue> operator) {
@@ -666,39 +593,19 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>>, I
     }
 
     public JsonObject updateValue(String key, JsonValue oldJsonValue, JsonValue newJsonValue) {
-        if (!this.isDefinedAt(key) || !this.get(key).equals(oldJsonValue))
-            return this;
-        else
+        if (this.isDefinedAt(key) && this.get(key).equals(oldJsonValue))
             return updateValue(key, newJsonValue);
+
+        return this;
 
     }
 
     public Iterator<JsonValue> valuesIterator() {
-        return new Iterator<JsonValue>() {
-
-            final Iterator<JsonEntry<String>> iterator = bindingsIntJsonValues.iterator();
-
-            @Override
-            public boolean hasNext() {
-                return iterator.hasNext();
-            }
-
-            @Override
-            public JsonValue next() {
-                return iterator.next().getValue();
-            }
-        };
+        return items.values().iterator();
     }
 
     public Stream<JsonValue> valuesStream() {
-        return StreamSupport.stream(
-                Spliterators.spliterator(
-                        valuesIterator(),
-                        bindingsKeysInt.size(),
-                        Spliterator.NONNULL | Spliterator.ORDERED | Spliterator.IMMUTABLE | Spliterator.DISTINCT
-                ),
-                false
-        );
+        return items.values().stream();
     }
 
 }

@@ -1,8 +1,8 @@
 package com.sidemash.redson.scalatest
 
-import java.util.function.UnaryOperator
+import java.util.function.{BiFunction, UnaryOperator}
 
-import com.sidemash.redson.{JsonEntry, JsonObject, JsonString}
+import com.sidemash.redson._
 
 
 class JsonObjectSpec extends UnitSpec {
@@ -45,12 +45,20 @@ class JsonObjectSpec extends UnitSpec {
     }
 
     obj.updateKey("greet", "GREET") should be (JsonObject.of(JsonEntry.of("GREET", "Hello"),JsonEntry.of("who", "World")))
-    obj.updateKey("greet", "GREET").getHead() should be  (JsonEntry.of("GREET", "Hello"))
+    obj.updateKey("greet", "GREET").containsAllKeys("GREET","who") should be  (true)
+    obj.updateKey("greet", "GREET").containsKey("greet")  should be  (false)
 
     obj.updateKey("greet", JsonString.of("Hello"), "GREET") should be (JsonObject.of(JsonEntry.of("GREET", "Hello"),JsonEntry.of("who", "World")))
-    obj.updateKey("greet", JsonString.of("Hello"),"GREET").getHead() should be  (JsonEntry.of("GREET", "Hello"))
+
+    // This test bellow assume a ordered garanty of updateKey method
+    //    obj.updateKey("greet", JsonString.of("Hello"),"GREET").getHead() should be  (JsonEntry.of("GREET", "Hello"))
+    obj.updateKey("greet", "GREET").containsAllKeys("GREET","who") should be  (true)
+    obj.updateKey("greet", "GREET").containsKey("greet")  should be  (false)
+    obj.updateKey("greet", "GREET").containsEntry(JsonEntry.of("GREET", "Hello"))  should be  (true)
+
 
     obj.updateKey("greet", uppercaseOperator) should be (JsonObject.of(JsonEntry.of("GREET", "Hello"),JsonEntry.of("who", "World")))
+    // This test bellow assume a ordered garanty of updateKey method
     obj.updateKey("greet", uppercaseOperator).getHead() should be  (JsonEntry.of("GREET", "Hello"))
   }
 
@@ -77,5 +85,14 @@ class JsonObjectSpec extends UnitSpec {
 
     obj.updateKey("", uppercaseOperator) should be (obj)
     obj.updateKey("gree", uppercaseOperator).getHead() should be  (JsonEntry.of("greet", "Hello"))
+  }
+
+  it should "Schould correctly apply fold method" in {
+    val array = JsonArray.of(Integer.valueOf(2), Integer.valueOf(1), Integer.valueOf(1), Integer.valueOf(1))
+    val addFn = new BiFunction[Integer, JsonValue, Integer]{
+      override def apply(t: Integer, u: JsonValue): Integer = t + u.asInt();
+    }
+    // here we sum up all the elements of our previous jsonArray
+    array.foldLeft[Integer](0, addFn) should be (5)
   }
 }
