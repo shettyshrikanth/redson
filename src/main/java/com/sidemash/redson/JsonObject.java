@@ -371,6 +371,18 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>>, I
         return items.keySet().stream();
     }
 
+    public <R> JsonObject map(Function<? super JsonEntry<String>, R> mapper) {
+        return JsonObject.of(this.stream().map(mapper.andThen(JsonValue::of)));
+    }
+
+    public <R> JsonObject mapValues(Function<? super JsonValue, R> mapper) {
+        return this.map(entry -> mapper.apply(entry.getValue()));
+    }
+
+    public <R> JsonObject mapKeys(Function<? super String, R> mapper) {
+        return this.map(entry -> mapper.apply(entry.getKey()));
+    }
+
     @Override
     public String toString() {
         return "JsonObject{" +
@@ -512,7 +524,7 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>>, I
     @Override
     public <T> Map<String, T> toStringIndexedMapOf(Class<T> cl, java.util.Map<String, T> map) {
         for (Map.Entry<String, JsonValue> entry : items.entrySet()) {
-            map.put(entry.getKey(), entry.getValue().as(cl));
+            map.put(entry.getKey(), entry.getValue().asPojo(cl));
         }
         return map;
     }
@@ -566,10 +578,14 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>>, I
             return this;
 
         Map<String, JsonValue> newItems = newItems();
-        newItems.putAll(this.items);
-        JsonValue value = newItems.get(oldKey);
-        newItems.remove(oldKey);
-        newItems.put(newKey, value);
+
+        this.forEach(entry -> {
+            if (entry.getKey().equals(oldKey))
+                newItems.put(newKey, entry.getValue());
+            else
+                newItems.put(entry.getKey(), entry.getValue());
+        });
+
         return new JsonObject(newItems);
     }
 

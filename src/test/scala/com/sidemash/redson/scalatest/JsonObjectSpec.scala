@@ -7,6 +7,7 @@ import com.sidemash.redson._
 
 class JsonObjectSpec extends UnitSpec {
 
+
   "A JsonObject" should "have registered values in first-in-first-out order at creation time" in {
     val array =
       JsonObject.of(
@@ -50,7 +51,7 @@ class JsonObjectSpec extends UnitSpec {
 
     obj.updateKey("greet", JsonString.of("Hello"), "GREET") should be (JsonObject.of(JsonEntry.of("GREET", "Hello"),JsonEntry.of("who", "World")))
 
-    // This test bellow assume a ordered garanty of updateKey method
+    // This test below assume a ordered garanty of updateKey method
     //    obj.updateKey("greet", JsonString.of("Hello"),"GREET").getHead() should be  (JsonEntry.of("GREET", "Hello"))
     obj.updateKey("greet", "GREET").containsAllKeys("GREET","who") should be  (true)
     obj.updateKey("greet", "GREET").containsKey("greet")  should be  (false)
