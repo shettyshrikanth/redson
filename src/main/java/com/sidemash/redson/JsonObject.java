@@ -512,7 +512,7 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>>, I
     @Override
     public <T> Map<String, T> toStringIndexedMapOf(Class<T> cl, java.util.Map<String, T> map) {
         for (Map.Entry<String, JsonValue> entry : items.entrySet()) {
-            map.put(entry.getKey(), entry.getValue().as(cl));
+            map.put(entry.getKey(), entry.getValue().asPojo(cl));
         }
         return map;
     }
