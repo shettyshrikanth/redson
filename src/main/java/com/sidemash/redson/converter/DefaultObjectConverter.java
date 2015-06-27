@@ -27,12 +27,14 @@ public enum DefaultObjectConverter implements  JsonConverter<Object> {
                     && (!Modifier.isStatic(modifier))
                     && (method.getName().startsWith("get")
                         || method.getName().startsWith("is")
-                        || method.getName().startsWith("has")))
+                        || (method.getName().startsWith("has") && !method.getName().equals("hashCode")))  )
             result.add(method);
 
         }
         return result;
     }
+
+
 
     private static List<Field> getEligibleFieldsFor(Class<?> cl) {
         List<Field> result = new ArrayList<>();
@@ -72,7 +74,6 @@ public enum DefaultObjectConverter implements  JsonConverter<Object> {
         try {
             // Recursively build a list of all class in "obj" class hierarchy
             List<Class<?>> classList = Json.getClassHierarchyOf(tmpClass);
-            System.out.println(classList);
             for (Class<?> c : classList) {
                 attributeMap.clear();
 
@@ -85,7 +86,6 @@ public enum DefaultObjectConverter implements  JsonConverter<Object> {
                 String methodNameWithoutPrefix;
                 String methodNameInJson;
                 for(Method method : getEligibleMethodsFor(c)) {
-                    System.out.println(method.getName());
                     fieldValue = method.invoke(obj);
                     if (fieldValue != obj ){
                         methodNameWithoutPrefix = method.getName().replaceFirst("get|is|has", "");
@@ -97,8 +97,6 @@ public enum DefaultObjectConverter implements  JsonConverter<Object> {
 
                         attributeMap.put(methodNameInJson, fieldValue);
                     }
-                    System.out.println("Finished");
-                    System.out.println();
                 }
 
                 result = result.union(JsonObject.of(attributeMap));

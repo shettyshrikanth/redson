@@ -372,6 +372,13 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>>, I
     }
 
     @Override
+    public String toString() {
+        return "JsonObject{" +
+                "items=" + items +
+                '}';
+    }
+
+    @Override
     public String prettyStringifyRecursive(int indent,
                                            int incrementAcc,
                                            boolean keepingNull,

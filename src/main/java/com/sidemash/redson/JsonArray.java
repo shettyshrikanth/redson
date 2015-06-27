@@ -849,9 +849,9 @@ public class JsonArray implements
     @Override
     public JsonNode toJsonNode() {
         ArrayNode result = JsonNodeFactory.instance.arrayNode();
-        items.stream().forEachOrdered(value  -> {
-            result.add(value.toJsonNode());
-        });
+        items.stream().forEachOrdered(value  ->
+            result.add(value.toJsonNode())
+        );
         return result;
     }
 

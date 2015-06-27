@@ -91,7 +91,8 @@ public final class Json {
         }
         // If a Writer function to Json has been registered for the "o" class or its standardized form
         // then get the function and apply it with Empty JsonObject as Parameter.
-        Optional<BiFunction<Object, JsonValue, JsonValue>> writerFn = getRegisteredWriterClassFor(standardizeClass(o.getClass())) ;
+        Optional<BiFunction<Object, JsonValue, JsonValue>> writerFn =
+                getRegisteredWriterClassFor(standardizeClass(o.getClass())) ;
         if(writerFn.isPresent()){
             return writerFn.get().apply(o, JsonObject.EMPTY);
         }
@@ -252,7 +253,6 @@ public final class Json {
     }
 
     private static<T> Class<?> standardizeClass(Class<T> initialClass){
-        System.out.println(">>>>>   " + initialClass);
         if(JsonValue.class.isAssignableFrom(initialClass))
             return JsonValue.class;
         else if( List.class.isAssignableFrom(initialClass) )
