@@ -30,8 +30,7 @@ public interface ImmutableMap<K,V>  {
 
     Stream<K> keysStream();
 
-    /*
-
+/*
     default  <U> U foldRight(U seed, BiFunction<JsonEntry<String>, U, U> op) {
         // Since parameters are reversed for 'op' function ( in foldLeft and foldRight )
         // we need to create an adapter function if we want to reuse foldLeft implementation
@@ -40,8 +39,8 @@ public interface ImmutableMap<K,V>  {
         return this.reverse().foldLeft(seed,adapterFunc);
     }
 
-    ImmutableMap<K,V>  reverse();
 
+    ImmutableMap<K,V>  reverse();
 
 
     ImmutableMap<K,V> updateWhile(Predicate<? super T> predicate, T elem);
@@ -58,7 +57,7 @@ public interface ImmutableMap<K,V>  {
 
     Set<String> keysWhere(Predicate<? super T> predicate);
 
-    String keyOf(T elem);
+    String getKeyOf(T elem);
 
     ImmutableMap<K,V> filterNot(Predicate<? super JsonEntry<K>> predicate);
 

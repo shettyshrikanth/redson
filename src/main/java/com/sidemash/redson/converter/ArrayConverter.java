@@ -6,6 +6,7 @@ import com.sidemash.redson.JsonValue;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class ArrayConverter<T> implements JsonContainerConverter<T[]> {
@@ -18,13 +19,15 @@ public class ArrayConverter<T> implements JsonContainerConverter<T[]> {
         for(JsonValue value : array)
             list.add(value.as(p.getActualTypeArguments()[0]));
 
-        @SuppressWarnings("unchecked")
-        T[] result = (T[]) list.toArray();
-        return result;
+        //@SuppressWarnings("unchecked")
+        //T[] result = (T[]) list.toArray();
+        return null;
     }
 
     @Override
     public JsonValue toJsonValue(T[] obj, JsonValue jsonValue) {
-        return JsonArray.of(obj);
+        System.out.println(obj.length);
+        //throw new RuntimeException("this normal");
+        return JsonValue.of(Arrays.asList(obj));
     }
 }

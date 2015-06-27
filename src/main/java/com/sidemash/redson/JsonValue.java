@@ -3,10 +3,16 @@ package com.sidemash.redson;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -15,6 +21,36 @@ public interface JsonValue {
 
     static JsonValue of(final Object o){
         return Json.toJsonValue(o);
+    }
+
+    static  JsonValue parse(byte[] bytes) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        return JsonValue.of(mapper.readTree(bytes));
+    }
+
+    static JsonValue parse(File file) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        return JsonValue.of(mapper.readTree(file));
+    }
+
+    static  JsonValue parse(Path path) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        return JsonValue.of(mapper.readTree(path.toFile()));
+    }
+
+    static  JsonValue parse(InputStream in) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        return JsonValue.of(mapper.readTree(in));
+    }
+
+    static  JsonValue parse(Reader reader) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        return JsonValue.of(mapper.readTree(reader));
+    }
+
+    static JsonValue parse(String string) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        return JsonValue.of(mapper.readTree(string));
     }
 
     default <T> T as(Type type) {
@@ -338,6 +374,5 @@ public interface JsonValue {
     }
 
     <T> Map<String, T> toStringIndexedMapOf(Class<T> c, Map<String, T> map);
-
 
 }

@@ -5,7 +5,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Tree<T> {
+public class  Tree<T> {
 
     private static final Tree<?> EMPTY = new Tree<>();
 

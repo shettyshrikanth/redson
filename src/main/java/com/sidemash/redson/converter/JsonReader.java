@@ -9,7 +9,7 @@ public interface  JsonReader<T> {
 
     T fromJsonValue(JsonValue jsonValue);
 
-    default T fromJsonValue(JsonValue jsonValue,  Type type){
+    default T fromJsonValue(JsonValue jsonValue, Type type){
         return  fromJsonValue(jsonValue);
     }
 

@@ -114,6 +114,66 @@ public class JsonArray implements
         return JsonArray.of(values.iterator());
     }
 
+    public static  JsonArray of(boolean... values) {
+        List<JsonValue> newEntryList = new ArrayList<>();
+        for(boolean value : values){
+            newEntryList.add(JsonBoolean.of(value));
+        }
+        return createJsonArray(newEntryList);
+    }
+    public static  JsonArray of(int... values) {
+        List<JsonValue> newEntryList = new ArrayList<>();
+        for(int value : values){
+            newEntryList.add(JsonNumber.of(value));
+        }
+        return createJsonArray(newEntryList);
+    }
+    public static  JsonArray of(char... values) {
+        List<JsonValue> newEntryList = new ArrayList<>();
+        for(char value : values){
+            newEntryList.add(JsonString.of(value));
+        }
+        return createJsonArray(newEntryList);
+    }
+    public static  JsonArray of(short... values) {
+        List<JsonValue> newEntryList = new ArrayList<>();
+        for(short value : values){
+            newEntryList.add(JsonNumber.of(value));
+        }
+        return createJsonArray(newEntryList);
+    }
+    public static  JsonArray of(byte... values) {
+        List<JsonValue> newEntryList = new ArrayList<>();
+        for(byte value : values){
+            newEntryList.add(JsonNumber.of(value));
+        }
+        return createJsonArray(newEntryList);
+    }
+    public static  JsonArray of(long... values) {
+        List<JsonValue> newEntryList = new ArrayList<>();
+        for(long value : values){
+            newEntryList.add(JsonNumber.of(value));
+        }
+        return createJsonArray(newEntryList);
+    }
+    public static  JsonArray of(float... values) {
+        List<JsonValue> newEntryList = new ArrayList<>();
+        for(float value : values){
+            newEntryList.add(JsonNumber.of(value));
+        }
+        return createJsonArray(newEntryList);
+    }
+    public static  JsonArray of(double... values) {
+        List<JsonValue> newEntryList = new ArrayList<>();
+        for(double value : values){
+            newEntryList.add(JsonNumber.of(value));
+        }
+        return createJsonArray(newEntryList);
+    }
+
+
+
+
     /**
      * Append the JsonValue passed as parameter at the end of this JsonArray
      *
@@ -512,11 +572,11 @@ public class JsonArray implements
 
         // If all the items have been visited and the last elem have to be taken
         // then we "limit the result to all items of this jsonArray"
-        if (!iterator.hasNext() && keepSkipping == true) return this;
+        if (!iterator.hasNext() && keepSkipping) return this;
 
             // If the predicate is false for the first element, then there is
             // no need to iterate we return immediately the Empty JsonArray.
-        else if (index == 1 && keepSkipping == false) return EMPTY;
+        else if (index == 1 && keepSkipping) return EMPTY;
         else return this.limit(index);
     }
 
@@ -561,7 +621,6 @@ public class JsonArray implements
             final String endIncrementation = endInc.toString();
             StringJoiner sj = new StringJoiner(",\n", "[\n", String.format("\n%s]", endIncrementation));
             JsonValue value;
-            Iterator<JsonEntry<Integer>> it = this.entryIterator();
             for (JsonValue jsonValue : items) {
                 value = jsonValue;
                 if (emptyValuesToNull && value.isJsonOptional() && value.isEmpty())
@@ -705,12 +764,12 @@ public class JsonArray implements
 
         // If the predicate is false for the first element, then there is
         // nothing to skip we return immediately the all the elem.
-        if (index == 1 && keepSkipping == false) return this;
+        if (index == 1 && !keepSkipping) return this;
 
             // If we did get out of the loop because all the items match the predicate AND
             // the predicate was true for the last item, then we have to skip all items
             // of the this JsonArray
-        else if (!iterator.hasNext() && keepSkipping == true) return EMPTY;
+        else if (!iterator.hasNext() && !keepSkipping) return EMPTY;
         else return this.skip(index);
     }
 
@@ -790,9 +849,9 @@ public class JsonArray implements
     @Override
     public JsonNode toJsonNode() {
         ArrayNode result = JsonNodeFactory.instance.arrayNode();
-        items.stream().forEachOrdered(value  -> {
-            result.add(value.toJsonNode());
-        });
+        items.stream().forEachOrdered(value  ->
+            result.add(value.toJsonNode())
+        );
         return result;
     }
 
@@ -895,7 +954,7 @@ public class JsonArray implements
             }
             i++;
         }
-        if(updated == false) return this;
+        if(!updated) return this;
         return createJsonArray(newItems);
     }
 

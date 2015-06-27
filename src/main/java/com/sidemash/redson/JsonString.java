@@ -18,7 +18,7 @@ public class JsonString implements JsonLiteral {
     }
 
 
-    public static JsonValue of(char character) {
+    public static JsonValue of(Character character) {
         return new JsonString(String.valueOf(character));
     }
 
