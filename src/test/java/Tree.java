@@ -10,15 +10,23 @@ public class  Tree<T> {
     private static final Tree<?> EMPTY = new Tree<>();
 
     static {
-        Json.registerWriter(Tree.class, (tree, jsonValue) -> JsonObject.of(
-                JsonEntry.of("node", tree.getNode()),
-                JsonEntry.of("children", tree.getChildren())
-        ));
+        Json.registerWriter(Tree.class, (tree, jsonValue) -> {
+            if(tree.isEmpty())
+                return JsonObject.EMPTY;
+            else {
+                return
+                        JsonObject.of(
+                                JsonEntry.of("node", tree.getNode()),
+                                JsonEntry.of("children", tree.getChildren())
+                        );
+            }
+        });
 
         Json.registerReader(Tree.class, (JsonValue jsVal, Type type) -> {
             if (jsVal.isJsonObject() && jsVal.isEmpty())
                 return Tree.empty();
 
+            System.out.println("We are here !!");
             ParameterizedType p = (ParameterizedType) type;
             List<Tree<Object>> children = new ArrayList<>();
             ((JsonArray) jsVal.get("children")).stream().forEach(value -> children.add(value.as(type)));
