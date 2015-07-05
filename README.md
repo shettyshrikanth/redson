@@ -6,7 +6,7 @@ Redson is a new Java 8 Json library that aims to handle Json in the way that :
 - Help removing `null` from the earth ( see [Avoiding null in your Java code](http://www.oracle.com/technetwork/articles/java/java8-optional-2175753.html) )
 - Simplify and reduce boilerplate when converting to/from Json even with complex rules that describe these conversions
 - Handle and manipulate Json as it was a first class data type
-- Provide an immutables data structures to manipulate Json Documents
+- Provide immutables data structures to manipulate Json Documents
 - Introduce a new JsonOptional data type
 - Is again a Dead Simple Library.
 - Is Written on top of [Jackson](https://github.com/FasterXML/jackson) (a excellent library that provided parsing capabilities via its streaming API)
@@ -98,6 +98,12 @@ A more complicated example, look at the following Json object
 ```
 We will construct this previous Json with redson in a simply way
 ```java
+JsonObject.of( 
+     JsonEntry.of("name", JsonString.of("John Doe")),
+     JsonEntry.of("age", JsonNumber.of(99))
+)
+
+// Or even more simply
 JsonObject.of( 
      JsonEntry.of("name", "John Doe"),
      JsonEntry.of("age", 99)
@@ -241,9 +247,54 @@ String firstFriendName =  friendList.getHeadOptional()
                                     .orElse("We are so sorry for you, #ForeverAlone :-( ");
 ```
 
-(Still In Progress)
+
 
 ### Converting Java to JsonValue
+#### Converting a single class
+Consider the following class
+````java
+public class Person {
+    
+    private String name;
+    private int age;
+
+    public Person(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+}
+```
+To convert this class to a JsonOject is a dead simple operation just add the following : 
+```java
+public class Person {
+    
+    private String name;
+    private int age;
+
+    // Adding the following static boc
+    static {
+        Json.registerWriter(Person.class, (Person person) -> 
+                JsonObject.of(
+                    JsonEntry.of("name", person.name),
+                    JsonEntry.of("age", person.age),
+                )
+        );
+    }
+    
+    public Person(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+}
+```
+Explanation : 
+Because the static bloc will be executed once, we register here the code that will convert any instance of Person to JsonObject. 
+The code inside the static bloc means `Resgister for any instance of Person.class the function that take a person and return its JsonObejct representation`
+With this way, you can do every thing you want when converting to Json including : Renaming fields, removing fields, adding fields, changing the value of fields etc ... this make make redson very suitable for doing RESTFul apis and we will know soon.
+Well that sounds good! But what is the purpose of the second parameter ? 
+What 
+
+
 
 ### Converting JsonValue to Java
 
