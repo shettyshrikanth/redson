@@ -244,7 +244,7 @@ public final class Json {
             T result =  (T) fn.apply(jsonValue, type);
             return result;
         }
-        else { 
+        else {
             throw new UnsupportedOperationException(
                     String.format("Unable to convert from JsonValue because converter " +
                             "for :  %s is not registered", type)
