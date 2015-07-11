@@ -26,6 +26,57 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>>, I
 
     private static Map<String, JsonValue> newItems() { return new LinkedHashMap<>(); }
 
+
+    /**
+     * A builder for a JsonObject to construct a JsonObject
+     * by adding values step by step. This a implementation
+     * of the Builder pattern.
+     */
+    public static class Builder {
+
+        private final Map<String, JsonValue> items;
+
+        private Builder() {
+            this.items = new HashMap<>();
+        }
+
+        public Builder append(String key, JsonValue value) {
+            this.items.put(key, value);
+            return this;
+        }
+
+        public Builder append(JsonEntry<String> entry) {
+            this.items.put(entry.getKey(), entry.getValue());
+            return this;
+        }
+
+        public Builder append(Map<String, JsonValue> values) {
+            this.items.putAll(values);
+            return this;
+        }
+
+        public Builder append(List<JsonEntry<String>> entries) {
+            entries.stream().forEach(entry -> this.append(entry));
+            return this;
+        }
+
+        public JsonObject build() {
+            if (this.items.isEmpty())
+                return JsonObject.EMPTY;
+            else
+                return new JsonObject(items);
+        }
+    }
+
+    /**
+     * Method to get a builder for a JsonObject.
+     *
+     * @return the constructed builder for <type>JsonObject</type>.
+     */
+    public static Builder builder() {
+        return new Builder();
+    }
+
     /**
      * Creates a JsonObject from the Map passed as parameter
      *
@@ -50,10 +101,10 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>>, I
         if(map.isEmpty())
             return EMPTY;
 
-        Map<String, JsonValue> newItems = newItems();
-        map.forEach((key, value) -> newItems.put(kToString.apply(key), JsonValue.of(value)));
+        Builder builder = JsonObject.builder();
+        map.forEach((key, value) -> builder.append(kToString.apply(key), JsonValue.of(value)));
 
-        return new JsonObject(newItems);
+        return builder.build();
     }
 
     /**
@@ -113,18 +164,19 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>>, I
         if (!it.hasNext())
             return JsonObject.EMPTY;
 
-        Map<String, JsonValue> newItems = newItems();
-        it.forEachRemaining(entry -> newItems.put(entry.getKey(), entry.getValue()));
+        Builder builder = JsonObject.builder();
+        it.forEachRemaining(entry -> builder.append(entry.getKey(), entry.getValue()));
 
-        return new JsonObject(newItems);
+        return builder.build();
     }
 
     public JsonObject append(String key, Object value) {
         Objects.requireNonNull(key);
-        Map<String, JsonValue> newItems = newItems();
-        newItems.putAll(this.items);
-        newItems.put(key, JsonValue.of(value));
-        return new JsonObject(newItems);
+        Builder builder = JsonObject.builder();
+        return builder
+                .append(this.items)
+                .append(key, JsonValue.of(value))
+                .build();
     }
 
     @Override
@@ -141,7 +193,7 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>>, I
     @Override
     public <T> Map<String, T> asMapOf(Class<T> cl, Map<String, T> map) {
         this.stream()
-            .forEachOrdered(entry -> map.put(entry.getKey(), entry.getValue().as(cl)));
+            .forEachOrdered(entry -> map.put(entry.getKey(), entry.getValue().asType(cl)));
         return map;
     }
 
@@ -524,7 +576,7 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>>, I
     @Override
     public <T> Map<String, T> toStringIndexedMapOf(Class<T> cl, java.util.Map<String, T> map) {
         for (Map.Entry<String, JsonValue> entry : items.entrySet()) {
-            map.put(entry.getKey(), entry.getValue().asPojo(cl));
+            map.put(entry.getKey(), entry.getValue().asType(cl));
         }
         return map;
     }
@@ -539,20 +591,18 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>>, I
             return this;
 
         else{
-            Map<String, JsonValue> newItems = newItems();
-            newItems.putAll(this.items);
-            newItems.putAll(other.items);
-
-            return new JsonObject(newItems);
+            Builder builder = JsonObject.builder();
+            return builder
+                    .append(this.items)
+                    .append(other.items)
+                    .build();
         }
     }
 
     public JsonObject unionAll(List<JsonObject> jsonObjects) {
-        Map<String, JsonValue> newItems = newItems();
-        for(JsonObject other : jsonObjects){
-            newItems.putAll(other.items);
-        }
-        return new JsonObject(newItems);
+        Builder builder = JsonObject.builder();
+        jsonObjects.forEach(jsonObject -> builder.append(jsonObject.items));
+        return builder.build();
     }
 
     @Override
@@ -565,11 +615,15 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>>, I
         if (!this.isDefinedAt(oldEntryKey))
             return this;
 
-        Map<String, JsonValue> newItems = newItems();
-        newItems.putAll(this.items);
-        JsonEntry<String> newEntry = operator.apply(getEntry(oldEntryKey));
-        newItems.put(newEntry.getKey(), newEntry.getValue());
-        return new JsonObject(newItems);
+        Builder builder = builder();
+        this.forEach(entry -> {
+            if (entry.getKey().equals(oldEntryKey))
+                builder.append(operator.apply(entry));
+            else
+                builder.append(entry);
+        });
+
+        return builder.build();
 
     }
 
@@ -577,16 +631,15 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>>, I
         if (!this.isDefinedAt(oldKey))
             return this;
 
-        Map<String, JsonValue> newItems = newItems();
-
+        Builder builder = builder();
         this.forEach(entry -> {
             if (entry.getKey().equals(oldKey))
-                newItems.put(newKey, entry.getValue());
+                builder.append(newKey, entry.getValue());
             else
-                newItems.put(entry.getKey(), entry.getValue());
+                builder.append(entry);
         });
 
-        return new JsonObject(newItems);
+        return builder.build();
     }
 
     @Override

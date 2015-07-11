@@ -17,7 +17,7 @@ public class ArrayConverter<T> implements JsonContainerConverter<T[]> {
         JsonArray array = (JsonArray) jsonValue;
         ParameterizedType p = (ParameterizedType) type;
         for(JsonValue value : array)
-            list.add(value.as(p.getActualTypeArguments()[0]));
+            list.add(value.asType(p.getActualTypeArguments()[0]));
 
         //@SuppressWarnings("unchecked")
         //T[] result = (T[]) list.toArray();

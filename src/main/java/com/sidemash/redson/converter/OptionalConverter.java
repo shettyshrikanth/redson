@@ -19,12 +19,12 @@ public class OptionalConverter<T> implements JsonContainerConverter<Optional<T>>
             JsonOptional jsOpt = (JsonOptional) jsonValue;
             ParameterizedType p = (ParameterizedType) type;
             result = Optional.of(
-                    jsOpt.get().as(p.getActualTypeArguments()[0])
+                    jsOpt.get().asType(p.getActualTypeArguments()[0])
             );
         } else {
             ParameterizedType p = (ParameterizedType) type;
             result = Optional.of(
-                    jsonValue.as(p.getActualTypeArguments()[0])
+                    jsonValue.asType(p.getActualTypeArguments()[0])
             );
         }
         return result;

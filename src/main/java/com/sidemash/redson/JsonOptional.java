@@ -216,12 +216,12 @@ public class JsonOptional implements JsonValue {
     }
 
     @Override
-    public <T> T asPojo(Class<T> cl) {
+    public <T> T asType(Class<T> cl) {
         return Json.fromJsonValue(value.get(), cl);
     }
 
     @Override
-    public <T> Optional<T> asPojoOptional(Class<T> cl) {
+    public <T> Optional<T> asTypeOptional(Class<T> cl) {
         if(!value.isPresent())
             return Optional.empty();
 
@@ -420,7 +420,7 @@ public class JsonOptional implements JsonValue {
 
     @Override
     public <T> Map<Integer, T> toIntIndexedMapOf(Class<T> cl, Map<Integer, T> map) {
-        value.ifPresent(elem -> map.put(0, elem.as(cl)));
+        value.ifPresent(elem -> map.put(0, elem.asType(cl)));
         return map;
     }
 

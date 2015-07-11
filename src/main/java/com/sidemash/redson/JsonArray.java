@@ -20,7 +20,7 @@ public class JsonArray implements
     /**
      * Common instance for an Empty JsonArray.
      */
-    public static final JsonArray EMPTY = new JsonArray(Collections.EMPTY_LIST);
+    public static final JsonArray EMPTY = new JsonArray(Collections.emptyList());
 
     /**
      * Storage of the JsonArray contents
@@ -35,6 +35,88 @@ public class JsonArray implements
      */
     private JsonArray(List<JsonValue> items) {
         this.items = items;
+    }
+
+
+    /**
+     * A builder for a JsonArray to construct a JsonArray
+     * by adding values step by step. This a implementation
+     * of the Builder pattern.
+     */
+    public static class Builder {
+
+        /**
+         * Storage of the JsonArray contents
+         */
+        private final List<JsonValue> items;
+
+        /**
+         * Builder constructor.
+         */
+        private Builder() {
+            this.items = new ArrayList<>();
+        }
+
+        /**
+         * Method to append a new value to the JsonArray.
+         * @param newValue the value to add
+         * @return this
+         */
+        public Builder append(JsonValue newValue) {
+            this.items.add(newValue);
+            return this;
+        }
+
+        /**
+         * Method to append a new value to the JsonArray.
+         * @param items
+         * @return this
+         */
+        public Builder append(List<JsonValue> items) {
+            this.items.addAll(items);
+            return this;
+        }
+
+        /**
+         *
+         * @param newValue
+         * @return
+         */
+        public Builder prepend(JsonValue newValue) {
+            this.items.add(0, newValue);
+            return this;
+        }
+
+        /**
+         *
+         * @param items
+         * @return
+         */
+        public Builder prepend(List<JsonValue> items) {
+            this.items.addAll(0, items);
+            return this;
+        }
+
+        /**
+         * Method to build the JsonArray.
+         *
+         * @return the constructed JsonArray
+         */
+        public JsonArray build() {
+            if (this.items.isEmpty())
+                return JsonArray.EMPTY;
+            else
+                return new JsonArray(this.items);
+        }
+    }
+
+    /**
+     * Method to get a builder for a JsonArray.
+     *
+     * @return the constructed builder for <type>JsonArray</type>.
+     */
+    public static Builder builder() {
+        return new Builder();
     }
 
     /**
@@ -94,13 +176,11 @@ public class JsonArray implements
         if(!it.hasNext())
             return JsonArray.EMPTY;
 
-        List<JsonValue> entryItems = new ArrayList<>();
-        int i = 0;
+        Builder builder = JsonArray.builder();
         while(it.hasNext()){
-            entryItems.add(JsonValue.of(it.next()));
-            ++i;
+            builder.append(JsonValue.of(it.next()));
         }
-        return createJsonArray(entryItems);
+        return builder.build();
     }
 
     /**
@@ -115,60 +195,60 @@ public class JsonArray implements
     }
 
     public static  JsonArray of(boolean... values) {
-        List<JsonValue> newEntryList = new ArrayList<>();
+        Builder builder = JsonArray.builder();
         for(boolean value : values){
-            newEntryList.add(JsonBoolean.of(value));
+            builder.append(JsonValue.of(value));
         }
-        return createJsonArray(newEntryList);
+        return builder.build();
     }
     public static  JsonArray of(int... values) {
-        List<JsonValue> newEntryList = new ArrayList<>();
+        Builder builder = JsonArray.builder();
         for(int value : values){
-            newEntryList.add(JsonNumber.of(value));
+            builder.append(JsonValue.of(value));
         }
-        return createJsonArray(newEntryList);
+        return builder.build();
     }
     public static  JsonArray of(char... values) {
-        List<JsonValue> newEntryList = new ArrayList<>();
+        Builder builder = JsonArray.builder();
         for(char value : values){
-            newEntryList.add(JsonString.of(value));
+            builder.append(JsonValue.of(value));
         }
-        return createJsonArray(newEntryList);
+        return builder.build();
     }
     public static  JsonArray of(short... values) {
-        List<JsonValue> newEntryList = new ArrayList<>();
+        Builder builder = JsonArray.builder();
         for(short value : values){
-            newEntryList.add(JsonNumber.of(value));
+            builder.append(JsonValue.of(value));
         }
-        return createJsonArray(newEntryList);
+        return builder.build();
     }
     public static  JsonArray of(byte... values) {
-        List<JsonValue> newEntryList = new ArrayList<>();
+        Builder builder = JsonArray.builder();
         for(byte value : values){
-            newEntryList.add(JsonNumber.of(value));
+            builder.append(JsonValue.of(value));
         }
-        return createJsonArray(newEntryList);
+        return builder.build();
     }
     public static  JsonArray of(long... values) {
-        List<JsonValue> newEntryList = new ArrayList<>();
+        Builder builder = JsonArray.builder();
         for(long value : values){
-            newEntryList.add(JsonNumber.of(value));
+            builder.append(JsonValue.of(value));
         }
-        return createJsonArray(newEntryList);
+        return builder.build();
     }
     public static  JsonArray of(float... values) {
-        List<JsonValue> newEntryList = new ArrayList<>();
+        Builder builder = JsonArray.builder();
         for(float value : values){
-            newEntryList.add(JsonNumber.of(value));
+            builder.append(JsonValue.of(value));
         }
-        return createJsonArray(newEntryList);
+        return builder.build();
     }
     public static  JsonArray of(double... values) {
-        List<JsonValue> newEntryList = new ArrayList<>();
+        Builder builder = JsonArray.builder();
         for(double value : values){
-            newEntryList.add(JsonNumber.of(value));
+            builder.append(JsonValue.of(value));
         }
-        return createJsonArray(newEntryList);
+        return builder.build();
     }
 
 
@@ -191,7 +271,7 @@ public class JsonArray implements
     @Override
     public <T> List<T> asListOf(Class<T> cl, List<T> list) {
         for (JsonValue item : items)
-            list.add(item.as(cl));
+            list.add(item.asType(cl));
 
         return list;
     }
@@ -210,7 +290,7 @@ public class JsonArray implements
     @Override
     public <T> Set<T> asSetOf(Class<T> cl, Set<T> set) {
         for (JsonValue item : items)
-            set.add(item.as(cl));
+            set.add(item.asType(cl));
 
         return set;
     }
@@ -327,14 +407,14 @@ public class JsonArray implements
 
         Iterator<JsonValue> it = items.iterator();
         JsonValue value;
-        List<JsonValue> entryList = new ArrayList<>();
+        Builder builder = JsonArray.builder();
         while (it.hasNext()) {
             value = it.next();
             if (value.isJsonArray())
-                entryList.addAll(((JsonArray) value).flatten().items);
-            else entryList.add(value);
+                builder.append(((JsonArray) value).flatten().items);
+            else builder.append(value);
         }
-        return createJsonArray(entryList);
+        return builder.build();
     }
 
     @Override
@@ -596,10 +676,10 @@ public class JsonArray implements
      * this JsonArray
      */
     public JsonArray prepend(Object object) {
-        List<JsonValue> newEntryList = new ArrayList<>();
-        newEntryList.add(JsonValue.of(object));
-        newEntryList.addAll(items);
-        return createJsonArray(newEntryList);
+        Builder builder = JsonArray.builder();
+        builder.append(JsonValue.of(object));
+        builder.append(items);
+        return builder.build();
     }
 
     @Override
@@ -839,7 +919,7 @@ public class JsonArray implements
     public <T> Map<Integer, T> toIntIndexedMapOf(Class<T> cl, Map<Integer, T> map) {
         int index = 0;
         for (JsonValue item : items) {
-            map.put(index, item.as(cl));
+            map.put(index, item.asType(cl));
             ++index;
         }
 
@@ -866,7 +946,7 @@ public class JsonArray implements
     public <T> Map<String, T> toStringIndexedMapOf(Class<T> cl, Map<String, T> map) {
         int index = 0;
         for (JsonValue item : items) {
-            map.put(String.valueOf(index), item.as(cl));
+            map.put(String.valueOf(index), item.asType(cl));
             ++index;
         }
 
@@ -882,19 +962,20 @@ public class JsonArray implements
 
         else {
             List<JsonValue> newList = new ArrayList<>();
-            newList.addAll(this.items);
-            newList.addAll(jsonArray.items);
-            return createJsonArray(newList);
+            Builder builder = JsonArray.builder();
+            return builder
+                    .append(this.items)
+                    .append(items)
+                    .build();
         }
     }
 
     public JsonArray unionAll(List<JsonArray> jsonArrays) {
-        List<JsonValue> newList = new ArrayList<>();
-        newList.addAll(this.items);
+        Builder builder = JsonArray.builder();
         for (JsonArray array : jsonArrays)
-            newList.addAll(array.items);
+            builder.append(array.items);
 
-        return createJsonArray(newList);
+        return builder.build();
     }
 
     public JsonArray updateFirst(Predicate<? super JsonEntry<Integer>> predicate,
@@ -920,17 +1001,17 @@ public class JsonArray implements
         if (!this.containsIndex(index))
             return this;
 
-        List<JsonValue> newList = new ArrayList<>();
         int i = 0;
         Iterator<JsonEntry<Integer>> it = this.entryIterator();
         JsonEntry<Integer> entry;
+        Builder builder = JsonArray.builder();
         while (it.hasNext()) {
             entry = it.next();
-            if (i == index) newList.add(function.apply(entry));
-            else newList.add(entry.getValue());
+            if (i == index) builder.append(function.apply(entry));
+            else builder.append(entry.getValue());
             i++;
         }
-        return createJsonArray(newList);
+        return builder.build();
     }
 
     public JsonArray updateWhere(Predicate<? super JsonEntry<Integer>> predicate,
@@ -941,21 +1022,22 @@ public class JsonArray implements
     public JsonArray updateWhere(Predicate<? super JsonEntry<Integer>> predicate,
                                  Function<JsonEntry<Integer>, JsonValue> function) {
         List<JsonValue> newItems = new ArrayList<>();
+        Builder builder = JsonArray.builder();
         int i = 0;
         boolean updated = false;
         JsonEntry<Integer> entry;
         for(JsonValue jsonValue : items){
             entry = JsonEntry.of(i, jsonValue);
             if (predicate.test(entry)){
-                newItems.add(function.apply(entry));
+                builder.append(function.apply(entry));
                 updated = true;
             } else {
-                newItems.add(entry.getValue());
+                builder.append(entry.getValue());
             }
             i++;
         }
         if(!updated) return this;
-        return createJsonArray(newItems);
+        return builder.build();
     }
 
     public JsonArray updateWhile(Predicate<? super JsonEntry<Integer>> predicate, JsonValue elem) {
@@ -967,17 +1049,16 @@ public class JsonArray implements
         if (isEmpty())
             return this;
 
-        List<JsonValue> newList = new ArrayList<>();
+        Builder builder = JsonArray.builder();
         Iterator<JsonEntry<Integer>> it = this.entryIterator();
         JsonEntry<Integer> entry;
         while (it.hasNext()) {
             entry = it.next();
             if (predicate.test(entry))
-                newList.add(function.apply(entry));
+                builder.append(function.apply(entry));
             else
-                newList.add(entry.getValue());
+                builder.append(entry.getValue());
         }
-        return createJsonArray(newList);
+        return builder.build();
     }
-
 }
