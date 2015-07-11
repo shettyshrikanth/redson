@@ -113,7 +113,7 @@ public class JsonArray implements
     /**
      * Method to get a builder for a JsonArray.
      *
-     * @return the constructed builder for <type>JsonArray</type>.
+     * @return the constructed builder for JsonArray.
      */
     public static Builder builder() {
         return new Builder();

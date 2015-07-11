@@ -354,24 +354,24 @@ public interface JsonValue {
     }
 
     /**
-     * Method which converts the JsonValue a <type>List</type> whose type
+     * Method which converts the JsonValue a List whose type
      * is type of the second parameter. Each element of the list will be
      * instance of the class passed as first parameter.
      *
      * @param cl class of object contained in the list
      * @param list the type of the result list
      * @param <T> the parameter type for the list
-     * @return the resulting <type>List</type>
+     * @return the resulting List
      */
     <T> List<T> asListOf(Class<T> cl, List<T> list);
 
     /**
-     * Method which converts the JsonValue to an <type>ArrayList</type>.
+     * Method which converts the JsonValue to an ArrayList.
      * Element of the list of will be instance of the parameter type.
      *
      * @param cl class of the element of the list
      * @param <T> type of element of the list
-     * @return the resulting <type>ArrayList</type>
+     * @return the resulting ArrayList
      */
     default <T> List<T> asListOf(Class<T> cl) {
         return asListOf(cl, new ArrayList<>());
@@ -403,41 +403,41 @@ public interface JsonValue {
     }
 
     /**
-     * Method to convert a JsonValue to the <type>Map</type> type passed as parameter.
+     * Method to convert a JsonValue to the Map type passed as parameter.
      *
      * @param cl the class of values stored in the map.
-     * @param map the <type>Map</type> type we want to convert to.
+     * @param map the Map type we want to convert to.
      * @param <T> the paramtrized type of the map.
      * @return the converted map.
      */
     <T> Map<String, T> asMapOf(Class<T> cl,  Map<String, T> map);
 
     /**
-     * Method to convert a JsonValue to the <type>HashMap</type>.
+     * Method to convert a JsonValue to the HashMap.
      *
      * @param cl the class of values stored in the map.
      * @param <T> the paramtrized type of the map.
-     * @return the converted <type>Map</type>.
+     * @return the converted Map.
      */
     default <T> Map<String, T> asMapOf(Class<T> cl){
         return asMapOf(cl, new HashMap<>());
     }
 
     /**
-     * Method wich converts the JsonValue as an <type>Optional</type> which
-     * contains the <object>JsonValue</object> if it is equals to not <value>JsonNull</value> or
-     * <value>JsonOptional.EMPTY</value>.
+     * Method wich converts the JsonValue as an Optional which
+     * contains the JsonValue if it is equals to not JsonNull or
+     * JsonOptional.EMPTY.
      *
-     * @return the resulting <type>Optional</type>.
+     * @return the resulting Optional.
      */
     default Optional<? extends JsonValue> asOptional() {
         return Optional.of(this);
     }
 
     /**
-     * Method wich converts the JsonValue as an <type>Optional</type> which
-     * contains the <object>JsonValue</object> if it is equals to not
-     * <value>JsonNull</value> or <value>JsonOptional.EMPTY</value>.
+     * Method wich converts the JsonValue as an Optional which
+     * contains the JsonValue if it is equals to not
+     * JsonNull or JsonOptional.EMPTY.
      * The JsonValue will be casted as instance of the first parameter
      *
      * @param cl
@@ -461,24 +461,24 @@ public interface JsonValue {
     }
 
     /**
-     * Method which converts the JsonValue a <type>Set</type> whose type
+     * Method which converts the JsonValue a Set whose type
      * is type of the second parameter. Each element of the set will be
      * instance of the class passed as first parameter.
      *
      * @param cl class of object contained in the list
      * @param set the type of the result set
      * @param <T> the parameter type for the set
-     * @return the resulting <type>Set</type>
+     * @return the resulting Set
      */
     <T> Set<T> asSetOf(Class<T> cl,  Set<T> set);
 
     /**
-     * Method which converts the JsonValue to an <type>LinkedHashSet</type>.
+     * Method which converts the JsonValue to an LinkedHashSet.
      * Element of the set of will be instance of the parameter type.
      *
      * @param cl class of the element of the set
      * @param <T> type of element of the set
-     * @return the resulting <type>LinkedHashSet</type>
+     * @return the resulting LinkedHashSet
      */
     default <T> Set<T> asSetOf(Class<T> cl){
         return asSetOf(cl, new LinkedHashSet<>());
@@ -617,7 +617,7 @@ public interface JsonValue {
     /**
      * Method which test if the JsonValue is empty
      *
-     * @return <value>true</value> if the JsonValue is empty
+     * @return true if the JsonValue is empty
      */
     boolean isEmpty();
 /*
@@ -653,14 +653,14 @@ public interface JsonValue {
     /**
      * Method to test if a JsonValue is instance of a JsonArray.
      *
-     * @return <value>true</value> if the JsonValue is a JsonArray.
+     * @return true if the JsonValue is a JsonArray.
      */
     boolean isJsonArray();
 
     /**
      * Method to test if a JsonValue is instance of a JsonBoolean.
      *
-     * @return <value>true</value> if the JsonValue is a JsonBoolean.
+     * @return true if the JsonValue is a JsonBoolean.
      */
     boolean isJsonBoolean();
 
@@ -668,56 +668,56 @@ public interface JsonValue {
      * Method to test if a JsonValue is instance of a JsonLiteral
      * (ie javascript primitive type: String, Number, Boolean, null, Undefined).
      *
-     * @return <value>true</value> if the JsonValue is a JsonLiteral.
+     * @return true if the JsonValue is a JsonLiteral.
      */
     boolean isJsonLiteral();
 
     /**
      * Method to test if a JsonValue is instance of a JsonNull.
      *
-     * @return <value>true</value> if the JsonValue is a JsonNull.
+     * @return true if the JsonValue is a JsonNull.
      */
     boolean isJsonNull();
 
     /**
      * Method to test if a JsonValue is instance of a JsonNumber.
      *
-     * @return <value>true</value> if the JsonValue is a JsonNumber.
+     * @return true if the JsonValue is a JsonNumber.
      */
     boolean isJsonNumber();
 
     /**
      * Method to test if a JsonValue is instance of a JsonObject.
      *
-     * @return <value>true</value> if the JsonValue is a JsonObject.
+     * @return true if the JsonValue is a JsonObject.
      */
     boolean isJsonObject();
 
     /**
      * Method to test if a JsonValue is instance of a JsonOptional.
      *
-     * @return <value>true</value> if the JsonValue is instance of a JsonOptional.
+     * @return true if the JsonValue is instance of a JsonOptional.
      */
     boolean isJsonOptional();
 
     /**
      * Method to test if a JsonValue is instance of a JsonString.
      *
-     * @return <value>true</value> if the JsonValue is instance of a JsonString.
+     * @return true if the JsonValue is instance of a JsonString.
      */
     boolean isJsonString();
 
     /**
      * Method to test if a JsonValue is instance of a JsonArray or a JsonObject.
      *
-     * @return <value>true</value> if the JsonValue is instance of a JsonArray or a JsonObject.
+     * @return true if the JsonValue is instance of a JsonArray or a JsonObject.
      */
     boolean isJsonStructure();
 
     /**
      * Method which test if the JsonValue is not empty
      *
-     * @return <value>true</value> if the JsonValue is not empty
+     * @return true if the JsonValue is not empty
      */
     default boolean isNotEmpty() {
         return (!isEmpty());
@@ -726,7 +726,7 @@ public interface JsonValue {
     /**
      * Method which print the JsonValue as a well formatted string.
      *
-     * @return the formatted <type>String</type>.
+     * @return the formatted String.
      */
     default String prettyStringify() {
         final int indent = 3;
@@ -734,11 +734,11 @@ public interface JsonValue {
     }
 
     /**
-     * Method which print the JsonValue as a well formatted <type>String</type>.
+     * Method which print the JsonValue as a well formatted String.
      * It take as parameter the number of spaces used for indentation.
      *
      * @param indent the number of spaces used for indentation.
-     * @return the formatted <type>String</type>.
+     * @return the formatted String.
      */
     default String prettyStringify(int indent) {
         final boolean keepingNull = false;
@@ -747,12 +747,12 @@ public interface JsonValue {
     }
 
     /**
-     * Method which print the JsonValue as a well formatted <type>String</type>.
-     * It take as parameter the boolean which specifies whether <value>null</value>
+     * Method which print the JsonValue as a well formatted String.
+     * It take as parameter the boolean which specifies whether null
      * should be keep in the Json representation.
      *
-     * @param keepingNull <value>true</value> if we want to keep <value>null</value> values.
-     * @return the formatted <type>String</type>.
+     * @param keepingNull true if we want to keep null values.
+     * @return the formatted String.
      */
     default String prettyStringify(boolean keepingNull) {
         final int indent = 3;
@@ -761,15 +761,15 @@ public interface JsonValue {
     }
 
     /**
-     * Method which print the JsonValue as a well formatted <type>String</type>.
+     * Method which print the JsonValue as a well formatted String.
      * It take as first parameter the boolean which specifies whether
-     * <value>null</value> should be keep in the Json representation. It takes
+     * null should be keep in the Json representation. It takes
      * as second parameter a boolean that speciies if we want to convert empty
-     * values to <value>null</value>.
+     * values to null.
      *
-     * @param keepingNull <value>true</value> if we want to keep <value>null</value> values.
-     * @param emptyValuesToNull <value>true</value> if we want to convert empty values to <value>null</value>.
-     * @return the formatted <type>String</type>.
+     * @param keepingNull true if we want to keep null values.
+     * @param emptyValuesToNull true if we want to convert empty values to null.
+     * @return the formatted String.
      */
     default String prettyStringify(boolean keepingNull, boolean emptyValuesToNull) {
         final int indent = 3;
@@ -777,16 +777,16 @@ public interface JsonValue {
     }
 
     /**
-     * Method which print the JsonValue as a well formatted <type>String</type>.
+     * Method which print the JsonValue as a well formatted String.
      * It take as first parameter the boolean which specifies whether
-     * <value>null</value> should be keep in the Json representation. It takes
+     * null should be keep in the Json representation. It takes
      * as second parameter a boolean that speciies if we want to convert empty
-     * values to <value>null</value>.
+     * values to null.
      *
-     * @param indent <value>true</value> if we want to keep <value>null</value> values.
-     * @param keepingNull <value>true</value> if we want to keep <value>null</value> values.
-     * @param emptyValuesToNull <value>true</value> if we want to convert empty values to <value>null</value>.
-     * @return the formatted <type>String</type>.
+     * @param indent true if we want to keep null values.
+     * @param keepingNull true if we want to keep null values.
+     * @param emptyValuesToNull true if we want to convert empty values to null.
+     * @return the formatted String.
      */
     default String prettyStringify(int indent, boolean keepingNull, boolean emptyValuesToNull) {
         return prettyStringifyRecursive(indent, indent, keepingNull, emptyValuesToNull);
@@ -808,8 +808,8 @@ public interface JsonValue {
     /**
      * Return a string representation of the JsonValue.
      *
-     * @param keepingNull <value>true</value> to keep null value in the json string.
-     * @param emptyValuesToNull <value>true</value> to convert empty values into null.
+     * @param keepingNull true to keep null value in the json string.
+     * @param emptyValuesToNull true to convert empty values into null.
      * @return the stringified json
      */
     String stringify(boolean keepingNull, boolean emptyValuesToNull);
@@ -817,7 +817,7 @@ public interface JsonValue {
     /**
      * Return a string representation of the JsonValue.
      *
-     * @param keepingNull <value>true</value> to keep null value in the json string.
+     * @param keepingNull true to keep null value in the json string.
      * @return the stringified json
      */
     default String stringify(boolean keepingNull){
@@ -826,26 +826,26 @@ public interface JsonValue {
     }
 
     /**
-     * Method which convert the JsonValue to a <type>Map</type> whose instance
+     * Method which convert the JsonValue to a Map whose instance
      * of the class of the map passed as parameter. Class of element of the
      * result map will be the first parameter. The result map will be indexed
      * by the order of the field in the JsonValue.
      *
      * @param c class of the element stored in the map.
      * @param map the map type we will used for result type.
-     * @param <T> <type>Map</type> parameter result type.
-     * @return the resulting <type>Map</type>.
+     * @param <T> Map parameter result type.
+     * @return the resulting Map.
      */
     <T> Map<Integer, T> toIntIndexedMapOf(Class<T> c, Map<Integer, T> map);
 
     /**
-     * Method which convert the JsonValue to a <type>LinkedHashMap</type>.
+     * Method which convert the JsonValue to a LinkedHashMap.
      * Class of element of the result map will be the first parameter. The
      * result map will be indexed by the order of the field in the JsonValue.
      *
      * @param c class of the element stored in the map.
-     * @param <T> <type>LinkedHashMap</type> parameter result type.
-     * @return the resulting <type>LinkedHashMap</type>.
+     * @param <T> LinkedHashMap parameter result type.
+     * @return the resulting LinkedHashMap.
      */
     default <T> Map<Integer, T> toIntIndexedMapOf(Class<T> c) {
         return toIntIndexedMapOf(c, new LinkedHashMap<>());
@@ -859,28 +859,28 @@ public interface JsonValue {
     JsonNode toJsonNode();
 
     /**
-     * Method which convert the JsonValue to a <type>LinkedHashMap</type>. Class of
+     * Method which convert the JsonValue to a LinkedHashMap. Class of
      * element of the result map will be the first parameter. The result map
      * will be indexed by the name of the field in the JsonValue.
      *
      * @param cl class of the element stored in the map.
-     * @param <T> <type>LinkedHashMap</type> parameter result type.
-     * @return the resulting <type>LinkedHashMap</type>.
+     * @param <T> LinkedHashMap parameter result type.
+     * @return the resulting LinkedHashMap.
      */
     default <T> Map<String, T> toStringIndexedMapOf(Class<T> cl){
         return toStringIndexedMapOf(cl, new LinkedHashMap<>());
     }
 
     /**
-     * Method which convert the JsonValue to a <type>Map</type> whose instance
+     * Method which convert the JsonValue to a Map whose instance
      * of the class of the map passed as parameter. Class of element of the
      * result map will be the first parameter. The result map will be indexed
      * by the name of the field in the JsonValue
      *
      * @param c class of the element stored in the map.
      * @param map the map type we will used for result type.
-     * @param <T> <type>Map</type> parameter result type.
-     * @return the resulting <type>Map</type>.
+     * @param <T> Map parameter result type.
+     * @return the resulting Map.
      */
     <T> Map<String, T> toStringIndexedMapOf(Class<T> c, Map<String, T> map);
 

@@ -71,7 +71,7 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>>, I
     /**
      * Method to get a builder for a JsonObject.
      *
-     * @return the constructed builder for <type>JsonObject</type>.
+     * @return the constructed builder for JsonObject.
      */
     public static Builder builder() {
         return new Builder();
@@ -80,9 +80,9 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>>, I
     /**
      * Creates a JsonObject from the Map passed as parameter
      *
-     * @param map
-     * @param <V>
-     * @return
+     * @param map Map to transform to an JsonObject
+     * @param <V> Type of items indexed in this map
+     * @return a new JsonObject
      */
     public static <V> JsonObject of(final Map<String, V> map) {
         return JsonObject.of(map, Function.<String>identity());
