@@ -29,10 +29,10 @@ public class  Tree<T> {
             System.out.println("We are here !!");
             ParameterizedType p = (ParameterizedType) type;
             List<Tree<Object>> children = new ArrayList<>();
-            ((JsonArray) jsVal.get("children")).stream().forEach(value -> children.add(value.as(type)));
+            ((JsonArray) jsVal.get("children")).stream().forEach(value -> children.add(value.asType(type)));
 
             return new Tree<>(
-                    jsVal.get("node").as(p.getActualTypeArguments()[0]),
+                    jsVal.get("node").asType(p.getActualTypeArguments()[0]),
                     children
             );
         });
@@ -68,8 +68,8 @@ public class  Tree<T> {
 
         Tree<?> tree = (Tree<?>) o;
 
-        if (node != null ? !node.equals(tree.node) : tree.node != null) return false;
-        return !(children != null ? !children.equals(tree.children) : tree.children != null);
+        return !(node != null ? !node.equals(tree.node) : tree.node != null)
+                && !(children != null ? !children.equals(tree.children) : tree.children != null);
 
     }
 

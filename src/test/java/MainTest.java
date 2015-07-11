@@ -10,7 +10,7 @@ public class MainTest {
         Tree<Charac<Integer>> emptyTree = Tree.empty();
 
         Tree<Charac<Integer>> singletonTree =
-                new Tree<>(new Charac<>("vCpu", 4, "Virtual CPU"));
+                new Tree<>(new Charac<>("vCpu", 4, "VirtuaU"));
 
         Tree<Charac<Integer>> tree =
                 new Tree<>(new Charac<>("Hyperviseur", 1, "Virtual Hyperviseur"),
@@ -25,9 +25,9 @@ public class MainTest {
 
 
 
-        System.out.println(JsonValue.of(emptyTree).as(new TypeReference<Tree<Charac<Integer>>>() {}));
-        System.out.println(JsonValue.of(singletonTree).as(new TypeReference<Tree<Charac<Integer>>>() {}));
-        System.out.println(JsonValue.of(tree).as(new TypeReference<Tree<Charac<Integer>>>() {}));
+        System.out.println(JsonValue.of(emptyTree).asType(new TypeReference<Tree<Charac<Integer>>>() {}));
+        System.out.println(JsonValue.of(singletonTree).asType(new TypeReference<Tree<Charac<Integer>>>() {}));
+        System.out.println(JsonValue.of(tree).asType(new TypeReference<Tree<Charac<Integer>>>() {}));
 
 /*
         Charac<String> characInt = new Charac<>("vCPU", "3", "Virtual CPU");
