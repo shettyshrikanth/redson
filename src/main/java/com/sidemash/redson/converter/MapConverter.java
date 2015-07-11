@@ -34,8 +34,8 @@ public class MapConverter<K,V> implements JsonContainerConverter<Map<K, V>> {
         ParameterizedType p = (ParameterizedType) type;
         for (JsonEntry<String> entry : obj)
             result.put(
-                    JsonString.of(entry.getKey()).as(p.getActualTypeArguments()[KEY]),
-                    entry.getValue().as(p.getActualTypeArguments()[VALUE])
+                    JsonString.of(entry.getKey()).asType(p.getActualTypeArguments()[KEY]),
+                    entry.getValue().asType(p.getActualTypeArguments()[VALUE])
             );
 
         return result;
@@ -46,7 +46,7 @@ public class MapConverter<K,V> implements JsonContainerConverter<Map<K, V>> {
         JsonObject obj = (JsonObject) jsonValue;
         ParameterizedType p = (ParameterizedType) type;
         for(JsonEntry<String> entry : obj)
-            result.put(entry.getKey(), entry.getValue().as(p.getActualTypeArguments()[VALUE]));
+            result.put(entry.getKey(), entry.getValue().asType(p.getActualTypeArguments()[VALUE]));
 
         return result;
     }

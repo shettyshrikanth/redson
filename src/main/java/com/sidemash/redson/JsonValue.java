@@ -114,8 +114,20 @@ public interface JsonValue {
      * @param <T> the return type (same as parameter)
      * @return the converted object
      */
-    default <T> T as(Type type) {
+    default <T> T asType(Type type) {
         return Json.fromJsonValue(this, type);
+    }
+    default <T> T asTypeOrDefault(Type type, T defaultValue) {
+        return this.<T>asTypeOptional(type).orElse(defaultValue);
+    }
+    default <T> Optional<T> asTypeOptional(Type type) {
+        Optional<T> result;
+        try {
+            result = Optional.of(asType(type));
+        } catch (Exception ex) {
+            result = Optional.empty();
+        }
+        return result;
     }
 
     /**
@@ -125,8 +137,20 @@ public interface JsonValue {
      * @param <T> the return type (same as parameter)
      * @return the converted object
      */
-    default <T> T as(TypeReference<T> typeReference) {
+    default <T> T asType(TypeReference<T> typeReference) {
         return Json.fromJsonValue(this, typeReference);
+    }
+    default <T> T asTypeOrDefault(TypeReference<T> typeReference, T defaultValue) {
+        return this.<T>asTypeOptional(typeReference).orElse(defaultValue);
+    }
+    default <T> Optional<T> asTypeOptional(TypeReference<T> typeReference) {
+        Optional<T> result;
+        try {
+            result = Optional.of(asType(typeReference));
+        } catch (Exception ex) {
+            result = Optional.empty();
+        }
+        return result;
     }
 
     /**
@@ -424,15 +448,15 @@ public interface JsonValue {
         return Json.fromJsonValueOptional(this, cl);
     }
 
-    default <T> T asPojo(Class<T> cl) {
+    default <T> T asType(Class<T> cl) {
         return Json.fromJsonValue(this, cl);
     }
 
-    default <T> Optional<T> asPojoOptional(Class<T> cl){
+    default <T> Optional<T> asTypeOptional(Class<T> cl){
         return Json.fromJsonValueOptional(this, cl);
     }
 
-    default <T> T asPojoOrDefault(Class<T> cl, T defaultValue) {
+    default <T> T asTypeOrDefault(Class<T> cl, T defaultValue) {
         return Json.fromJsonValueOrDefault(this, cl, defaultValue);
     }
 

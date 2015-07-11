@@ -16,7 +16,7 @@ public class QueueConverter<T> implements JsonContainerConverter<Queue<T>> {
         JsonArray array = (JsonArray) jsonValue;
         ParameterizedType p = (ParameterizedType) type;
         for(JsonValue value : array)
-            result.add(value.as(p.getActualTypeArguments()[0]));
+            result.add(value.asType(p.getActualTypeArguments()[0]));
 
         return result;
     }

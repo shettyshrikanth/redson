@@ -271,7 +271,7 @@ public class JsonArray implements
     @Override
     public <T> List<T> asListOf(Class<T> cl, List<T> list) {
         for (JsonValue item : items)
-            list.add(item.as(cl));
+            list.add(item.asType(cl));
 
         return list;
     }
@@ -290,7 +290,7 @@ public class JsonArray implements
     @Override
     public <T> Set<T> asSetOf(Class<T> cl, Set<T> set) {
         for (JsonValue item : items)
-            set.add(item.as(cl));
+            set.add(item.asType(cl));
 
         return set;
     }
@@ -919,7 +919,7 @@ public class JsonArray implements
     public <T> Map<Integer, T> toIntIndexedMapOf(Class<T> cl, Map<Integer, T> map) {
         int index = 0;
         for (JsonValue item : items) {
-            map.put(index, item.as(cl));
+            map.put(index, item.asType(cl));
             ++index;
         }
 
@@ -946,7 +946,7 @@ public class JsonArray implements
     public <T> Map<String, T> toStringIndexedMapOf(Class<T> cl, Map<String, T> map) {
         int index = 0;
         for (JsonValue item : items) {
-            map.put(String.valueOf(index), item.as(cl));
+            map.put(String.valueOf(index), item.asType(cl));
             ++index;
         }
 
