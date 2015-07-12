@@ -1,3 +1,5 @@
+organization := "com.sidemash"
+
 name := "redson"
 
 version := "0.1.0"
