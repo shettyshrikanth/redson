@@ -264,7 +264,17 @@ public class Person {
     }
 }
 ```
-To convert this class to a JsonOject is a dead simple operation just add the following : 
+To convert this class to a JsonOject is a dead simple operation just add the following bloc that means `Resgister for any instance of Person.class the function that take a person and return its JsonObject representation`
+```java
+Json.registerWriter(Person.class, (Person person) -> 
+        JsonObject.of(
+            JsonEntry.of("name", person.name),
+            JsonEntry.of("age", person.age),
+        )
+);
+```
+Because we have to do this once for every instance of Person, we will put this bloc of code in a static bloc and our class will become :   
+        
 ```java
 public class Person {
     
@@ -289,10 +299,14 @@ public class Person {
 ```
 Explanation : 
 Because the static bloc will be executed once, we register here the code that will convert any instance of Person to JsonObject. 
-The code inside the static bloc means `Resgister for any instance of Person.class the function that take a person and return its JsonObejct representation`
-With this way, you can do every thing you want when converting to Json including : Renaming fields, removing fields, adding fields, changing the value of fields etc ... this make make redson very suitable for doing RESTFul apis and we will know soon.
-Well that sounds good! But what is the purpose of the second parameter ? 
-What 
+With this way, you can do every thing you want when converting to Json including : Renaming fields, removing fields, adding fields, changing the value of fields etc ... this fundamental behaviour make redson very suitable for doing RESTFul apis and we will know soon.
+
+
+#### Converting a class hierarchy
+
+{{ Still in progress }} 
+
+#### What about REST Service ?
 
 
 
@@ -315,7 +329,9 @@ What
 
 
 
-## Authors
+## About the Authors
 Serge Martial N.
+Serge Martial is a CS student at Polytech Paris-Sud, the engineering school of Université Paris-Sud, The 1st University in france and is currently doing his internship at Thales. He was previously an intern at Cisco Systems at Issy-Les-Moulineaux in France. 
 
 Stephane Tankoua
+Stephane is a Software Engineer graduated from Polytech Lille the engineering school of "Université des sciences et Technologies de Lille" in Statistics and Computer Science. He is currently a software developper at CapGemini in Paris and previously was at Atos WorldLine Lille, France.
