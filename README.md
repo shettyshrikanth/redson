@@ -272,6 +272,10 @@ Json.registerWriter(Person.class, (Person person) ->
             JsonEntry.of("age", person.age),
         )
 );
+
+// Now, you can convert a Person to Json
+Person person = new Person("John Doe", 99);
+JsonValue.of(person);      // -> { "name" : "John Doe", "age" : 99 }
 ```
 If we were to rename the name field inside the JsonObject, we would have written 
 ```java
@@ -281,6 +285,10 @@ Json.registerWriter(Person.class, (Person person) ->
             JsonEntry.of("age", person.age),
         )
 );
+
+// Now, when you convert a Person to Json, you will have this result 
+Person person = new Person("John Doe", 99);
+JsonValue.of(person);      // -> { "fullName" : "John Doe", "age" : 99 }
 ```
 Because we have to do this once for every instance of Person, we will put this bloc of code in a static bloc and our class will become :   
         
@@ -293,10 +301,10 @@ public class Person {
     // Adding the following static boc
     static {
         Json.registerWriter(Person.class, (Person person) -> 
-                JsonObject.of(
-                    JsonEntry.of("name", person.name),
-                    JsonEntry.of("age", person.age),
-                )
+            JsonObject.of(
+                JsonEntry.of("name", person.name),
+                JsonEntry.of("age", person.age)
+            )
         );
     }
     
@@ -308,7 +316,7 @@ public class Person {
 ```
 Explanation : 
 Because the static bloc will be executed once, we register here the code that will convert any instance of Person to JsonObject. 
-With this way, you can do every thing you want when converting to Json including : Renaming fields, removing fields, adding fields, changing the value of fields etc ... this fundamental behaviour make redson very suitable for doing RESTFul apis and we will know soon.
+With this way, you can do every thing you want when converting to Json including : Renaming fields, removing fields, adding fields, changing the value of fields etc ... this fundamental behaviour make redson very suitable for doing RESTFul apis and we will know how soon.
 
 
 #### Converting a class hierarchy
