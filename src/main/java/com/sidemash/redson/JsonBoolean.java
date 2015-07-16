@@ -8,6 +8,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 public enum JsonBoolean implements JsonLiteral {
 
@@ -54,6 +55,12 @@ public enum JsonBoolean implements JsonLiteral {
     };
 
     private final boolean value;
+
+
+    @Override
+    public Boolean asDefaultObject() {
+        return value;
+    }
 
     JsonBoolean(boolean value) {
         this.value = value;
@@ -282,5 +289,4 @@ public enum JsonBoolean implements JsonLiteral {
                 "value=" + value +
                 '}';
     }
-
 }

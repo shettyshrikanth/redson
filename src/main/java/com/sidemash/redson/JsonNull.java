@@ -40,6 +40,11 @@ public enum JsonNull implements JsonLiteral {
     }
 
     @Override
+    public Object asDefaultObject() {
+        return null;
+    }
+
+    @Override
     public Optional<BigInteger> asBigIntegerOptional() {
         return Optional.empty();
     }

@@ -55,8 +55,8 @@ public enum DefaultObjectConverter implements  JsonConverter<Object> {
     }
 
     @Override
-    public Map<String, Object> fromJsonValue(JsonValue jsonValue) {
-        return jsonValue.toStringIndexedMapOf(Object.class);
+    public Object fromJsonValue(JsonValue jsonValue) {
+        return jsonValue.asDefaultObject();
     }
 
     @Override

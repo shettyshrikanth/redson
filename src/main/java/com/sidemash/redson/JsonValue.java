@@ -14,6 +14,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -141,7 +142,7 @@ public interface JsonValue {
         return Json.fromJsonValue(this, typeReference);
     }
     default <T> T asTypeOrDefault(TypeReference<T> typeReference, T defaultValue) {
-        return this.<T>asTypeOptional(typeReference).orElse(defaultValue);
+        return this.asTypeOptional(typeReference).orElse(defaultValue);
     }
     default <T> Optional<T> asTypeOptional(TypeReference<T> typeReference) {
         Optional<T> result;
@@ -159,6 +160,7 @@ public interface JsonValue {
      * @return the converted object
      */
     BigDecimal asBigDecimal();
+
 
     /**
      * Method which convert a <tt>JsonValue</tt> to a <tt>BigDecimal</tt> wrapped in an option.
@@ -342,6 +344,8 @@ public interface JsonValue {
      */
     Optional<Integer> asIntOptional();
 
+    Object asDefaultObject();
+
     /**
      * Method which convert a <tt>JsonValue</tt> to a <tt>Integer</tt> if it
      * can be converted or the default <tt>Integer</tt> value passes as
@@ -424,29 +428,22 @@ public interface JsonValue {
     }
 
     /**
-     * Method wich converts the JsonValue as an Optional which
-     * contains the JsonValue if it is equals to not JsonNull or
-     * JsonOptional.EMPTY.
+     * Method which converts the JsonValue as an Optional of type T
+     * By calling this method, you roughly say : "Interpret this JsonValue
+     * as an instance of Optional and return this Optional".
+     * Hence, if this JsonValue is an Instance of JsonObject, JsonArray, JsonLiteral (except
+     * the JsonNull literal), the interpretation will naturally fail.
+     * If this JsonValue is an instance of JsonNull, Optional.empty() will be return.
      *
-     * @return the resulting Optional.
+     * This method will succeed only if this JsonValue is an instance of JsonOptional or
+     * JsonNull.
+     * @param cl Class of the desired type component of Optional
+     * @param <T> desired type component of Optional
+     * @throws  ClassCastException if this JsonValue is not an instance of JsonOptional
+     *          or JsonNull
+     * @return Optional of Type T
      */
-    default Optional<? extends JsonValue> asOptional() {
-        return Optional.of(this);
-    }
-
-    /**
-     * Method wich converts the JsonValue as an Optional which
-     * contains the JsonValue if it is equals to not
-     * JsonNull or JsonOptional.EMPTY.
-     * The JsonValue will be casted as instance of the first parameter
-     *
-     * @param cl
-     * @param <T>
-     * @return
-     */
-    default <T> Optional<T> asOptionalOf(Class<T> cl){
-        return Json.fromJsonValueOptional(this, cl);
-    }
+    <T> Optional<T> asOptionalOf(Class<T> cl);
 
     default <T> T asType(Class<T> cl) {
         return Json.fromJsonValue(this, cl);

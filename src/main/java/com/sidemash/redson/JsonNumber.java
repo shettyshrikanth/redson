@@ -125,6 +125,11 @@ public class JsonNumber implements JsonLiteral {
     }
 
     @Override
+    public BigDecimal asDefaultObject() {
+        return value;
+    }
+
+    @Override
     public char asChar() {
         throw new ClassCastException(
                 String.format(

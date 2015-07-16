@@ -88,7 +88,7 @@ class JsonObjectSpec extends UnitSpec {
     obj.updateKey("gree", uppercaseOperator).getHead() should be  (JsonEntry.of("greet", "Hello"))
   }
 
-  it should "Schould correctly apply fold method" in {
+  it should "Should correctly apply fold method" in {
     val array = JsonArray.of(Integer.valueOf(2), Integer.valueOf(1), Integer.valueOf(1), Integer.valueOf(1))
     val addFn = new BiFunction[Integer, JsonValue, Integer]{
       override def apply(t: Integer, u: JsonValue): Integer = t + u.asInt();

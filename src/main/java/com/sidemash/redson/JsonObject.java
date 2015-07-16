@@ -8,11 +8,13 @@ import com.sidemash.redson.util.ImmutableMap;
 
 import java.util.*;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@SuppressWarnings("unused")
 public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>>, ImmutableMap<String, JsonValue> {
 
 
@@ -26,6 +28,14 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>>, I
 
     private static Map<String, JsonValue> newItems() { return new LinkedHashMap<>(); }
 
+    private static Map<String, JsonValue> newItems(Map<String, JsonValue> items) {
+        return new LinkedHashMap<>(items);
+    }
+
+    private static JsonObject createJsonObject(final Map<String, JsonValue> items){
+        if (items.isEmpty()) return JsonObject.EMPTY;
+        else return new JsonObject(items);
+    }
 
     /**
      * A builder for a JsonObject to construct a JsonObject
@@ -37,7 +47,7 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>>, I
         private final Map<String, JsonValue> items;
 
         private Builder() {
-            this.items = new HashMap<>();
+            this.items = newItems();
         }
 
         public Builder append(String key, JsonValue value) {
@@ -50,21 +60,27 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>>, I
             return this;
         }
 
-        public Builder append(Map<String, JsonValue> values) {
+        public<T extends Map<String, ? extends JsonValue>>  Builder append(T values) {
             this.items.putAll(values);
             return this;
         }
 
-        public Builder append(List<JsonEntry<String>> entries) {
-            entries.stream().forEach(entry -> this.append(entry));
+        public Builder append(Builder builder) {
+            this.items.putAll(builder.items);
+            return this;
+        }
+
+        public<T extends Map.Entry<String, ?>> Builder append(T stringEntry) {
+            return this.append(JsonEntry.of(stringEntry));
+        }
+
+        public<T extends Collection<? extends Map.Entry<String, ?>>> Builder append(T entryCollection) {
+            entryCollection.stream().forEach(this::append);
             return this;
         }
 
         public JsonObject build() {
-            if (this.items.isEmpty())
-                return JsonObject.EMPTY;
-            else
-                return new JsonObject(items);
+            return createJsonObject(newItems(items));
         }
     }
 
@@ -92,20 +108,27 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>>, I
      * Creates a JsonObject from the Map passed as parameter
      *
      * @param map
-     * @param kToString Function to convert the Keys to a String
+     * @param keyToString Function to convert the Keys to a String
      * @param <K>
      * @param <V>
      * @return
      */
-    public static <K, V> JsonObject of(final Map<K, V> map, final Function<K, String> kToString) {
+    public static <K, V> JsonObject of(final Map<K, V> map, final Function<K, String> keyToString) {
         if(map.isEmpty())
             return EMPTY;
 
         Builder builder = JsonObject.builder();
-        map.forEach((key, value) -> builder.append(kToString.apply(key), JsonValue.of(value)));
+        map.forEach((key, value) -> builder.append(keyToString.apply(key), JsonValue.of(value)));
 
         return builder.build();
     }
+
+    @Override
+    public Map<String, Object> asDefaultObject() {
+        return this.asMapOf(Object.class, new LinkedHashMap<>());
+    }
+
+
 
     /**
      * Creates a JsonObject composed of one entry which contains the key and the value passed as parameter
@@ -115,15 +138,14 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>>, I
      */
     public static JsonObject of(final String key, final Object value) {
         Objects.requireNonNull(key);
-        return JsonObject.of(
-                Collections.singletonMap(key, value),
-                Function.<String>identity()
-        );
+        return new JsonObject(Collections.singletonMap(key, JsonValue.of(value)));
     }
 
     /**
      * Create JsonObject from the Object passed as parameter
-     * @param o
+     * This is roughtly equivalent to : (JsonObject) JsonValue.of(o)
+     *
+     * @param o Object to convert to JsonObject
      * @throws ClassCastException if o can't be converted to a valid JsonObject
      * @return
      */
@@ -133,47 +155,59 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>>, I
 
     /**
      * Create JsonObject from an jsonEntry passed as parameter
-     * @param jsonEntry
+     * @param jsonEntry Unique entry to add to Json
      * @return
      */
-    public static JsonObject of(final JsonEntry<String> jsonEntry) {
-        return JsonObject.of(
-                Collections.singletonMap(jsonEntry.getKey(), jsonEntry.getValue()),
-                Function.<String>identity()
-        );
+    public static <T extends Map.Entry<String, ? extends JsonValue>> JsonObject of(final T jsonEntry) {
+        return JsonObject.of(jsonEntry.getKey(), jsonEntry.getValue());
     }
 
     @SafeVarargs
-    public static JsonObject of(final JsonEntry<String> jsonEntry1, final JsonEntry<String>... jsonEntries) {
+    public static <T extends Map.Entry<String, ?>> JsonObject of(final T jsonEntry1, final T... jsonEntries) {
         Objects.requireNonNull(jsonEntry1);
         List<JsonEntry<String>> itemsList = new ArrayList<>();
-        itemsList.add(jsonEntry1);
-        itemsList.addAll(Arrays.asList(jsonEntries));
+        itemsList.add(JsonEntry.of(jsonEntry1));
+        if(jsonEntries.length > 0 && jsonEntries[0] instanceof JsonEntry) {
+            // This cast is safe as the first item of this jsonEntries array
+            // is an instance of JsonEntry, because arrays are homogeneous,
+            // all items of this JsonObject are an instance of JsonEntry<String>.
+            @SuppressWarnings("unchecked")
+            JsonEntry<String>[] arr = (JsonEntry<String>[]) jsonEntries;
+            itemsList.addAll(Arrays.asList(arr));
+        }
+        else {
+            itemsList.addAll(
+                    Arrays.asList(jsonEntries)
+                            .stream()
+                            .map(JsonEntry::of)
+                            .collect(Collectors.toList())
+            );
+        }
         return of(itemsList.iterator());
     }
 
-    public static JsonObject of(Iterable<JsonEntry<String>> iterable) {
+    public static<S> JsonObject of(Iterable<? extends Map.Entry<String, S>> iterable) {
         return JsonObject.of(iterable.iterator());
     }
 
-    public static JsonObject of(Stream<JsonEntry<String>> stream) {
+    public static<S> JsonObject of(Stream<? extends Map.Entry<String, S>> stream) {
         return JsonObject.of(stream.iterator());
     }
 
-    public static JsonObject of(Iterator<JsonEntry<String>> it) {
+    // esayer d'integerer final Function<K, String> keyToString)
+    public static<S> JsonObject of(Iterator<? extends Map.Entry<String, S>> it) {
         if (!it.hasNext())
             return JsonObject.EMPTY;
 
         Builder builder = JsonObject.builder();
-        it.forEachRemaining(entry -> builder.append(entry.getKey(), entry.getValue()));
+        it.forEachRemaining(entry -> builder.append(entry.getKey(), JsonValue.of(entry.getValue())));
 
         return builder.build();
     }
 
     public JsonObject append(String key, Object value) {
         Objects.requireNonNull(key);
-        Builder builder = JsonObject.builder();
-        return builder
+        return JsonObject.builder()
                 .append(this.items)
                 .append(key, JsonValue.of(value))
                 .build();
@@ -191,6 +225,7 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>>, I
     }
 
     @Override
+    // Revoir la definition de asMapOf et integrer asMapOf(keyClass, valueClass, defaultValue)
     public <T> Map<String, T> asMapOf(Class<T> cl, Map<String, T> map) {
         this.stream()
             .forEachOrdered(entry -> map.put(entry.getKey(), entry.getValue().asType(cl)));
@@ -235,13 +270,13 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>>, I
 
     public <E> boolean containsAllValues(Iterable<E> allValues) {
         for(E value : allValues){
-            if(!items.containsValue(value))
+            if(!(value instanceof JsonValue && items.containsValue(value)))
                 return false;
         }
         return true;
     }
 
-    public <E> boolean containsAllValues(E... allValues) {
+    public boolean containsAllValues(Object... allValues) {
         return this.containsAllValues(Arrays.asList(allValues));
     }
 
@@ -255,7 +290,7 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>>, I
 
     @Override
     public boolean containsValue(Object value) {
-        return items.containsValue(value);
+        return value instanceof JsonValue && items.containsValue(value);
     }
 
     @Override
@@ -423,17 +458,6 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>>, I
         return items.keySet().stream();
     }
 
-    public <R> JsonObject map(Function<? super JsonEntry<String>, R> mapper) {
-        return JsonObject.of(this.stream().map(mapper.andThen(JsonValue::of)));
-    }
-
-    public <R> JsonObject mapValues(Function<? super JsonValue, R> mapper) {
-        return this.map(entry -> mapper.apply(entry.getValue()));
-    }
-
-    public <R> JsonObject mapKeys(Function<? super String, R> mapper) {
-        return this.map(entry -> mapper.apply(entry.getKey()));
-    }
 
     @Override
     public String toString() {
@@ -562,9 +586,7 @@ public class JsonObject implements JsonStructure, Iterable<JsonEntry<String>>, I
     @Override
     public JsonNode toJsonNode() {
         ObjectNode result = JsonNodeFactory.instance.objectNode();
-        items.forEach((key, value) -> {
-            result.set(key, value.toJsonNode());
-        });
+        items.forEach((key, value) ->  result.set(key, value.toJsonNode()));
         return result;
     }
 

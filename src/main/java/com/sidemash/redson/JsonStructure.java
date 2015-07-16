@@ -6,10 +6,10 @@ import java.math.BigInteger;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 
-
+@SuppressWarnings("unused")
 public interface JsonStructure extends JsonValue {
-
 
     @Override
     default BigDecimal asBigDecimal() {
@@ -17,6 +17,17 @@ public interface JsonStructure extends JsonValue {
                 String.format(
                         "instance of %s could not be get as BigDecimal",
                         this.getClass().getSimpleName()
+                )
+        );
+    }
+
+    @Override
+    default <T> Optional<T> asOptionalOf(Class<T> cl){
+        throw new ClassCastException(
+                String.format(
+                        "instance of %s could not be get as Optional of %s",
+                        this.getClass().getSimpleName(),
+                        cl.getSimpleName()
                 )
         );
     }
@@ -146,10 +157,6 @@ public interface JsonStructure extends JsonValue {
         return Optional.empty();
     }
 
-    @Override
-    default Optional<? extends JsonValue> asOptional() {
-        return Optional.of(this);
-    }
 
     @Override
     default short asShort() {

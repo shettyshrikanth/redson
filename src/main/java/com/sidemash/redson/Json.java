@@ -34,26 +34,34 @@ public final class Json {
 
     static {
         registerDefaultConverter(Boolean.class,    BooleanConverter.INSTANCE);
+        registerDefaultConverter(boolean.class,    BooleanConverter.INSTANCE);
         registerDefaultConverter(Byte.class,       ByteConverter.INSTANCE);
+        registerDefaultConverter(byte.class,       ByteConverter.INSTANCE);
+        registerDefaultConverter(Character.class,  CharacterConverter.INSTANCE);
+        registerDefaultConverter(char.class,  CharacterConverter.INSTANCE);
+        registerDefaultConverter(Double.class,     DoubleConverter.INSTANCE);
+        registerDefaultConverter(double.class,     DoubleConverter.INSTANCE);
+        registerDefaultConverter(Float.class,      FloatConverter.INSTANCE);
+        registerDefaultConverter(float.class,      FloatConverter.INSTANCE);
+        registerDefaultConverter(Integer.class,    IntegerConverter.INSTANCE);
+        registerDefaultConverter(int.class,         IntegerConverter.INSTANCE);
+        registerDefaultConverter(Long.class,       LongConverter.INSTANCE);
+        registerDefaultConverter(long.class,       LongConverter.INSTANCE);
+        registerDefaultConverter(Short.class,      ShortConverter.INSTANCE);
+        registerDefaultConverter(short.class,      ShortConverter.INSTANCE);
         registerDefaultConverter(BigDecimal.class, BigDecimalConverter.INSTANCE);
         registerDefaultConverter(BigInteger.class, BigIntegerConverter.INSTANCE);
-        registerDefaultConverter(Character.class,  CharacterConverter.INSTANCE);
-        registerDefaultConverter(Double.class,     DoubleConverter.INSTANCE);
-        registerDefaultConverter(Float.class,      FloatConverter.INSTANCE);
-        registerDefaultConverter(Integer.class,    IntegerConverter.INSTANCE);
-        registerDefaultConverter(Long.class,       LongConverter.INSTANCE);
-        registerDefaultConverter(Short.class,      ShortConverter.INSTANCE);
         registerDefaultConverter(String.class,     StringConverter.INSTANCE);
         registerDefaultConverter(Object.class,     DefaultObjectConverter.INSTANCE);
         registerDefaultConverter(JsonValue.class,  JsonValueConverter.INSTANCE);
         registerDefaultConverter(Enum.class,       EnumConverter.INSTANCE);
         registerDefaultConverter(JsonNode.class,   JsonNodeConverter.INSTANCE);
+        registerDefaultConverter(Array.class,      ArrayConverter.INSTANCE);
 
         registerDefaultConverter(List.class,       new ListConverter<>());
         registerDefaultConverter(BaseStream.class, new StreamConverter<>());
         registerDefaultConverter(Set.class,        new SetConverter<>());
         registerDefaultConverter(Queue.class,      new QueueConverter<>());
-        registerDefaultConverter(Array.class,      new ArrayConverter<>());
         registerDefaultConverter(Optional.class,   new OptionalConverter<>());
         registerDefaultConverter(Map.class,        new MapConverter<>());
         registerDefaultConverter(Iterator.class,   new IteratorConverter<>());
@@ -72,6 +80,7 @@ public final class Json {
             return (JsonValue)o;
 
         if(o.getClass().isArray()){
+
             if(o instanceof int[])
                 return JsonArray.of((int[]) o);
             if(o instanceof char[])
@@ -174,13 +183,14 @@ public final class Json {
         }
         else {
 
-            if( cl.isArray() ||  Map.class.isAssignableFrom(cl) ||  Iterable.class.isAssignableFrom(cl) )
+            if( Map.class.isAssignableFrom(cl) ||  Iterable.class.isAssignableFrom(cl) )
                 throw new UnsupportedOperationException(
                         String.format("Impossible to convert this JsonValue to %s. Try to pass this expression :" +
                                 " 'new TypeReference<T>{}' instead of 'T.class' for conversion ", cl)
                 );
-
-            if( cl.isEnum() )
+            if( cl.isArray() )
+                fnResult = (T) map.get(Array.class);
+            else if( cl.isEnum() )
                 fnResult = (T) map.get(cl);
             else if(JsonValue.class.isAssignableFrom(cl))
                 fnResult = (T) map.get(JsonValue.class);
@@ -282,12 +292,18 @@ public final class Json {
     }
 
     public static <T> T fromJsonValue(JsonValue jsonValue, Class<T> expectedClass){
-        Function<JsonValue, Object> fn;
-        fn = getJsonReaderFunctionFor(expectedClass);
-
-        @SuppressWarnings("unchecked")
-        T result =  (T) fn.apply(jsonValue);
-        return result;
+        if(expectedClass.isArray()){
+            @SuppressWarnings("unchecked")
+            T result = (T) getJsonContainerReaderFunctionFor(expectedClass).apply(jsonValue, expectedClass);
+            return result;
+        }
+        else {
+            Function<JsonValue, Object> fn;
+            fn = getJsonReaderFunctionFor(expectedClass);
+            @SuppressWarnings("unchecked")
+            T result = (T) fn.apply(jsonValue);
+            return result;
+        }
     }
 
     public static <T> Optional<T> fromJsonValueOptional(JsonValue jsonValue, Class<T> expectedClass){

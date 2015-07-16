@@ -9,10 +9,6 @@ public interface ImmutableVector<T>  {
 
     ImmutableVector<T> distinct();
 
-    ImmutableVector<T> filter(Predicate<? super T> predicate);
-
-    ImmutableVector<T> filterNot(Predicate<? super T> predicate);
-
     <U> U foldLeft(U seed, BiFunction<U, T, U> op);
 
     default  <U> U foldRight(U seed, BiFunction<T, U, U> op) {
@@ -62,7 +58,7 @@ public interface ImmutableVector<T>  {
     List<Integer> indexOf(T elem, int from);
 
     */
-      ImmutableVector<T> slice(int from, int until);
+    ImmutableVector<T> slice(int from, int until);
 
     ImmutableVector<T> sorted(Comparator<? super T> comparator);
 

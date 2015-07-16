@@ -4,7 +4,8 @@ package com.sidemash.redson;
 import java.util.Map;
 import java.util.Objects;
 
-public abstract class JsonEntry<T> {
+public abstract class JsonEntry<T> implements Map.Entry<T,JsonValue> {
+
     private final T key;
     private final JsonValue value;
 
@@ -28,8 +29,13 @@ public abstract class JsonEntry<T> {
         return new IntIndexedJsonEntry(key, Json.toJsonValue(o));
     }
 
-    public static JsonEntry<String> of(Map.Entry<String, JsonValue> entry){
-        return new StringIndexedJsonEntry(entry.getKey(), entry.getValue());
+    public static<T extends Map.Entry<String, ?>> JsonEntry<String> of(T  entry){
+        if (entry instanceof  JsonEntry) {
+            @SuppressWarnings("unchecked")
+            JsonEntry<String> e = (JsonEntry<String>) entry;
+            return e;
+        }
+        return new StringIndexedJsonEntry(entry.getKey(), JsonValue.of(entry.getValue()));
     }
 
     @Override
@@ -59,7 +65,11 @@ public abstract class JsonEntry<T> {
         return result;
     }
 
-    public abstract Map.Entry<T, JsonValue> toMapEntry();
+    @Override
+    public JsonValue setValue(JsonValue value) {
+        throw new UnsupportedOperationException("Set the value of instance of an immutable class");
+    }
+
 
     @Override
     public String toString() {
@@ -75,32 +85,6 @@ public abstract class JsonEntry<T> {
             super(key, value);
         }
 
-        @Override
-        public Map.Entry<Integer, JsonValue> toMapEntry() {
-            IntIndexedJsonEntry outer = this;
-            return new Map.Entry<Integer, JsonValue>() {
-
-                final Integer innerKey = outer.getKey() ;
-                JsonValue innerValue = outer.getValue();
-
-                @Override
-                public Integer getKey() {
-                    return innerKey;
-                }
-
-                @Override
-                public JsonValue getValue() {
-                    return innerValue;
-                }
-
-                @Override
-                public JsonValue setValue(JsonValue newInnerValue) {
-                    JsonValue oldInnerValue = innerValue;
-                    this.innerValue = newInnerValue;
-                    return oldInnerValue;
-                }
-            };
-        }
     }
 
     private static class StringIndexedJsonEntry extends  JsonEntry<String> {
@@ -109,31 +93,5 @@ public abstract class JsonEntry<T> {
             super(key, value);
         }
 
-        @Override
-        public Map.Entry<String, JsonValue> toMapEntry() {
-            StringIndexedJsonEntry outer = this;
-            return new Map.Entry<String, JsonValue>() {
-
-                final String innerKey = outer.getKey() ;
-                JsonValue innerValue = outer.getValue();
-
-                @Override
-                public String getKey() {
-                    return innerKey;
-                }
-
-                @Override
-                public JsonValue getValue() {
-                    return innerValue;
-                }
-
-                @Override
-                public JsonValue setValue(JsonValue newInnerValue) {
-                    JsonValue oldInnerValue = innerValue;
-                    this.innerValue = newInnerValue;
-                    return oldInnerValue;
-                }
-            };
-        }
     }
 }

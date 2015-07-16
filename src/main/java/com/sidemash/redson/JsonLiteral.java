@@ -2,6 +2,7 @@ package com.sidemash.redson;
 
 
 import java.util.*;
+import java.util.function.Consumer;
 
 public interface JsonLiteral extends JsonValue {
 
@@ -103,6 +104,21 @@ public interface JsonLiteral extends JsonValue {
     @Override
     default String prettyStringify() {
         return toString();
+    }
+
+
+    @Override
+    default <T> Optional<T> asOptionalOf(Class<T> cl){
+        if(this.isJsonNull())
+            return Optional.empty();
+
+        throw new ClassCastException(
+                String.format(
+                        "instance of %s could not be get as Optional of %s",
+                        this.getClass().getSimpleName(),
+                        cl.getSimpleName()
+                )
+        );
     }
 
     @Override

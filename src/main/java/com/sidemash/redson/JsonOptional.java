@@ -12,7 +12,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-
+@SuppressWarnings("unused")
 public class JsonOptional implements JsonValue {
 
     public static final JsonOptional EMPTY = new JsonOptional(Optional.empty());
@@ -24,6 +24,7 @@ public class JsonOptional implements JsonValue {
 
 
     public static<T> JsonOptional of(T value) {
+        Objects.requireNonNull(value);
         if(value instanceof Optional)
             return of((Optional<?>) value);
 
@@ -40,6 +41,21 @@ public class JsonOptional implements JsonValue {
                 .orElse(JsonOptional.EMPTY);
     }
 
+    /**
+     * Turn the Optional passed as parameter as an instance of JsonOptional.
+     * if the value Optional is empty then JsonOptional.EMPTY will be return
+     * If not, a JsonOptional containing the same element converted to JsonValue.
+     * Example :
+     * JsonOptional.of( Optional.of("Hello") ) will return JsonOptional(JsonString("Hello"))
+     * JsonOptional.of( Optional.of(1) ) will return  JsonOptional(JsonNumber(1))
+     * JsonOptional.of( Optional.empty() ) will return  JsonOptional.EMPTY
+     *
+     * @param value Optional value
+     * @param <T> Type of element contained in the Optional value
+     * @throws NullPointerException if the value param is null
+     * @return JsonOptional.EMPTY if the Optional value were empty and a JsonOptional
+     *          containing the same element as the Optional value otherwise.
+     */
     public static<T> JsonOptional of(Optional<T> value) {
         return value
                 .map(v -> new JsonOptional(Optional.of(Json.toJsonValue(v))))
@@ -167,6 +183,11 @@ public class JsonOptional implements JsonValue {
     }
 
     @Override
+    public Optional<Object> asDefaultObject() {
+        return value.map(JsonValue::asDefaultObject);
+    }
+
+    @Override
     public <T> List<T> asListOf(Class<T> cl, List<T> list) {
         if(value.isPresent())
             list.add(Json.fromJsonValue(value.get(), cl));
@@ -189,6 +210,12 @@ public class JsonOptional implements JsonValue {
         );
     }
 
+
+    @Override
+    public void forEach(Consumer<? super JsonValue> action) {
+        value.ifPresent(action);
+    }
+
     @Override
     public Optional<Long> asLongOptional() {
         return Optional.empty();
@@ -205,10 +232,6 @@ public class JsonOptional implements JsonValue {
         );
     }
 
-    @Override
-    public Optional<JsonValue> asOptional() {
-        return value;
-    }
 
     @Override
     public <T> Optional<T> asOptionalOf(Class<T> c) {
@@ -413,7 +436,7 @@ public class JsonOptional implements JsonValue {
         if(value.isPresent())
             return value.get().stringify(keepingNull, emptyValuesToNull);
         else if(emptyValuesToNull)
-            return JsonNull.INSTANCE.stringify(keepingNull, emptyValuesToNull);
+            return JsonNull.INSTANCE.stringify(keepingNull, true);
         else
             throw new UnsupportedOperationException("stringify an empty JsonOptional");
     }

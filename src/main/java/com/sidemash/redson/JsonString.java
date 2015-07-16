@@ -245,6 +245,12 @@ public class JsonString implements JsonLiteral {
         return value.equals(that.value);
     }
 
+
+    @Override
+    public String asDefaultObject() {
+        return value;
+    }
+
     @Override
     public JsonValue get() {
         throw new NoSuchElementException(

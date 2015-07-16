@@ -2,32 +2,45 @@ package com.sidemash.redson.converter;
 
 import com.sidemash.redson.JsonArray;
 import com.sidemash.redson.JsonValue;
+import scala.util.parsing.json.JSONArray;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class ArrayConverter<T> implements JsonContainerConverter<T[]> {
+public enum ArrayConverter implements JsonConverter {
+    INSTANCE ;
 
     @Override
-    public T[] fromJsonValue(JsonValue jsonValue,Type type) {
-        List<T> list = new ArrayList<>();
-        JsonArray array = (JsonArray) jsonValue;
-        ParameterizedType p = (ParameterizedType) type;
-        for(JsonValue value : array)
-            list.add(value.asType(p.getActualTypeArguments()[0]));
-
-        //@SuppressWarnings("unchecked")
-        //T[] result = (T[]) list.toArray();
-        return null;
+    public Object fromJsonValue(JsonValue jsonValue) {
+        throw new AssertionError(String.format("This method should have never been called in class %s ", this.getClass()));
     }
 
     @Override
-    public JsonValue toJsonValue(T[] obj, JsonValue jsonValue) {
-        System.out.println(obj.length);
-        //throw new RuntimeException("this normal");
-        return JsonValue.of(Arrays.asList(obj));
+    public Object fromJsonValue(JsonValue jsonValue, Type type) {
+        JsonArray jsonArray = (JsonArray) jsonValue;
+        Class<?> componentType = ((Class<?>) type).getComponentType();
+        Object result = Array.newInstance(componentType, jsonArray.length());
+        jsonArray.entryStream().forEach(entry ->
+                        Array.set(result, entry.getKey(), entry.getValue().asType(componentType))
+        );
+        return result;
     }
+
+    @Override
+    public JsonValue toJsonValue(Object objArray, JsonValue jsonValue) {
+        int objArrayLength = Array.getLength(objArray);
+        if(objArrayLength == 0)
+            return JsonArray.EMPTY;
+
+        JsonArray.Builder builder = JsonArray.builder();
+        for(int i = 0; i < objArrayLength; i++){
+            builder.append(JsonValue.of(Array.get(objArray, i)));
+        }
+        return builder.build();
+    }
+
 }

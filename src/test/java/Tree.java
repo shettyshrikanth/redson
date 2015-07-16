@@ -26,7 +26,6 @@ public class  Tree<T> {
             if (jsVal.isJsonObject() && jsVal.isEmpty())
                 return Tree.empty();
 
-            System.out.println("We are here !!");
             ParameterizedType p = (ParameterizedType) type;
             List<Tree<Object>> children = new ArrayList<>();
             ((JsonArray) jsVal.get("children")).stream().forEach(value -> children.add(value.asType(type)));
