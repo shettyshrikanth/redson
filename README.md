@@ -264,11 +264,20 @@ public class Person {
     }
 }
 ```
-To convert this class to a JsonOject is a dead simple operation just add the following bloc that means `Resgister for any instance of Person.class the function that take a person and return its JsonObject representation`
+To convert this class to a JsonOject is a dead simple operation just add the following bloc that means `Register for any instance of Person.class the function that take a person and return its JsonObject representation`
 ```java
 Json.registerWriter(Person.class, (Person person) -> 
         JsonObject.of(
             JsonEntry.of("name", person.name),
+            JsonEntry.of("age", person.age),
+        )
+);
+```
+If we were to rename the name field inside the JsonObject, we would have written 
+```java
+Json.registerWriter(Person.class, (Person person) -> 
+        JsonObject.of(
+            JsonEntry.of("fullName", person.name), // <- Change the name attribute of Json representation of Person
             JsonEntry.of("age", person.age),
         )
 );
