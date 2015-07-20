@@ -26,7 +26,7 @@ publishMavenStyle := true
 
 publishTo := {
   val nexus = "https://oss.sonatype.org/"
-  if (isSnapshot.value)
+  if (version.value.trim.endsWith("SNAPSHOT"))
     Some("snapshots" at nexus + "content/repositories/snapshots")
   else
     Some("releases"  at nexus + "service/local/staging/deploy/maven2")
@@ -65,3 +65,7 @@ pomExtra := (
         <url>https://github.com/stankoua</url>
       </developer>
     </developers>)
+
+
+// Do not append Scala versions to the generated artifacts
+crossPaths := false
