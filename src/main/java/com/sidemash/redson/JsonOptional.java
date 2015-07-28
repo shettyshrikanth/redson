@@ -13,7 +13,7 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 @SuppressWarnings("unused")
-public class JsonOptional implements JsonValue {
+public class JsonOptional implements JsonValue, Iterable<JsonValue> {
 
     public static final JsonOptional EMPTY = new JsonOptional(Optional.empty());
     private final Optional<JsonValue> value;
@@ -61,6 +61,7 @@ public class JsonOptional implements JsonValue {
                 .map(v -> new JsonOptional(Optional.of(Json.toJsonValue(v))))
                 .orElse(JsonOptional.EMPTY);
     }
+
     @Override
     public BigDecimal asBigDecimal() {
         throw new ClassCastException(
@@ -210,6 +211,18 @@ public class JsonOptional implements JsonValue {
         );
     }
 
+
+    /**
+     * Returns an iterator over elements of type {@code T}.
+     *
+     * @return an Iterator.
+     */
+    @Override
+    public Iterator<JsonValue> iterator() {
+        return value
+                .map(jsonValue -> Collections.singleton(jsonValue).iterator())
+                .orElseThrow(NoSuchElementException::new);
+    }
 
     @Override
     public void forEach(Consumer<? super JsonValue> action) {
@@ -430,6 +443,7 @@ public class JsonOptional implements JsonValue {
     public int size() {
         return (value.isPresent()) ? 1 : 0;
     }
+
 
     @Override
     public String stringify(boolean keepingNull, boolean emptyValuesToNull) {

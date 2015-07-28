@@ -881,4 +881,96 @@ public interface JsonValue {
      */
     <T> Map<String, T> toStringIndexedMapOf(Class<T> c, Map<String, T> map);
 
+
+    /**
+     * Method which cast the value to a JsonArray.
+     *
+     * @throws ClassCastException if the value is not an instance of JsonArray.
+     * @return the resulting JsonArray.
+     */
+    default JsonArray asJsonArray() {
+       return (JsonArray) this;
+    }
+
+    /**
+     * Method which cast the value to a JsonObject.
+     *
+     * @throws ClassCastException if the value is not an instance of JsonObject.
+     * @return the resulting JsonObject.
+     */
+    default JsonObject asJsonObject() {
+        return (JsonObject) this;
+    }
+
+    /**
+     * Method which cast the value to a JsonBoolean.
+     *
+     * @throws ClassCastException if the value is not an instance of JsonBoolean.
+     * @return the resulting JsonBoolean.
+     */
+    default JsonBoolean asJsonBoolean() {
+        return (JsonBoolean) this;
+    }
+
+    /**
+     * Method which cast the value to a JsonNull.
+     *
+     * @throws ClassCastException if the value is not an instance of JsonNull.
+     * @return the resulting JsonNull.
+     */
+    default JsonNull asJsonNull() {
+        return (JsonNull) this;
+    }
+
+    /**
+     * Method which cast the value to a JsonNumber.
+     *
+     * @throws ClassCastException if the value is not an instance of JsonNumber.
+     * @return the resulting JsonNumber.
+     */
+    default JsonNumber asJsonNumber() {
+        return (JsonNumber) this;
+    }
+
+    /**
+     * Method which cast the value to a JsonString.
+     *
+     * @throws ClassCastException if the value is not an instance of JsonString.
+     * @return the resulting JsonString.
+     */
+    default JsonString asJsonString() {
+        return (JsonString) this;
+    }
+
+    /**
+     * Method which cast the value to a JsonOptional.
+     *
+     * @throws ClassCastException if the value is not an instance of JsonOptional.
+     * @return the resulting JsonOptional.
+     */
+    default JsonOptional asJsonOptional() {
+        return (JsonOptional) this;
+    }
+
+
+    /**
+     * Method which cast the value to a JsonLiteral.
+     *
+     * @throws ClassCastException if the value is not an instance of JsonLiteral.
+     * @return the resulting JsonLiteral.
+     */
+    default JsonLiteral asJsonLiteral() {
+        return (JsonLiteral) this;
+    }
+
+    /**
+     * Method which cast the value to a JsonStructure.
+     *
+     * @throws ClassCastException if the value is not an instance of JsonStructure.
+     * @return the resulting JsonStructure.
+     */
+    default JsonStructure asJsonStructure() {
+        return (JsonStructure) this;
+    }
+
 }
