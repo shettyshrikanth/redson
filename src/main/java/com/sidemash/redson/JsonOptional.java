@@ -61,6 +61,7 @@ public class JsonOptional implements JsonValue {
                 .map(v -> new JsonOptional(Optional.of(Json.toJsonValue(v))))
                 .orElse(JsonOptional.EMPTY);
     }
+
     @Override
     public BigDecimal asBigDecimal() {
         throw new ClassCastException(
@@ -428,6 +429,7 @@ public class JsonOptional implements JsonValue {
     public int size() {
         return (value.isPresent()) ? 1 : 0;
     }
+
 
     @Override
     public String stringify(boolean keepingNull, boolean emptyValuesToNull) {
