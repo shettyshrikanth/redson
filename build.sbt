@@ -2,9 +2,11 @@ organization := "com.sidemash"
 
 name := "redson"
 
-version := "0.1.0"
+version := "0.1.0-beta1"
 
 javaOptions in run += "-Xdoclint:none"
+
+javaHome := Some(file("/usr/share/java/jdk1.8.0_40/"))
 
 fork in run := true
 
