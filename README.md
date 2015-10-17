@@ -348,7 +348,12 @@ With this way, you can do every thing you want when converting to Json including
 
 ## About the Authors
 Serge Martial N.
-Serge Martial is a CS student at Polytech Paris-Sud, the engineering school of Université Paris-Sud, The 1st University in france and is currently doing his internship at Thales. He was previously an intern at Cisco Systems at Issy-Les-Moulineaux in France. 
+
+Serge Martial is a CS student at Polytech Paris-Sud, the engineering school of Université Paris-Sud, [The 2nd best  University in france](http://www.shanghairanking.com/fr/ARWU2013.html) and is currently doing his internship at Thales. He was previously an intern at Cisco Systems at Issy-Les-Moulineaux in France. 
+
+
+
 
 Stephane Tankoua
+
 Stephane is a Software Engineer graduated from Polytech Lille the engineering school of "Université des sciences et Technologies de Lille" in Statistics and Computer Science. He is currently a software developper at CapGemini in Paris and previously was at Atos WorldLine Lille, France.
