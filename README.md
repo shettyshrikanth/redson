@@ -1,4 +1,4 @@
-# Redson
+# Redson [Upgraded to scala 2.12 version]
 A lightweight library to handle json for Java 8 built with functional style and Simplicity in mind.
 
 ## What is Redson ? 

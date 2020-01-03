@@ -16,6 +16,7 @@ public class MapConverter<K,V> implements JsonContainerConverter<Map<K, V>> {
     private final int KEY = 0;
     private final int VALUE = 1;
 
+    @SuppressWarnings("unchecked")
     @Override
     public Map<K, V> fromJsonValue(JsonValue jsonValue, Type type) {
         ParameterizedType p = (ParameterizedType) type;

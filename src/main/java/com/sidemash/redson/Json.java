@@ -15,6 +15,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.BaseStream;
 
+@SuppressWarnings("unchecked")
 public final class Json {
 
     private static final Map<Class<?>, Function<JsonValue, ?>>
@@ -71,6 +72,7 @@ public final class Json {
 
     private Json(){}
 
+    @SuppressWarnings("unchecked")
     public static JsonValue toJsonValue(Object o){
 
         if(o == null)
@@ -171,6 +173,7 @@ public final class Json {
     public static BiFunction<JsonValue,Type, Object> getJsonContainerReaderFunctionFor(Class<?> cl){
         return getFunctionFrom(cl,containerReadersFromJson, usersDefinedContainerReadersFromJson );
     }
+    
     private static<T> T getFunctionFrom(Class<?> cl, Map<?,?> map, Map<?,?> userDefinedMap){
         //Function<JsonValue, Object> fnResult;
         T fnResult;

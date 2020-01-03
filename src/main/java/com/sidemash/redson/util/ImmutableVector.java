@@ -3,7 +3,6 @@ package com.sidemash.redson.util;
 
 import java.util.Comparator;
 import java.util.function.BiFunction;
-import java.util.function.Predicate;
 
 public interface ImmutableVector<T>  {
 

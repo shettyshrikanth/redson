@@ -2,15 +2,10 @@ package com.sidemash.redson.converter;
 
 import com.sidemash.redson.JsonArray;
 import com.sidemash.redson.JsonValue;
-import scala.util.parsing.json.JSONArray;
-
 import java.lang.reflect.Array;
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
+@SuppressWarnings("rawtypes")
 public enum ArrayConverter implements JsonConverter {
     INSTANCE ;
 

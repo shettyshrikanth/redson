@@ -19,3 +19,8 @@ project/plugins/project/
 # Intellij Idea specific
 .idea
 *.iml
+/bin/
+/.cache-main
+/.cache-tests
+/.classpath
+/.project

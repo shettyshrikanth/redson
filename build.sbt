@@ -6,19 +6,14 @@ version := "0.1.0-beta1"
 
 javaOptions in run += "-Xdoclint:none"
 
-javaHome := Some(file("/usr/share/java/jdk1.8.0_40/"))
-
 fork in run := true
 
-scalaVersion := "2.10.5"
+scalaVersion := "2.12.9"
 
-libraryDependencies += "com.fasterxml.jackson.core" % "jackson-databind" % "2.5.4" withSources() withJavadoc()
-
-libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.4" % "test" withSources() withJavadoc()
-
-libraryDependencies += "org.scalacheck" %% "scalacheck" % "1.12.3" % "test"  withSources() withJavadoc()
-
-libraryDependencies += "org.specs2" %% "specs2-core" % "3.6" % "test" withSources() withJavadoc()
+libraryDependencies += "com.fasterxml.jackson.core" % "jackson-databind" % "2.10.1"  withSources() withJavadoc()
+libraryDependencies += "org.scalatest" %% "scalatest" % "3.1.0" % "test" withSources() withJavadoc()
+libraryDependencies += "org.scalacheck" %% "scalacheck" % "1.14.3" % "test"  withSources() withJavadoc()
+libraryDependencies += "org.specs2" %% "specs2-core" % "4.8.1" % "test" withSources() withJavadoc()
 
 resolvers += "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases"
 
@@ -63,7 +58,7 @@ pomExtra := (
       </developer>
       <developer>
         <id>stankoua</id>
-        <name>Stéphane Tankoua</name>
+        <name>Stï¿½phane Tankoua</name>
         <url>https://github.com/stankoua</url>
       </developer>
     </developers>)

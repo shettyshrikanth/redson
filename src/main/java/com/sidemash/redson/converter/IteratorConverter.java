@@ -29,7 +29,6 @@ public class IteratorConverter<T> implements  JsonContainerConverter<Iterator<T>
 
             @Override
             public T next() {
-                @SuppressWarnings("unchecked")
                 T next = jsonArray.getHead().asType(typeT);
                 jsonArray = jsonArray.skip(1);
                 return next;
